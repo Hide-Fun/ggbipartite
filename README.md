@@ -183,9 +183,8 @@ p
 
 ### Add labels
 
-現状うまい方法が思いつかないため、anotate
-でつける。座標の取得は、`construct_bn_coordination()`
-で取得できるためこれを利用する。
+The coordinates can be obtained with construct_bn_coordination(), so
+I’ll use that for adding labels.
 
 ``` r
 bn_coords <- construct_bn_coordination(

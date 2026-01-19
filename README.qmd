@@ -290,6 +290,220 @@ p2 <- ggplot(
 p1 + p2
 ```
 
+## Add phylogenetic tree
+
+```{r}
+library(tidyverse)
+library(ggtree)
+library(marquee)
+library(patchwork)
+devtools::load_all(".")
+
+set.seed(123)
+## host (plants) phylogeny.
+host_phylo <- rtree(nrow(interaction_matrix))
+host_phylo$tip.label <- LETTERS[1:10]
+## symbiont (fungal) phylogeny.
+symbiont_phylo <- rtree(ncol(interaction_matrix))
+symbiont_phylo$tip.label <- sprintf("otu%d", 1:4)
+
+interaction_matrix <- tibble(
+  host = LETTERS[1:10],
+  otu1 = c(1, 0, 100, 2, 1, 500, 40, 0, 1, 0),
+  otu2 = c(10, 0, 1, 5, 1, 0, 10, 0, 4, 0),
+  otu3 = c(350, 10, 0, 0, 0, 0, 0, 1, 3, 0),
+  otu4 = c(0, 0, 0, 0, 1, 0, 1, 0, 0, 150)
+) %>%
+  as.data.frame() %>%
+  mutate(
+    host = factor(
+      host,
+      levels = c("J", "I", "H", "G", "E", "D", "F", "B", "A", "C")
+    )
+  ) %>%
+  arrange(host) %>%
+  relocate(host, otu3, otu2, otu1, otu4) %>%
+  column_to_rownames("host") %>%
+  as.matrix()
+
+interaction_df <-
+  interaction_matrix %>%
+  as_tibble(rownames = "host") %>%
+  pivot_longer(
+    cols = -host,
+    names_to = "otu",
+    values_to = "num_seq"
+  ) %>%
+  filter(num_seq > 0) %>%
+  mutate(
+    host = factor(host, rownames(interaction_matrix)),
+    otu = factor(otu, colnames(interaction_matrix))
+  )
+
+metadata_row <- tibble(
+  host = LETTERS[1:10],
+  family = c("A", "A", "A", "B", "B", "B", "B", "B", "C", "C")
+)
+
+new_nm <- tibble(
+  old = LETTERS[1:10],
+  new = glue::glue("***{old}*** *{letters[1:10]}* test")
+)
+
+bn_coords <- construct_bn_coordination(
+  .mat = interaction_matrix,
+  .row = "host",
+  .metadata_row = metadata_row,
+  .gap = sum(interaction_matrix) / 10
+)
+
+p <-
+  ggplot(
+    interaction_df,
+    aes(row = host, column = otu, count = num_seq),
+  ) +
+  geom_bipnet_box(
+    type = "box2",
+    fill = "navy",
+    linewidth = .1
+  ) +
+  geom_bipnet_interaction(
+    type = "interaction",
+    alpha = 0.8,
+    show.legend = FALSE,
+    linewidth = .1
+  ) +
+  geom_bipnet_box(
+    aes(fill = after_stat(family)),
+    type = "box1",
+    row_nm = "host",
+    metadata_row = metadata_row,
+    show.legend = FALSE,
+    linewidth = .1
+  ) +
+  coord_equal() +
+  theme_bw()
+
+host_phylo2 <- adjust_tree(
+  .phylo = host_phylo,
+  .box = bn_coords$box1,
+  tree_position = "left"
+) %>%
+  marquee_tiplab(
+    align = TRUE,
+    label_map = new_nm,
+    size = 5,
+    show_guides = TRUE,
+    x_start_nudge = .2,
+    guide_end_gap_ratio = .03,
+    show_labels = FALSE
+  )
+
+symbiont_phylo2 <- adjust_tree(
+  .phylo = symbiont_phylo,
+  .box = bn_coords$box2,
+  tree_position = "right"
+) %>%
+  marquee_tiplab(
+    align = TRUE,
+    label_map = new_nm,
+    size = 5,
+    show_guides = TRUE,
+    x_start_nudge = .2,
+    guide_end_gap_ratio = .03,
+    show_labels = FALSE
+  ) +
+  scale_x_reverse()
+
+create_link <- function(box, ggtree, direction, xmin = 0, xend = 1) {
+  box <- box %>% 
+    pivot_longer(
+      cols = c(xmin, xmax, ymin, ymax),
+      names_to = c("axis", "end"),
+      names_pattern = "([xy])(min|max)"
+    ) %>%
+    # Spread axis -> get single columns x and y
+    pivot_wider(
+      names_from = axis,
+      values_from = value
+    ) %>% 
+     summarise(
+      y = mean(y),
+      .by = c(label)
+    )
+  
+  ggtree <- ggtree@data %>% 
+    filter(isTip) %>% 
+    reframe(
+      y = mean(y),
+      .by = c(label)
+    )
+  
+  if (direction == "left") {
+    coords <- box %>% 
+      left_join(ggtree, c("row" = "label"))
+  } else {
+    coords <- box %>% 
+      left_join(ggtree, c("row" = "label"))
+  }
+}
+
+df_link1 <- plot_link(bn_coords_box = bn_coords$box1, ggtree = host_phylo2)
+df_link2 <- plot_link(bn_coords_box = bn_coords$box2, ggtree = symbiont_phylo2)
+
+p_link1 <- ggplot() +
+  geom_segment(
+    data = df_link1,
+    mapping = aes(x = x, y = y, xend = xend, yend = yend, group = label),
+    linetype = "dotted",
+    linewidth = .3
+  ) +
+  geom_point(
+    data = df_link1,
+    mapping = aes(x, y),
+    size = 1
+  ) +
+  geom_point(
+    data = df_link1,
+    mapping = aes(xend, yend),
+    size = 1
+  ) +
+  scale_x_continuous(expand = expansion(mult = 0.1)) +
+  scale_y_continuous(expand = expansion(mult = 0.08)) +
+  coord_equal()
+
+p_link2 <- ggplot() +
+  geom_segment(
+    data = df_link2,
+    mapping = aes(x = x, y = y, xend = xend, yend = yend, group = label),
+    linetype = "dotted",
+    linewidth = .3
+  ) +
+  geom_point(
+    data = df_link2,
+    mapping = aes(x, y),
+    size = 1
+  ) +
+  geom_point(
+    data = df_link2,
+    mapping = aes(xend, yend),
+    size = 1
+  ) +
+  scale_x_continuous(expand = expansion(mult = 0.1)) +
+  scale_y_continuous(expand = expansion(mult = 0.08)) +
+  coord_equal()
+
+host_phylo2 +
+  p_link1 +
+  p +
+  p_link2 +
+  symbiont_phylo2 +
+  plot_layout(nrow = 1) &
+  theme_void()
+
+```
+
+
 ## Summary
 
 -   **Outside (preprocessing)**: keep community data matrix reshaping, row totals, and column totals in tidy data frames (`interaction_df`, `row_sum_df`, `col_sum_df`).

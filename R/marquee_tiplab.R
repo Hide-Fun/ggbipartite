@@ -38,6 +38,7 @@ marquee_tiplab <- function(
   x_start_nudge = 0.1,
   y_start_nudge = 0,
   guide_end_gap_ratio = 0.03,
+  show_labels = TRUE,
   ...
 ) {
   # ---- Basic checks (keep strict but practical) ----
@@ -161,20 +162,21 @@ marquee_tiplab <- function(
       )
   }
 
-  p_out <- p_out +
-    marquee::geom_marquee(
-      data = tips_joined,
-      ggplot2::aes(
-        x = .data$x_label_start,
-        y = .data$y_label_start,
-        label = .data$label_out
-      ),
-      size = size,
-      inherit.aes = FALSE,
-      width = grid::unit(width_mm, "mm"),
-      show.legend = FALSE,
-      ...
-    )
-
+  if (show_labels) {
+    p_out <- p_out +
+      marquee::geom_marquee(
+        data = tips_joined,
+        ggplot2::aes(
+          x = .data$x_label_start,
+          y = .data$y_label_start,
+          label = .data$label_out
+        ),
+        size = size,
+        inherit.aes = FALSE,
+        width = grid::unit(width_mm, "mm"),
+        show.legend = FALSE,
+        ...
+      )
+  }
   p_out
 }

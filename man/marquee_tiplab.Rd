@@ -16,6 +16,7 @@ marquee_tiplab(
   x_start_nudge = 0.1,
   y_start_nudge = 0,
   guide_end_gap_ratio = 0.03,
+  show_labels = TRUE,
   ...
 )
 }

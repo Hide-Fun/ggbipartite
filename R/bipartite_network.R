@@ -156,7 +156,7 @@ construct_bn_coordination <- function(
       left_join(.metadata_row, by = c("row" = .row))
   } else if (!is.null(.metadata_column)) {
     box2 <- box2 %>%
-      left_join(.metadata_columnby = c("column" = .column))
+      left_join(.metadata_column, by = c("column" = .column))
 
     interaction_coords <- interaction_coords %>%
       left_join(.metadata_column, by = c("column" = .column))

@@ -149,26 +149,42 @@ construct_bn_coordination <- function(
 
   if (!is.null(.metadata_row) && !is.null(.metadata_column)) {
     box1 <- box1 %>%
-      left_join(.metadata_row, by = c("row" = .row))
+      dplyr::mutate(row = as.character(row)) %>%
+      dplyr::left_join(.metadata_row, by = c("row" = .row))
 
     box2 <- box2 %>%
-      left_join(.metadata_column, by = c("column" = .column))
+      dplyr::mutate(column = as.character(column)) %>%
+      dplyr::left_join(.metadata_column, by = c("column" = .column))
 
     interaction_coords <- interaction_coords %>%
-      left_join(.metadata_column, by = c("column" = .column)) %>%
-      left_join(.metadata_row, by = c("row" = .row))
+      dplyr::mutate(
+        row = as.character(row),
+        column = as.character(column)
+      ) %>%
+      dplyr::left_join(.metadata_column, by = c("column" = .column)) %>%
+      dplyr::left_join(.metadata_row, by = c("row" = .row))
   } else if (!is.null(.metadata_column)) {
     box2 <- box2 %>%
-      left_join(.metadata_column, by = c("column" = .column))
+      dplyr::mutate(column = as.character(column)) %>%
+      dplyr::left_join(.metadata_column, by = c("column" = .column))
 
     interaction_coords <- interaction_coords %>%
-      left_join(.metadata_column, by = c("column" = .column))
+      dplyr::mutate(
+        row = as.character(row),
+        column = as.character(column)
+      ) %>%
+      dplyr::left_join(.metadata_column, by = c("column" = .column))
   } else if (!is.null(.metadata_row)) {
     box1 <- box1 %>%
-      left_join(.metadata_row, by = c("row" = .row))
+      dplyr::mutate(row = as.character(row)) %>%
+      dplyr::left_join(.metadata_row, by = c("row" = .row))
 
     interaction_coords <- interaction_coords %>%
-      left_join(.metadata_row, by = c("row" = .row))
+      dplyr::mutate(
+        row = as.character(row),
+        column = as.character(column)
+      ) %>%
+      dplyr::left_join(.metadata_row, by = c("row" = .row))
   }
 
   return(list(

@@ -101,6 +101,9 @@ information used downstream.
 m <- matrix(c(2, 1, 0,
               0, 3, 2), nrow = 2, byrow = TRUE)
 
+rownames(m) <- c(1, 2)
+colnames(m) <- c(1, 2, 3)
+
 # Optional metadata (must contain `row` / `column` keys)
 row_meta <- tibble::tibble(row = 1:2, group = c("A", "B"))
 col_meta <- tibble::tibble(column = 1:3, type = c("x","y","z"))

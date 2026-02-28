@@ -15,6 +15,7 @@ stat_bipnet(
   gap = NULL,
   box_ratio = 5,
   ratio = 1/1.618,
+  interaction_type = c("abundance", "binary"),
   adjust_box_height = TRUE,
   geom = "polygon",
   position = "identity",
@@ -56,6 +57,9 @@ from a \code{formula} (e.g. \code{~ head(.x, 10)}).}
 \item{box_ratio}{Width of boxes relative to the interaction band.}
 
 \item{ratio}{Overall aspect ratio of the layout.}
+
+\item{interaction_type}{One of `"abundance"` or `"binary"` for interaction
+rendering.}
 
 \item{adjust_box_height}{If `TRUE`, scale box heights by totals.}
 

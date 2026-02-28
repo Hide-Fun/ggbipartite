@@ -1,3 +1,39 @@
+compute_binary_interaction_coords <- function(.bn_coords) {
+  row_points <- .bn_coords$box1 |>
+    dplyr::transmute(
+      row = as.character(row),
+      x = (xmin + xmax) / 2,
+      y = (ymin + ymax) / 2
+    )
+
+  column_points <- .bn_coords$box2 |>
+    dplyr::transmute(
+      column = as.character(column),
+      xend = (xmin + xmax) / 2,
+      yend = (ymin + ymax) / 2
+    )
+
+  interaction_cells <- .bn_coords$interaction_coords |>
+    dplyr::mutate(
+      row = as.character(row),
+      column = as.character(column)
+    )
+
+  drop_cols <- intersect(
+    c("x", "y", "area", "group"),
+    names(interaction_cells)
+  )
+  if (length(drop_cols) > 0) {
+    interaction_cells <- interaction_cells |>
+      dplyr::select(-dplyr::all_of(drop_cols))
+  }
+
+  interaction_cells |>
+    dplyr::distinct(row, column, .keep_all = TRUE) |>
+    dplyr::left_join(row_points, by = "row") |>
+    dplyr::left_join(column_points, by = "column")
+}
+
 #' Stat for bipartite “box–interaction” layout
 #'
 #' `StatBipnet` computes the coordinates required to draw two sets of
@@ -77,9 +113,15 @@ StatBipnet <- ggplot2::ggproto(
     gap = NULL,
     box_ratio = 5,
     ratio = 1 / 1.618,
+    interaction_type = "abundance",
     adjust_box_height = TRUE,
     na.rm = FALSE
   ) {
+    interaction_type <- match.arg(
+      interaction_type,
+      choices = c("abundance", "binary")
+    )
+
     # Convert to matrix.
     mat <- data.frame(
       row = data$row,
@@ -118,8 +160,14 @@ StatBipnet <- ggplot2::ggproto(
       out <- bn_coords$box2
       out$group <- out$column
     } else if (type == "interaction") {
-      out <- bn_coords$interaction_coords
+      if (interaction_type == "binary") {
+        out <- compute_binary_interaction_coords(bn_coords)
+      } else {
+        out <- bn_coords$interaction_coords
+      }
       out$group <- as.factor(paste0(out$row, out$column))
+    } else {
+      rlang::abort("`type` must be one of 'box1', 'box2', or 'interaction'.")
     }
     out
   }
@@ -139,6 +187,8 @@ StatBipnet <- ggplot2::ggproto(
 #' @param gap Spacing between the two partitions (see Details of `StatBipnet`).
 #' @param box_ratio Width of boxes relative to the interaction band.
 #' @param ratio Overall aspect ratio of the layout.
+#' @param interaction_type One of `"abundance"` or `"binary"` for interaction
+#'   rendering.
 #' @param adjust_box_height If `TRUE`, scale box heights by totals.
 #' @param geom Geom to use. Defaults to `"polygon"` for convenience.
 #' @param na.rm Logical indicating whether to drop `NA`s.
@@ -183,6 +233,7 @@ stat_bipnet <- function(
   gap = NULL,
   box_ratio = 5,
   ratio = 1 / 1.618,
+  interaction_type = c("abundance", "binary"),
   adjust_box_height = TRUE,
   geom = "polygon",
   position = "identity",
@@ -191,6 +242,15 @@ stat_bipnet <- function(
   inherit.aes = FALSE,
   ...
 ) {
+  interaction_type <- match.arg(interaction_type)
+  if (
+    type == "interaction" &&
+      interaction_type == "binary" &&
+      identical(geom, "polygon")
+  ) {
+    geom <- "segment"
+  }
+
   ggplot2::layer(
     stat = StatBipnet,
     geom = geom,
@@ -208,6 +268,7 @@ stat_bipnet <- function(
       gap = gap,
       box_ratio = box_ratio,
       ratio = ratio,
+      interaction_type = interaction_type,
       adjust_box_height = adjust_box_height,
       na.rm = na.rm,
       ...

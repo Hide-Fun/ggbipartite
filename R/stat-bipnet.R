@@ -84,7 +84,7 @@ extract_tip_positions <- function(x, arg_name) {
     tip_df <- ggtree::ggtree(x)$data
   } else if (is_ggplot_object(x)) {
     tip_df <- x$data
-  } else if (isS4(x) && "data" %in% methods::slotNames(x)) {
+  } else if (isS4(x) && "data" %in% slotNames(x)) {
     tip_df <- x@data
   } else {
     stop(
@@ -523,6 +523,7 @@ StatBipnet <- ggplot2::ggproto(
 #' handled by the chosen geom (e.g., `fill`, `colour`, `alpha`).
 #'
 #' @return A ggplot2 layer using `StatBipnet`.
+#' @importFrom methods slotNames
 #'
 #' @examples
 #' # Minimal example

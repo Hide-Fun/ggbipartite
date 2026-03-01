@@ -8,16 +8,15 @@
 #' @param .mat A numeric matrix of interactions; rows and columns represent the
 #'   two node sets.
 #' @param .row A single string giving the key column name in `.metadata_row`
-#'   that should match row identifiers from `.mat`.
+#'   used to join row metadata to row identifiers.
 #' @param .column A single string giving the key column name in
-#'   `.metadata_column` that should match column identifiers from `.mat`.
+#'   `.metadata_column` used to join column metadata to column identifiers.
 #' @param .metadata_row Optional tibble/data frame of row-level metadata to join
-#'   to the **row-side** box table (`box1`). Must contain a `row` key that
-#'   matches the identifiers used in `.mat`/`bipartite_network()`.
+#'   to the **row-side** box table (`box1`). Must contain the column specified
+#'   by `.row`.
 #' @param .metadata_column Optional tibble/data frame of column-level metadata to
 #'   join to the **column-side** box table (`box2`) and to `interaction_coords`.
-#'   Must contain a `column` key that matches the identifiers used in
-#'   `.mat`/`bipartite_network()`.
+#'   Must contain the column specified by `.column`.
 #' @param .x0,.y0 Numeric scalars; global origin for the left/bottom corner of
 #'   the first box.
 #' @param .gap Non-negative numeric scalar; baseline vertical gap between
@@ -26,7 +25,7 @@
 #'   \code{sum(.mat) / .box_ratio}.
 #' @param .ratio Positive numeric scalar; divisor to derive overall width as
 #'   \code{sum(.mat) / .ratio}.
-#' @param .adjust_box_height Logical; if \code{FALSE}, the vertical gaps for each
+#' @param .adjust_box_height Logical; if \code{TRUE}, the vertical gaps for each
 #'   side are adjusted so that the total heights of the two sides match (uses
 #'   \code{\link{calc_global_params}} and its helper).
 #'
@@ -53,10 +52,9 @@
 #' }
 #'
 #' @note
-#' The function body refers to \code{.metadata_row} and \code{.metadata_column}
-#' (with correct spelling) in the joins, while the arguments are named
-#' \code{.metadata_row} and \code{.metadata_column}. Align these names in your
-#' implementation to avoid runtime errors.
+#' Row/column identifiers are coerced to character before joining metadata.
+#' Ensure that key values in the columns specified by `.row` and `.column`
+#' match those character identifiers.
 #'
 #' The helper \code{compute_box_coords()} is expected to accept arguments
 #' \code{(.df, .var, .size, .x0, .width, .gap)} and return a data frame with

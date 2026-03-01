@@ -1,3 +1,13 @@
+#' Detect ggplot objects with backward compatibility
+#'
+#' Uses `ggplot2::is_ggplot()` when available and falls back to
+#' `ggplot2::is.ggplot()` for older ggplot2 versions.
+#'
+#' @param x Object to test.
+#'
+#' @return A logical scalar indicating whether `x` is a ggplot object.
+#' @keywords internal
+#' @noRd
 is_ggplot_object <- function(x) {
   if ("is_ggplot" %in% getNamespaceExports("ggplot2")) {
     return(ggplot2::is_ggplot(x))
@@ -6,6 +16,17 @@ is_ggplot_object <- function(x) {
   ggplot2::is.ggplot(x)
 }
 
+#' Resolve an internal helper function by name
+#'
+#' Looks up a function first in the current search path and then in the
+#' `ggbipartite` namespace. Stops with an actionable error when the function
+#' cannot be found.
+#'
+#' @param fn_name Function name as a single character string.
+#'
+#' @return A function object.
+#' @keywords internal
+#' @noRd
 resolve_internal_function <- function(fn_name) {
   if (
     exists(
@@ -60,6 +81,19 @@ resolve_internal_function <- function(fn_name) {
   )
 }
 
+#' Extract tip positions from multiple supported input formats
+#'
+#' Accepts tip-position inputs as a data frame, `phylo`, ggplot/ggtree object,
+#' or an S4 object with a `data` slot, and standardises them to a two-column
+#' data frame (`label`, `y`).
+#'
+#' @param x Input object containing tip-position information, or `NULL`.
+#' @param arg_name Argument name used in error messages.
+#'
+#' @return `NULL` when `x` is `NULL`; otherwise a data frame with columns
+#'   `label` and `y` (one row per unique label).
+#' @keywords internal
+#' @noRd
 extract_tip_positions <- function(x, arg_name) {
   if (is.null(x)) {
     return(NULL)
@@ -141,6 +175,16 @@ extract_tip_positions <- function(x, arg_name) {
   out
 }
 
+#' Aggregate long interaction data into positive interaction cells
+#'
+#' Converts interaction mappings (`row`, `column`, `count`) to a canonical
+#' interaction-cell table and keeps only finite, strictly positive totals.
+#'
+#' @param data A data frame containing at least `row`, `column`, and `count`.
+#'
+#' @return A tibble with columns `row`, `column`, and `interaction`.
+#' @keywords internal
+#' @noRd
 prepare_interaction_cells <- function(data) {
   data |>
     dplyr::transmute(
@@ -156,6 +200,20 @@ prepare_interaction_cells <- function(data) {
     dplyr::filter(is.finite(.data$interaction), .data$interaction > 0)
 }
 
+#' Shift box coordinates to match target tip positions
+#'
+#' Computes per-id vertical shifts from current box centres to target tip
+#' positions and applies those shifts to `ymin`/`ymax`.
+#'
+#' @param box_df A box-coordinate data frame containing `ymin` and `ymax`.
+#' @param id_col Column name in `box_df` that identifies rows to align.
+#' @param tip_positions A data frame with columns `label` and `y`, or `NULL`.
+#' @param side_name Side label used in error messages (for example `"row"`).
+#'
+#' @return `box_df` with adjusted `ymin` and `ymax` when tip positions are
+#'   provided; otherwise the unchanged input.
+#' @keywords internal
+#' @noRd
 align_box_to_tip_positions <- function(box_df, id_col, tip_positions, side_name) {
   if (is.null(tip_positions)) {
     return(box_df)
@@ -218,6 +276,20 @@ align_box_to_tip_positions <- function(box_df, id_col, tip_positions, side_name)
     dplyr::select(-id, -delta)
 }
 
+#' Recompute bipartite coordinates after tip-position alignment
+#'
+#' Aligns row and/or column boxes to external tip positions and rebuilds
+#' interaction polygons from the adjusted boxes.
+#'
+#' @param .bn_coords A list returned by `construct_bn_coordination()`.
+#' @param .tip_positions_row Optional row-side tip positions.
+#' @param .tip_positions_column Optional column-side tip positions.
+#' @param .interaction_cells Canonical interaction-cell table.
+#'
+#' @return Updated `.bn_coords` with aligned `box1`/`box2` and refreshed
+#'   `interaction_coords`.
+#' @keywords internal
+#' @noRd
 adjust_bn_coords_to_tip_positions <- function(
   .bn_coords,
   .tip_positions_row,
@@ -286,6 +358,18 @@ adjust_bn_coords_to_tip_positions <- function(
   .bn_coords
 }
 
+#' Build binary interaction segment coordinates from bipartite coordinates
+#'
+#' Computes box centres for row and column partitions and joins them to unique
+#' interaction cells to produce segment endpoints.
+#'
+#' @param .bn_coords A coordinate list containing `box1`, `box2`, and
+#'   `interaction_coords`.
+#'
+#' @return A data frame with one row per interaction and columns
+#'   `row`, `column`, `x`, `y`, `xend`, and `yend` plus any retained metadata.
+#' @keywords internal
+#' @noRd
 compute_binary_interaction_coords <- function(.bn_coords) {
   row_points <- .bn_coords$box1 |>
     dplyr::transmute(

@@ -149,7 +149,7 @@ p +
   theme_void()
 ```
 
-![](README_files/figure-commonmark/unnamed-chunk-2-1.png)
+![](README_files/figure-commonmark/box-label-annotation-1.png)
 
 ## 3. 系統樹とネットワークの統合（リンク線あり）
 
@@ -254,7 +254,7 @@ t1 +
   plot_layout(nrow = 1, widths = c(1, 0.25, 1, 0.25, 1))
 ```
 
-![](README_files/figure-commonmark/unnamed-chunk-3-1.png)
+![](README_files/figure-commonmark/phylo-network-links-abundance-1.png)
 
 ## 4. `align = T` 版（tip ラベル整列描画）
 
@@ -325,7 +325,7 @@ t1 +
   plot_layout(nrow = 1, widths = c(1, 0.25, 1, 0.25, 1))
 ```
 
-![](README_files/figure-commonmark/unnamed-chunk-4-1.png)
+![](README_files/figure-commonmark/align-true-version-1.png)
 
 ## 5. binary モード（リンク線あり）
 
@@ -473,7 +473,7 @@ t1 +
   plot_layout(nrow = 1, widths = c(1, 0.25, 1, 0.25, 1))
 ```
 
-![](README_files/figure-commonmark/unnamed-chunk-5-1.png)
+![](README_files/figure-commonmark/binary-with-links-1.png)
 
 ## 6. binary: 明示的リンク線なしの整列表示
 
@@ -524,7 +524,7 @@ t1_binary_aligned +
   plot_layout(nrow = 1, widths = c(1, 1, 1))
 ```
 
-![](README_files/figure-commonmark/unnamed-chunk-6-1.png)
+![](README_files/figure-commonmark/binary-aligned-no-links-1.png)
 
 ## 7. binary: 系統樹スケールを保持した tip 対応表示
 
@@ -604,4 +604,4 @@ t1_tree_scale +
   plot_layout(nrow = 1, widths = c(1, 1, 1))
 ```
 
-![](README_files/figure-commonmark/unnamed-chunk-7-1.png)
+![](README_files/figure-commonmark/binary-tree-scale-1.png)

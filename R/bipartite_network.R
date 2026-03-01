@@ -7,6 +7,10 @@
 #'
 #' @param .mat A numeric matrix of interactions; rows and columns represent the
 #'   two node sets.
+#' @param .row A single string giving the key column name in `.metadata_row`
+#'   that should match row identifiers from `.mat`.
+#' @param .column A single string giving the key column name in
+#'   `.metadata_column` that should match column identifiers from `.mat`.
 #' @param .metadata_row Optional tibble/data frame of row-level metadata to join
 #'   to the **row-side** box table (`box1`). Must contain a `row` key that
 #'   matches the identifiers used in `.mat`/`bipartite_network()`.

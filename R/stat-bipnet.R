@@ -1,3 +1,291 @@
+is_ggplot_object <- function(x) {
+  if ("is_ggplot" %in% getNamespaceExports("ggplot2")) {
+    return(ggplot2::is_ggplot(x))
+  }
+
+  ggplot2::is.ggplot(x)
+}
+
+resolve_internal_function <- function(fn_name) {
+  if (
+    exists(
+      fn_name,
+      mode = "function",
+      inherits = TRUE
+    )
+  ) {
+    return(
+      get(
+        fn_name,
+        mode = "function",
+        inherits = TRUE
+      )
+    )
+  }
+
+  if (!("ggbipartite" %in% loadedNamespaces())) {
+    requireNamespace("ggbipartite", quietly = TRUE)
+  }
+
+  if ("ggbipartite" %in% loadedNamespaces()) {
+    ns <- asNamespace("ggbipartite")
+    if (
+      exists(
+        fn_name,
+        envir = ns,
+        mode = "function",
+        inherits = FALSE
+      )
+    ) {
+      return(
+        get(
+          fn_name,
+          envir = ns,
+          mode = "function",
+          inherits = FALSE
+        )
+      )
+    }
+  }
+
+  stop(
+    paste0(
+      "`",
+      fn_name,
+      "()` could not be found. ",
+      "Load ggbipartite with `library(ggbipartite)` or source the required ",
+      "R files (including `R/bipartite_network.R` and ",
+      "`R/compute_interaction_coords.R`)."
+    )
+  )
+}
+
+extract_tip_positions <- function(x, arg_name) {
+  if (is.null(x)) {
+    return(NULL)
+  }
+
+  if (is.data.frame(x)) {
+    required_cols <- c("label", "y")
+    missing_cols <- setdiff(required_cols, names(x))
+    if (length(missing_cols) > 0) {
+      stop(
+        paste0(
+          "`",
+          arg_name,
+          "` data frame is missing columns: ",
+          paste(missing_cols, collapse = ", "),
+          "."
+        )
+      )
+    }
+    tip_df <- x
+  } else if (inherits(x, "phylo")) {
+    tip_df <- ggtree::ggtree(x)$data
+  } else if (is_ggplot_object(x)) {
+    tip_df <- x$data
+  } else if (isS4(x) && "data" %in% methods::slotNames(x)) {
+    tip_df <- x@data
+  } else {
+    stop(
+      paste0(
+        "`",
+        arg_name,
+        "` must be NULL, a data frame with `label`/`y`, `phylo`, or ggtree ",
+        "object."
+      )
+    )
+  }
+
+  if (!is.data.frame(tip_df)) {
+    stop("Extracted tip data must be a data frame.")
+  }
+
+  if (all(c("label", "y") %in% names(tip_df))) {
+    out <- tip_df |>
+      dplyr::mutate(
+        label = as.character(.data$label),
+        y = as.numeric(.data$y)
+      ) |>
+      dplyr::filter(!is.na(.data$label), is.finite(.data$y)) |>
+      dplyr::group_by(.data$label) |>
+      dplyr::summarise(y = mean(.data$y), .groups = "drop")
+  } else {
+    required_cols <- c("isTip", "label", "y")
+    missing_cols <- setdiff(required_cols, names(tip_df))
+    if (length(missing_cols) > 0) {
+      stop(
+        paste0(
+          "Extracted tip data is missing columns: ",
+          paste(missing_cols, collapse = ", "),
+          "."
+        )
+      )
+    }
+
+    out <- tip_df |>
+      dplyr::filter(!is.na(.data$isTip) & .data$isTip) |>
+      dplyr::mutate(
+        label = as.character(.data$label),
+        y = as.numeric(.data$y)
+      ) |>
+      dplyr::filter(!is.na(.data$label), is.finite(.data$y)) |>
+      dplyr::group_by(.data$label) |>
+      dplyr::summarise(y = mean(.data$y), .groups = "drop")
+  }
+
+  if (nrow(out) == 0) {
+    stop(paste0("`", arg_name, "` does not contain usable tip positions."))
+  }
+
+  out
+}
+
+prepare_interaction_cells <- function(data) {
+  data |>
+    dplyr::transmute(
+      row = as.character(.data$row),
+      column = as.character(.data$column),
+      interaction = as.numeric(.data$count)
+    ) |>
+    dplyr::group_by(.data$row, .data$column) |>
+    dplyr::summarise(
+      interaction = sum(.data$interaction, na.rm = TRUE),
+      .groups = "drop"
+    ) |>
+    dplyr::filter(is.finite(.data$interaction), .data$interaction > 0)
+}
+
+align_box_to_tip_positions <- function(box_df, id_col, tip_positions, side_name) {
+  if (is.null(tip_positions)) {
+    return(box_df)
+  }
+
+  if (!(id_col %in% names(box_df))) {
+    stop(
+      paste0(
+        "`",
+        id_col,
+        "` is missing in ",
+        side_name,
+        " box coordinates."
+      )
+    )
+  }
+
+  current_centres <- box_df |>
+    dplyr::transmute(
+      id = as.character(.data[[id_col]]),
+      y_center = (.data$ymin + .data$ymax) / 2
+    ) |>
+    dplyr::group_by(.data$id) |>
+    dplyr::summarise(y_center = mean(.data$y_center), .groups = "drop")
+
+  shift_tbl <- current_centres |>
+    dplyr::left_join(
+      tip_positions |>
+        dplyr::transmute(id = as.character(.data$label), y_target = .data$y),
+      by = "id"
+    )
+
+  if (any(!is.finite(shift_tbl$y_target))) {
+    missing_ids <- shift_tbl |>
+      dplyr::filter(!is.finite(.data$y_target)) |>
+      dplyr::arrange(.data$id) |>
+      dplyr::pull(.data$id)
+    stop(
+      paste0(
+        "Missing tip y positions for ",
+        side_name,
+        " ids: ",
+        paste(missing_ids, collapse = ", "),
+        "."
+      )
+    )
+  }
+
+  shift_tbl <- shift_tbl |>
+    dplyr::mutate(delta = .data$y_target - .data$y_center) |>
+    dplyr::select(id, delta)
+
+  box_df |>
+    dplyr::mutate(id = as.character(.data[[id_col]])) |>
+    dplyr::left_join(shift_tbl, by = "id") |>
+    dplyr::mutate(
+      ymin = .data$ymin + .data$delta,
+      ymax = .data$ymax + .data$delta
+    ) |>
+    dplyr::select(-id, -delta)
+}
+
+adjust_bn_coords_to_tip_positions <- function(
+  .bn_coords,
+  .tip_positions_row,
+  .tip_positions_column,
+  .interaction_cells
+) {
+  if (is.null(.tip_positions_row) && is.null(.tip_positions_column)) {
+    return(.bn_coords)
+  }
+
+  .bn_coords$box1 <- align_box_to_tip_positions(
+    box_df = .bn_coords$box1,
+    id_col = "row",
+    tip_positions = .tip_positions_row,
+    side_name = "row"
+  )
+  .bn_coords$box2 <- align_box_to_tip_positions(
+    box_df = .bn_coords$box2,
+    id_col = "column",
+    tip_positions = .tip_positions_column,
+    side_name = "column"
+  )
+
+  if (nrow(.interaction_cells) == 0) {
+    .bn_coords$interaction_coords <- .bn_coords$interaction_coords[0, ]
+    return(.bn_coords)
+  }
+
+  compute_interaction_coords_fn <- resolve_internal_function(
+    "compute_interaction_coords"
+  )
+
+  interaction_coords <- compute_interaction_coords_fn(
+    .box1 = .bn_coords$box1,
+    .box2 = .bn_coords$box2,
+    .interation_cell = .interaction_cells
+  ) |>
+    dplyr::mutate(
+      row = as.character(.data$row),
+      column = as.character(.data$column)
+    )
+
+  original_interaction <- .bn_coords$interaction_coords |>
+    dplyr::mutate(
+      row = as.character(.data$row),
+      column = as.character(.data$column)
+    )
+
+  extra_cols <- setdiff(
+    names(original_interaction),
+    c("row", "column", "x", "y", "area", "group")
+  )
+  if (length(extra_cols) > 0) {
+    metadata_lookup <- original_interaction |>
+      dplyr::distinct(
+        .data$row,
+        .data$column,
+        .keep_all = TRUE
+      ) |>
+      dplyr::select(dplyr::all_of(c("row", "column", extra_cols)))
+    interaction_coords <- interaction_coords |>
+      dplyr::left_join(metadata_lookup, by = c("row", "column"))
+  }
+
+  .bn_coords$interaction_coords <- interaction_coords
+  .bn_coords
+}
+
 compute_binary_interaction_coords <- function(.bn_coords) {
   row_points <- .bn_coords$box1 |>
     dplyr::transmute(
@@ -72,7 +360,8 @@ compute_binary_interaction_coords <- function(.bn_coords) {
 #' @section Parameters handled:
 #' `StatBipnet` honours the arguments accepted by [stat_bipnet()], including
 #' `type`, `metadata_row`, `metadata_column`, `gap`, `box_ratio`, `ratio`,
-#' `adjust_box_height`, and `na.rm`. These are validated in
+#' `adjust_box_height`, `tip_positions_row`, `tip_positions_column`, and
+#' `na.rm`. These are validated in
 #' `StatBipnet$setup_params()` before being forwarded to
 #' `construct_bn_coordination()`.
 #'
@@ -115,6 +404,8 @@ StatBipnet <- ggplot2::ggproto(
     ratio = 1 / 1.618,
     interaction_type = "abundance",
     adjust_box_height = FALSE,
+    tip_positions_row = NULL,
+    tip_positions_column = NULL,
     na.rm = FALSE
   ) {
     interaction_type <- match.arg(
@@ -140,7 +431,11 @@ StatBipnet <- ggplot2::ggproto(
       ) |>
       as.matrix()
 
-    bn_coords <- construct_bn_coordination(
+    construct_bn_coordination_fn <- resolve_internal_function(
+      "construct_bn_coordination"
+    )
+
+    bn_coords <- construct_bn_coordination_fn(
       .mat = mat,
       .row = row_nm,
       .column = column_nm,
@@ -153,6 +448,24 @@ StatBipnet <- ggplot2::ggproto(
       .ratio = ratio,
       .adjust_box_height = adjust_box_height
     )
+
+    tip_positions_row <- extract_tip_positions(
+      tip_positions_row,
+      arg_name = "tip_positions_row"
+    )
+    tip_positions_column <- extract_tip_positions(
+      tip_positions_column,
+      arg_name = "tip_positions_column"
+    )
+
+    interaction_cells <- prepare_interaction_cells(data)
+    bn_coords <- adjust_bn_coords_to_tip_positions(
+      .bn_coords = bn_coords,
+      .tip_positions_row = tip_positions_row,
+      .tip_positions_column = tip_positions_column,
+      .interaction_cells = interaction_cells
+    )
+
     if (type == "box1") {
       out <- bn_coords$box1
       out$group <- out$row
@@ -182,6 +495,10 @@ StatBipnet <- ggplot2::ggproto(
 #'
 #' @inheritParams ggplot2::layer
 #' @param type One of `"box1"`, `"box2"`, or `"interaction"`.
+#' @param row_nm A single string giving the key column name in
+#'   `metadata_row` used to join row metadata.
+#' @param column_nm A single string giving the key column name in
+#'   `metadata_column` used to join column metadata.
 #' @param metadata_row Optional data frame with row metadata used by the stat.
 #' @param metadata_column Optional data frame with column metadata used by the stat.
 #' @param gap Spacing between the two partitions (see Details of `StatBipnet`).
@@ -190,6 +507,11 @@ StatBipnet <- ggplot2::ggproto(
 #' @param interaction_type One of `"abundance"` or `"binary"` for interaction
 #'   rendering.
 #' @param adjust_box_height If `TRUE`, scale box heights by totals.
+#' @param tip_positions_row Optional row-side tip positions. Accepts either:
+#'   (1) a data frame with columns `label` and `y`, or (2) a tree object
+#'   (`phylo`/ggtree) from which tip positions are extracted.
+#' @param tip_positions_column Optional column-side tip positions. Accepts the
+#'   same formats as `tip_positions_row`.
 #' @param geom Geom to use. Defaults to `"polygon"` for convenience.
 #' @param na.rm Logical indicating whether to drop `NA`s.
 #' @param show.legend Passed to [ggplot2::layer()].
@@ -235,6 +557,8 @@ stat_bipnet <- function(
   ratio = 1 / 1.618,
   interaction_type = c("abundance", "binary"),
   adjust_box_height = FALSE,
+  tip_positions_row = NULL,
+  tip_positions_column = NULL,
   geom = "polygon",
   position = "identity",
   na.rm = FALSE,
@@ -270,6 +594,8 @@ stat_bipnet <- function(
       ratio = ratio,
       interaction_type = interaction_type,
       adjust_box_height = adjust_box_height,
+      tip_positions_row = tip_positions_row,
+      tip_positions_column = tip_positions_column,
       na.rm = na.rm,
       ...
     )

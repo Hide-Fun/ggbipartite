@@ -10,6 +10,8 @@ geom_bipnet_interaction(
   stat = "bipnet",
   position = "identity",
   interaction_type = c("abundance", "binary"),
+  tip_positions_row = NULL,
+  tip_positions_column = NULL,
   ...,
   na.rm = FALSE,
   show.legend = NA,
@@ -53,6 +55,13 @@ to use \code{position_jitter()}, give the position as \code{"jitter"}.
 }}
 
 \item{interaction_type}{One of `"abundance"` or `"binary"`.}
+
+\item{tip_positions_row}{Optional row-side tip positions. Accepts either:
+(1) a data frame with columns `label` and `y`, or (2) a tree object
+(`phylo`/ggtree) from which tip positions are extracted.}
+
+\item{tip_positions_column}{Optional column-side tip positions. Accepts the
+same formats as `tip_positions_row`.}
 
 \item{...}{Additional aesthetics passed to the geom/stat.}
 

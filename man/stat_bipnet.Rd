@@ -17,6 +17,8 @@ stat_bipnet(
   ratio = 1/1.618,
   interaction_type = c("abundance", "binary"),
   adjust_box_height = FALSE,
+  tip_positions_row = NULL,
+  tip_positions_column = NULL,
   geom = "polygon",
   position = "identity",
   na.rm = FALSE,
@@ -48,6 +50,12 @@ from a \code{formula} (e.g. \code{~ head(.x, 10)}).}
 
 \item{type}{One of `"box1"`, `"box2"`, or `"interaction"`.}
 
+\item{row_nm}{A single string giving the key column name in
+`metadata_row` used to join row metadata.}
+
+\item{column_nm}{A single string giving the key column name in
+`metadata_column` used to join column metadata.}
+
 \item{metadata_row}{Optional data frame with row metadata used by the stat.}
 
 \item{metadata_column}{Optional data frame with column metadata used by the stat.}
@@ -62,6 +70,13 @@ from a \code{formula} (e.g. \code{~ head(.x, 10)}).}
 rendering.}
 
 \item{adjust_box_height}{If `TRUE`, scale box heights by totals.}
+
+\item{tip_positions_row}{Optional row-side tip positions. Accepts either:
+(1) a data frame with columns `label` and `y`, or (2) a tree object
+(`phylo`/ggtree) from which tip positions are extracted.}
+
+\item{tip_positions_column}{Optional column-side tip positions. Accepts the
+same formats as `tip_positions_row`.}
 
 \item{geom}{Geom to use. Defaults to `"polygon"` for convenience.}
 

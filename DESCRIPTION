@@ -16,9 +16,8 @@ Depends:
 Imports: 
     dplyr,
     ggtree,
-    marquee,
-    grid,
     magrittr,
+    methods,
     purrr,
     rlang,
     stringr,

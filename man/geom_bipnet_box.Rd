@@ -9,6 +9,8 @@ geom_bipnet_box(
   data = NULL,
   stat = "bipnet",
   position = "identity",
+  tip_positions_row = NULL,
+  tip_positions_column = NULL,
   ...,
   na.rm = FALSE,
   show.legend = NA,
@@ -50,6 +52,13 @@ to use \code{position_jitter()}, give the position as \code{"jitter"}.
 \item For more information and other ways to specify the position, see the
 \link[ggplot2:layer_positions]{layer position} documentation.
 }}
+
+\item{tip_positions_row}{Optional row-side tip positions. Accepts either:
+(1) a data frame with columns `label` and `y`, or (2) a tree object
+(`phylo`/ggtree) from which tip positions are extracted.}
+
+\item{tip_positions_column}{Optional column-side tip positions. Accepts the
+same formats as `tip_positions_row`.}
 
 \item{...}{Additional aesthetics passed to the geom/stat.}
 

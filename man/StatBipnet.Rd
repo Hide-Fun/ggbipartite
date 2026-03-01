@@ -55,7 +55,8 @@ expected to return a list with elements `box1`, `box2`, and
 
 `StatBipnet` honours the arguments accepted by [stat_bipnet()], including
 `type`, `metadata_row`, `metadata_column`, `gap`, `box_ratio`, `ratio`,
-`adjust_box_height`, and `na.rm`. These are validated in
+`adjust_box_height`, `tip_positions_row`, `tip_positions_column`, and
+`na.rm`. These are validated in
 `StatBipnet$setup_params()` before being forwarded to
 `construct_bn_coordination()`.
 }

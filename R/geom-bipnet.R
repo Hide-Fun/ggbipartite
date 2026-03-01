@@ -67,6 +67,8 @@ geom_bipnet_box <- function(
   data = NULL,
   stat = "bipnet",
   position = "identity",
+  tip_positions_row = NULL,
+  tip_positions_column = NULL,
   ...,
   na.rm = FALSE,
   show.legend = NA,
@@ -80,7 +82,12 @@ geom_bipnet_box <- function(
     position = position,
     show.legend = show.legend,
     inherit.aes = inherit.aes,
-    params = list(na.rm = na.rm, ...)
+    params = list(
+      tip_positions_row = tip_positions_row,
+      tip_positions_column = tip_positions_column,
+      na.rm = na.rm,
+      ...
+    )
   )
 }
 
@@ -155,6 +162,8 @@ geom_bipnet_point <- function(
   data = NULL,
   stat = "bipnet",
   position = "identity",
+  tip_positions_row = NULL,
+  tip_positions_column = NULL,
   ...,
   na.rm = FALSE,
   show.legend = NA,
@@ -168,7 +177,12 @@ geom_bipnet_point <- function(
     position = position,
     show.legend = show.legend,
     inherit.aes = inherit.aes,
-    params = list(na.rm = na.rm, ...)
+    params = list(
+      tip_positions_row = tip_positions_row,
+      tip_positions_column = tip_positions_column,
+      na.rm = na.rm,
+      ...
+    )
   )
 }
 
@@ -296,6 +310,8 @@ geom_bipnet_interaction <- function(
   stat = "bipnet",
   position = "identity",
   interaction_type = c("abundance", "binary"),
+  tip_positions_row = NULL,
+  tip_positions_column = NULL,
   ...,
   na.rm = FALSE,
   show.legend = NA,
@@ -318,6 +334,8 @@ geom_bipnet_interaction <- function(
     inherit.aes = inherit.aes,
     params = list(
       interaction_type = interaction_type,
+      tip_positions_row = tip_positions_row,
+      tip_positions_column = tip_positions_column,
       na.rm = na.rm,
       ...
     )

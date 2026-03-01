@@ -145,6 +145,51 @@ p <- ggplot(
 p
 ```
 
+```{r}
+#| fig-width: 9
+#| fig-height: 6
+#| fig-dpi: 400
+
+# binary.
+bmat <- (interaction_matrix != 0) * 1L
+
+interaction_df <-
+  bmat %>%
+  as_tibble(rownames = "host") %>%
+  pivot_longer(
+    cols = -host,
+    names_to = "otu",
+    values_to = "num_seq"
+  ) %>%
+  filter(num_seq > 0) 
+
+p_binary <- ggplot(
+  interaction_df,
+  aes(row = host, column = otu, count = num_seq)
+) +
+  geom_bipnet_interaction(
+    type = "interaction",
+    interaction_type = "binary",
+    linewidth = .5,
+    show.legend = FALSE
+  ) +
+  geom_bipnet_point(
+    type = "box1",
+    fill = "steelblue"
+  ) +
+  geom_bipnet_point(
+    type = "box2",
+    fill = "navy"
+  ) +
+  coord_equal() +
+  labs(
+    title = "Bipartite interaction (rows × columns)"
+  ) +
+  theme_bw()
+
+p_binary
+```
+
 ### Add labels
 
 The coordinates can be obtained with construct_bn_coordination(), so I’ll use that for adding labels.
@@ -295,9 +340,7 @@ p1 + p2
 ```{r}
 library(tidyverse)
 library(ggtree)
-library(marquee)
 library(patchwork)
-devtools::load_all(".")
 
 set.seed(123)
 ## host (plants) phylogeny.
@@ -345,11 +388,6 @@ metadata_row <- tibble(
   family = c("A", "A", "A", "B", "B", "B", "B", "B", "C", "C")
 )
 
-new_nm <- tibble(
-  old = LETTERS[1:10],
-  new = glue::glue("***{old}*** *{letters[1:10]}* test")
-)
-
 bn_coords <- construct_bn_coordination(
   .mat = interaction_matrix,
   .row = "host",
@@ -369,7 +407,7 @@ p <-
   ) +
   geom_bipnet_interaction(
     type = "interaction",
-    alpha = 0.8,
+    alpha = 0.6,
     show.legend = FALSE,
     linewidth = .1
   ) +
@@ -388,31 +426,13 @@ host_phylo2 <- adjust_tree(
   .phylo = host_phylo,
   .box = bn_coords$box1,
   tree_position = "left"
-) %>%
-  marquee_tiplab(
-    align = TRUE,
-    label_map = new_nm,
-    size = 5,
-    show_guides = TRUE,
-    x_start_nudge = .2,
-    guide_end_gap_ratio = .03,
-    show_labels = FALSE
-  )
+)
 
 symbiont_phylo2 <- adjust_tree(
   .phylo = symbiont_phylo,
   .box = bn_coords$box2,
   tree_position = "right"
-) %>%
-  marquee_tiplab(
-    align = TRUE,
-    label_map = new_nm,
-    size = 5,
-    show_guides = TRUE,
-    x_start_nudge = .2,
-    guide_end_gap_ratio = .03,
-    show_labels = FALSE
-  ) +
+) +
   scale_x_reverse()
 
 create_link <- function(box, ggtree, direction, xmin = 0, xend = 1) {

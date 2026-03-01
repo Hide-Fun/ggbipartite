@@ -22,7 +22,7 @@
 #'   \code{sum(.mat) / .box_ratio}.
 #' @param .ratio Positive numeric scalar; divisor to derive overall width as
 #'   \code{sum(.mat) / .ratio}.
-#' @param .adjust_box_height Logical; if \code{TRUE}, the vertical gaps for each
+#' @param .adjust_box_height Logical; if \code{FALSE}, the vertical gaps for each
 #'   side are adjusted so that the total heights of the two sides match (uses
 #'   \code{\link{calc_global_params}} and its helper).
 #'
@@ -109,7 +109,7 @@ construct_bn_coordination <- function(
   .gap = 0,
   .box_ratio = 5,
   .ratio = 1 / 1.618,
-  .adjust_box_height = TRUE
+  .adjust_box_height = FALSE
 ) {
   dfs <- bipartite_network(.mat = .mat)
 

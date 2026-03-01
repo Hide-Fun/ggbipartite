@@ -91,7 +91,7 @@ StatBipnet <- ggplot2::ggproto(
       message("Picking gap of ", signif(params$gap, 3))
     }
     if (is.null(params$adjust_box_height)) {
-      params$adjust_box_height <- TRUE # default
+      params$adjust_box_height <- FALSE # default
     }
     if (
       !is.logical(params$adjust_box_height) ||
@@ -114,7 +114,7 @@ StatBipnet <- ggplot2::ggproto(
     box_ratio = 5,
     ratio = 1 / 1.618,
     interaction_type = "abundance",
-    adjust_box_height = TRUE,
+    adjust_box_height = FALSE,
     na.rm = FALSE
   ) {
     interaction_type <- match.arg(
@@ -234,7 +234,7 @@ stat_bipnet <- function(
   box_ratio = 5,
   ratio = 1 / 1.618,
   interaction_type = c("abundance", "binary"),
-  adjust_box_height = TRUE,
+  adjust_box_height = FALSE,
   geom = "polygon",
   position = "identity",
   na.rm = FALSE,

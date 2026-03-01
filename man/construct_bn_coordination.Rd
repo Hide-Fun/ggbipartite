@@ -15,7 +15,7 @@ construct_bn_coordination(
   .gap = 0,
   .box_ratio = 5,
   .ratio = 1/1.618,
-  .adjust_box_height = TRUE
+  .adjust_box_height = FALSE
 )
 }
 \arguments{
@@ -43,7 +43,7 @@ adjacent items on each side (subject to adjustment; see \code{.adjust_box_height
 \item{.ratio}{Positive numeric scalar; divisor to derive overall width as
 \code{sum(.mat) / .ratio}.}
 
-\item{.adjust_box_height}{Logical; if \code{TRUE}, the vertical gaps for each
+\item{.adjust_box_height}{Logical; if \code{FALSE}, the vertical gaps for each
 side are adjusted so that the total heights of the two sides match (uses
 \code{\link{calc_global_params}} and its helper).}
 }

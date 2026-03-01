@@ -16,7 +16,7 @@ stat_bipnet(
   box_ratio = 5,
   ratio = 1/1.618,
   interaction_type = c("abundance", "binary"),
-  adjust_box_height = TRUE,
+  adjust_box_height = FALSE,
   geom = "polygon",
   position = "identity",
   na.rm = FALSE,

@@ -1,13 +1,13 @@
 Package: ggbipartite
 Type: Package
 Title: Visualize Bipartite Networks with ggplot2
-Version: 0.1.2
+Version: 0.9.2
 Authors@R: c(
     person("Hidehito", "Okada", , "hidefungi@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3210-2736"))
   )
 Description: Provides tools to visualize bipartite interaction matrices on
-    top of ggplot2. It includes stat/geom layers to draw row and column
+    of ggplot2. It includes stat/geom layers to draw row and column
     boxes and interaction polygons, coordinate constructors for custom
     workflows, and helpers to align bipartite layouts with phylogenetic
     trees.

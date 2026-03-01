@@ -27,8 +27,8 @@
   }
   eps <- diff(x_range) / 200
 
-  tip_data <- df |>
-    dplyr::filter(!is.na(.data$isTip) & .data$isTip) |>
+  tip_data <- df %>%
+    dplyr::filter(!is.na(.data$isTip) & .data$isTip) %>%
     dplyr::mutate(
       x_lab = .data$x + eps + offset
     )

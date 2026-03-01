@@ -20,11 +20,11 @@ get_tip_order <- function(x) {
     )
   }
 
-  tip_labels <- tree_data |>
-    dplyr::filter(!is.na(.data$isTip) & .data$isTip) |>
-    dplyr::filter(!is.na(.data$label), !is.na(.data$y)) |>
-    dplyr::arrange(.data$y, .data$label) |>
-    dplyr::distinct(.data$label) |>
+  tip_labels <- tree_data %>%
+    dplyr::filter(!is.na(.data$isTip) & .data$isTip) %>%
+    dplyr::filter(!is.na(.data$label), !is.na(.data$y)) %>%
+    dplyr::arrange(.data$y, .data$label) %>%
+    dplyr::distinct(.data$label) %>%
     dplyr::pull(.data$label)
 
   if (length(tip_labels) == 0) {

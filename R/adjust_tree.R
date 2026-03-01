@@ -118,11 +118,11 @@ adjust_tree <- function(
       )
     }
 
-    tip_labels <- tree_data |>
-      dplyr::filter(!is.na(.data$isTip) & .data$isTip) |>
-      dplyr::filter(!is.na(.data$label)) |>
-      dplyr::distinct(.data$label) |>
-      dplyr::pull(.data$label) |>
+    tip_labels <- tree_data %>%
+      dplyr::filter(!is.na(.data$isTip) & .data$isTip) %>%
+      dplyr::filter(!is.na(.data$label)) %>%
+      dplyr::distinct(.data$label) %>%
+      dplyr::pull(.data$label) %>%
       as.character()
 
     match_counts <- vapply(
@@ -143,32 +143,32 @@ adjust_tree <- function(
       )
     }
 
-    box_tip <- .box |>
+    box_tip <- .box %>%
       dplyr::mutate(
         .label = as.character(.data[[label_col]]),
         y_target = (.data$ymin + .data$ymax) / 2
-      ) |>
-      dplyr::filter(!is.na(.data$.label), is.finite(.data$y_target)) |>
-      dplyr::group_by(.data$.label) |>
+      ) %>%
+      dplyr::filter(!is.na(.data$.label), is.finite(.data$y_target)) %>%
+      dplyr::group_by(.data$.label) %>%
       dplyr::summarise(y_target = mean(.data$y_target), .groups = "drop")
 
-    tree_tip <- tree_data |>
-      dplyr::filter(!is.na(.data$isTip) & .data$isTip) |>
-      dplyr::filter(!is.na(.data$label), is.finite(.data$y)) |>
-      dplyr::group_by(.data$label) |>
+    tree_tip <- tree_data %>%
+      dplyr::filter(!is.na(.data$isTip) & .data$isTip) %>%
+      dplyr::filter(!is.na(.data$label), is.finite(.data$y)) %>%
+      dplyr::group_by(.data$label) %>%
       dplyr::summarise(y_tip = mean(.data$y), .groups = "drop")
 
-    tip_map <- tree_tip |>
-      dplyr::mutate(label = as.character(.data$label)) |>
+    tip_map <- tree_tip %>%
+      dplyr::mutate(label = as.character(.data$label)) %>%
       dplyr::left_join(
         box_tip,
         by = c("label" = ".label")
       )
 
     if (any(!is.finite(tip_map$y_target))) {
-      missing_labels <- tip_map |>
-        dplyr::filter(!is.finite(.data$y_target)) |>
-        dplyr::arrange(.data$label) |>
+      missing_labels <- tip_map %>%
+        dplyr::filter(!is.finite(.data$y_target)) %>%
+        dplyr::arrange(.data$label) %>%
         dplyr::pull(.data$label)
       stop(
         paste0(
@@ -180,7 +180,7 @@ adjust_tree <- function(
     }
 
     if (nrow(tip_map) >= 2) {
-      tip_map <- tip_map |>
+      tip_map <- tip_map %>%
         dplyr::arrange(.data$y_tip, .data$label)
 
       y_map <- stats::approxfun(

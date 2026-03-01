@@ -47,21 +47,21 @@ create_link <- function(box, ggtree, direction, x = 0, xend = 1) {
     )
   }
 
-  box_summary <- box |>
+  box_summary <- box %>%
     tidyr::pivot_longer(
       cols = c("xmin", "xmax", "ymin", "ymax"),
       names_to = c("axis", "end"),
       names_pattern = "([xy])(min|max)"
-    ) |>
+    ) %>%
     tidyr::pivot_wider(
       names_from = "axis",
       values_from = "value"
-    ) |>
-    dplyr::group_by(.data[[id_col]]) |>
+    ) %>%
+    dplyr::group_by(.data[[id_col]]) %>%
     dplyr::summarise(
       y1 = mean(.data$y, na.rm = TRUE),
       .groups = "drop"
-    ) |>
+    ) %>%
     dplyr::mutate(
       x = x,
       xend = xend
@@ -78,9 +78,9 @@ create_link <- function(box, ggtree, direction, x = 0, xend = 1) {
     )
   }
 
-  tip_summary <- tree_data |>
-    dplyr::filter(!is.na(.data$isTip) & .data$isTip) |>
-    dplyr::group_by(.data$label) |>
+  tip_summary <- tree_data %>%
+    dplyr::filter(!is.na(.data$isTip) & .data$isTip) %>%
+    dplyr::group_by(.data$label) %>%
     dplyr::summarise(
       y2 = mean(.data$y, na.rm = TRUE),
       .groups = "drop"

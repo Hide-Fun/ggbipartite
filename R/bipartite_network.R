@@ -239,7 +239,7 @@ construct_bn_coordination <- function(
 #'
 #' # Example stub for `to_longer()` if not available:
 #' to_longer <- function(.mat) {
-#'   tibble::as_tibble(as.data.frame(as.table(.mat))) |>
+#'   tibble::as_tibble(as.data.frame(as.table(.mat))) %>%
 #'     dplyr::rename(row = Var1, column = Var2, interaction_size = Freq)
 #' }
 #'
@@ -252,10 +252,10 @@ construct_bn_coordination <- function(
 #' @export
 bipartite_network <- function(.mat) {
   # Calculate row/column sums.
-  rsf <- rowSums(.mat) |>
+  rsf <- rowSums(.mat) %>%
     tibble::enframe(name = "row", value = "interaction_size")
 
-  csf <- colSums(.mat) |>
+  csf <- colSums(.mat) %>%
     tibble::enframe(name = "column", value = "interaction_size")
 
   # Convert to longer tibble (expects a `to_longer()` helper to exist).

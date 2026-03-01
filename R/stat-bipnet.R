@@ -136,13 +136,13 @@ extract_tip_positions <- function(x, arg_name) {
   }
 
   if (all(c("label", "y") %in% names(tip_df))) {
-    out <- tip_df |>
+    out <- tip_df %>%
       dplyr::mutate(
         label = as.character(.data$label),
         y = as.numeric(.data$y)
-      ) |>
-      dplyr::filter(!is.na(.data$label), is.finite(.data$y)) |>
-      dplyr::group_by(.data$label) |>
+      ) %>%
+      dplyr::filter(!is.na(.data$label), is.finite(.data$y)) %>%
+      dplyr::group_by(.data$label) %>%
       dplyr::summarise(y = mean(.data$y), .groups = "drop")
   } else {
     required_cols <- c("isTip", "label", "y")
@@ -157,14 +157,14 @@ extract_tip_positions <- function(x, arg_name) {
       )
     }
 
-    out <- tip_df |>
-      dplyr::filter(!is.na(.data$isTip) & .data$isTip) |>
+    out <- tip_df %>%
+      dplyr::filter(!is.na(.data$isTip) & .data$isTip) %>%
       dplyr::mutate(
         label = as.character(.data$label),
         y = as.numeric(.data$y)
-      ) |>
-      dplyr::filter(!is.na(.data$label), is.finite(.data$y)) |>
-      dplyr::group_by(.data$label) |>
+      ) %>%
+      dplyr::filter(!is.na(.data$label), is.finite(.data$y)) %>%
+      dplyr::group_by(.data$label) %>%
       dplyr::summarise(y = mean(.data$y), .groups = "drop")
   }
 
@@ -186,17 +186,17 @@ extract_tip_positions <- function(x, arg_name) {
 #' @keywords internal
 #' @noRd
 prepare_interaction_cells <- function(data) {
-  data |>
+  data %>%
     dplyr::transmute(
       row = as.character(.data$row),
       column = as.character(.data$column),
       interaction = as.numeric(.data$count)
-    ) |>
-    dplyr::group_by(.data$row, .data$column) |>
+    ) %>%
+    dplyr::group_by(.data$row, .data$column) %>%
     dplyr::summarise(
       interaction = sum(.data$interaction, na.rm = TRUE),
       .groups = "drop"
-    ) |>
+    ) %>%
     dplyr::filter(is.finite(.data$interaction), .data$interaction > 0)
 }
 
@@ -231,25 +231,25 @@ align_box_to_tip_positions <- function(box_df, id_col, tip_positions, side_name)
     )
   }
 
-  current_centres <- box_df |>
+  current_centres <- box_df %>%
     dplyr::transmute(
       id = as.character(.data[[id_col]]),
       y_center = (.data$ymin + .data$ymax) / 2
-    ) |>
-    dplyr::group_by(.data$id) |>
+    ) %>%
+    dplyr::group_by(.data$id) %>%
     dplyr::summarise(y_center = mean(.data$y_center), .groups = "drop")
 
-  shift_tbl <- current_centres |>
+  shift_tbl <- current_centres %>%
     dplyr::left_join(
-      tip_positions |>
+      tip_positions %>%
         dplyr::transmute(id = as.character(.data$label), y_target = .data$y),
       by = "id"
     )
 
   if (any(!is.finite(shift_tbl$y_target))) {
-    missing_ids <- shift_tbl |>
-      dplyr::filter(!is.finite(.data$y_target)) |>
-      dplyr::arrange(.data$id) |>
+    missing_ids <- shift_tbl %>%
+      dplyr::filter(!is.finite(.data$y_target)) %>%
+      dplyr::arrange(.data$id) %>%
       dplyr::pull(.data$id)
     stop(
       paste0(
@@ -262,17 +262,17 @@ align_box_to_tip_positions <- function(box_df, id_col, tip_positions, side_name)
     )
   }
 
-  shift_tbl <- shift_tbl |>
-    dplyr::mutate(delta = .data$y_target - .data$y_center) |>
+  shift_tbl <- shift_tbl %>%
+    dplyr::mutate(delta = .data$y_target - .data$y_center) %>%
     dplyr::select(id, delta)
 
-  box_df |>
-    dplyr::mutate(id = as.character(.data[[id_col]])) |>
-    dplyr::left_join(shift_tbl, by = "id") |>
+  box_df %>%
+    dplyr::mutate(id = as.character(.data[[id_col]])) %>%
+    dplyr::left_join(shift_tbl, by = "id") %>%
     dplyr::mutate(
       ymin = .data$ymin + .data$delta,
       ymax = .data$ymax + .data$delta
-    ) |>
+    ) %>%
     dplyr::select(-id, -delta)
 }
 
@@ -326,13 +326,13 @@ adjust_bn_coords_to_tip_positions <- function(
     .box1 = .bn_coords$box1,
     .box2 = .bn_coords$box2,
     .interation_cell = .interaction_cells
-  ) |>
+  ) %>%
     dplyr::mutate(
       row = as.character(.data$row),
       column = as.character(.data$column)
     )
 
-  original_interaction <- .bn_coords$interaction_coords |>
+  original_interaction <- .bn_coords$interaction_coords %>%
     dplyr::mutate(
       row = as.character(.data$row),
       column = as.character(.data$column)
@@ -343,14 +343,14 @@ adjust_bn_coords_to_tip_positions <- function(
     c("row", "column", "x", "y", "area", "group")
   )
   if (length(extra_cols) > 0) {
-    metadata_lookup <- original_interaction |>
+    metadata_lookup <- original_interaction %>%
       dplyr::distinct(
         .data$row,
         .data$column,
         .keep_all = TRUE
-      ) |>
+      ) %>%
       dplyr::select(dplyr::all_of(c("row", "column", extra_cols)))
-    interaction_coords <- interaction_coords |>
+    interaction_coords <- interaction_coords %>%
       dplyr::left_join(metadata_lookup, by = c("row", "column"))
   }
 
@@ -371,21 +371,21 @@ adjust_bn_coords_to_tip_positions <- function(
 #' @keywords internal
 #' @noRd
 compute_binary_interaction_coords <- function(.bn_coords) {
-  row_points <- .bn_coords$box1 |>
+  row_points <- .bn_coords$box1 %>%
     dplyr::transmute(
       row = as.character(row),
       x = (xmin + xmax) / 2,
       y = (ymin + ymax) / 2
     )
 
-  column_points <- .bn_coords$box2 |>
+  column_points <- .bn_coords$box2 %>%
     dplyr::transmute(
       column = as.character(column),
       xend = (xmin + xmax) / 2,
       yend = (ymin + ymax) / 2
     )
 
-  interaction_cells <- .bn_coords$interaction_coords |>
+  interaction_cells <- .bn_coords$interaction_coords %>%
     dplyr::mutate(
       row = as.character(row),
       column = as.character(column)
@@ -396,13 +396,13 @@ compute_binary_interaction_coords <- function(.bn_coords) {
     names(interaction_cells)
   )
   if (length(drop_cols) > 0) {
-    interaction_cells <- interaction_cells |>
+    interaction_cells <- interaction_cells %>%
       dplyr::select(-dplyr::all_of(drop_cols))
   }
 
-  interaction_cells |>
-    dplyr::distinct(row, column, .keep_all = TRUE) |>
-    dplyr::left_join(row_points, by = "row") |>
+  interaction_cells %>%
+    dplyr::distinct(row, column, .keep_all = TRUE) %>%
+    dplyr::left_join(row_points, by = "row") %>%
     dplyr::left_join(column_points, by = "column")
 }
 
@@ -508,11 +508,11 @@ StatBipnet <- ggplot2::ggproto(
         names_sort = TRUE,
         values_from = "count",
         values_fill = 0
-      ) |>
+      ) %>%
       dplyr::arrange(row) %>%
       tibble::column_to_rownames(
         var = "row"
-      ) |>
+      ) %>%
       as.matrix()
 
     construct_bn_coordination_fn <- resolve_internal_function(
@@ -619,7 +619,7 @@ StatBipnet <- ggplot2::ggproto(
 #'   host = LETTERS[1:4],
 #'   otu1 = c(1, 0, 3, 2),
 #'   otu2 = c(0, 2, 1, 0)
-#' ) |>
+#' ) %>%
 #'   pivot_longer(!host, names_to = "otu", values_to = "num_seq")
 #'
 #' ggplot(interaction_df, aes(row = host, column = otu, count = num_seq)) +

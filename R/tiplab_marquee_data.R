@@ -18,8 +18,8 @@
     )
   }
 
-  tip_data <- df |>
-    dplyr::filter(!is.na(.data$isTip) & .data$isTip) |>
+  tip_data <- df %>%
+    dplyr::filter(!is.na(.data$isTip) & .data$isTip) %>%
     dplyr::mutate(
       x_lab = .tiplab_align_x(df = df, offset = offset)
     )

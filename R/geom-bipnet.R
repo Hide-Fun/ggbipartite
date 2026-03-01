@@ -44,7 +44,7 @@ GeomBipnetBox <- ggproto(
 #'   host = LETTERS[1:4],
 #'   otu1 = c(1, 0, 3, 2),
 #'   otu2 = c(0, 2, 1, 0)
-#' ) |>
+#' ) %>%
 #'   tidyr::pivot_longer(
 #'     cols = !host,
 #'     names_to = "otu",
@@ -143,7 +143,7 @@ GeomBipnetPoint <- ggproto(
 #'   host = LETTERS[1:4],
 #'   otu1 = c(1, 0, 1, 1),
 #'   otu2 = c(0, 1, 1, 0)
-#' ) |>
+#' ) %>%
 #'   tidyr::pivot_longer(
 #'     cols = !host,
 #'     names_to = "otu",
@@ -273,7 +273,7 @@ GeomBipnetInteractionBinary <- ggproto(
 #'   host = LETTERS[1:4],
 #'   otu1 = c(1, 0, 3, 2),
 #'   otu2 = c(0, 2, 1, 0)
-#' ) |>
+#' ) %>%
 #'   tidyr::pivot_longer(
 #'     cols = !host,
 #'     names_to = "otu",

@@ -7,12 +7,13 @@
 #' @param x A supported tree input object.
 #'
 #' @return A data frame containing tree data.
+#' @importFrom methods slotNames
 #' @keywords internal
 #' @noRd
 .extract_tree_data <- function(x) {
   if (.is_ggplot_obj(x)) {
     tree_data <- x$data
-  } else if (isS4(x) && "data" %in% methods::slotNames(x)) {
+  } else if (isS4(x) && "data" %in% slotNames(x)) {
     tree_data <- x@data
   } else {
     tree_data <- ggtree::ggtree(x)$data

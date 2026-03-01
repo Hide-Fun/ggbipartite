@@ -9,6 +9,8 @@ geom_bipnet_box(
   data = NULL,
   stat = "bipnet",
   position = "identity",
+  tip_positions_row = NULL,
+  tip_positions_column = NULL,
   ...,
   na.rm = FALSE,
   show.legend = NA,
@@ -51,6 +53,13 @@ to use \code{position_jitter()}, give the position as \code{"jitter"}.
 \link[ggplot2:layer_positions]{layer position} documentation.
 }}
 
+\item{tip_positions_row}{Optional row-side tip positions. Accepts either:
+(1) a data frame with columns `label` and `y`, or (2) a tree object
+(`phylo`/ggtree) from which tip positions are extracted.}
+
+\item{tip_positions_column}{Optional column-side tip positions. Accepts the
+same formats as `tip_positions_row`.}
+
 \item{...}{Additional aesthetics passed to the geom/stat.}
 
 \item{na.rm}{Logical indicating whether to drop `NA`s.}
@@ -80,7 +89,7 @@ interaction_df <- tibble::tibble(
   host = LETTERS[1:4],
   otu1 = c(1, 0, 3, 2),
   otu2 = c(0, 2, 1, 0)
-) |>
+) \%>\%
   tidyr::pivot_longer(
     cols = !host,
     names_to = "otu",

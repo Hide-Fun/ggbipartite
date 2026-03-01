@@ -7,13 +7,16 @@
 #'
 #' @param .mat A numeric matrix of interactions; rows and columns represent the
 #'   two node sets.
+#' @param .row A single string giving the key column name in `.metadata_row`
+#'   used to join row metadata to row identifiers.
+#' @param .column A single string giving the key column name in
+#'   `.metadata_column` used to join column metadata to column identifiers.
 #' @param .metadata_row Optional tibble/data frame of row-level metadata to join
-#'   to the **row-side** box table (`box1`). Must contain a `row` key that
-#'   matches the identifiers used in `.mat`/`bipartite_network()`.
+#'   to the **row-side** box table (`box1`). Must contain the column specified
+#'   by `.row`.
 #' @param .metadata_column Optional tibble/data frame of column-level metadata to
 #'   join to the **column-side** box table (`box2`) and to `interaction_coords`.
-#'   Must contain a `column` key that matches the identifiers used in
-#'   `.mat`/`bipartite_network()`.
+#'   Must contain the column specified by `.column`.
 #' @param .x0,.y0 Numeric scalars; global origin for the left/bottom corner of
 #'   the first box.
 #' @param .gap Non-negative numeric scalar; baseline vertical gap between
@@ -49,10 +52,9 @@
 #' }
 #'
 #' @note
-#' The function body refers to \code{.metadata_row} and \code{.metadata_column}
-#' (with correct spelling) in the joins, while the arguments are named
-#' \code{.metadata_row} and \code{.metadata_column}. Align these names in your
-#' implementation to avoid runtime errors.
+#' Row/column identifiers are coerced to character before joining metadata.
+#' Ensure that key values in the columns specified by `.row` and `.column`
+#' match those character identifiers.
 #'
 #' The helper \code{compute_box_coords()} is expected to accept arguments
 #' \code{(.df, .var, .size, .x0, .width, .gap)} and return a data frame with
@@ -75,6 +77,9 @@
 #' \dontrun{
 #' m <- matrix(c(2, 1, 0,
 #'               0, 3, 2), nrow = 2, byrow = TRUE)
+#'
+#' rownames(m) <- c(1, 2)
+#' colnames(m) <- c(1, 2, 3)
 #'
 #' # Optional metadata (must contain `row` / `column` keys)
 #' row_meta <- tibble::tibble(row = 1:2, group = c("A", "B"))
@@ -106,7 +111,7 @@ construct_bn_coordination <- function(
   .gap = 0,
   .box_ratio = 5,
   .ratio = 1 / 1.618,
-  .adjust_box_height = TRUE
+  .adjust_box_height = FALSE
 ) {
   dfs <- bipartite_network(.mat = .mat)
 
@@ -146,26 +151,42 @@ construct_bn_coordination <- function(
 
   if (!is.null(.metadata_row) && !is.null(.metadata_column)) {
     box1 <- box1 %>%
-      left_join(.metadata_row, by = c("row" = .row))
+      dplyr::mutate(row = as.character(row)) %>%
+      dplyr::left_join(.metadata_row, by = c("row" = .row))
 
     box2 <- box2 %>%
-      left_join(.metadata_column, by = c("column" = .column))
+      dplyr::mutate(column = as.character(column)) %>%
+      dplyr::left_join(.metadata_column, by = c("column" = .column))
 
     interaction_coords <- interaction_coords %>%
-      left_join(.metadata_column, by = c("column" = .column)) %>%
-      left_join(.metadata_row, by = c("row" = .row))
+      dplyr::mutate(
+        row = as.character(row),
+        column = as.character(column)
+      ) %>%
+      dplyr::left_join(.metadata_column, by = c("column" = .column)) %>%
+      dplyr::left_join(.metadata_row, by = c("row" = .row))
   } else if (!is.null(.metadata_column)) {
     box2 <- box2 %>%
-      left_join(.metadata_columnby = c("column" = .column))
+      dplyr::mutate(column = as.character(column)) %>%
+      dplyr::left_join(.metadata_column, by = c("column" = .column))
 
     interaction_coords <- interaction_coords %>%
-      left_join(.metadata_column, by = c("column" = .column))
+      dplyr::mutate(
+        row = as.character(row),
+        column = as.character(column)
+      ) %>%
+      dplyr::left_join(.metadata_column, by = c("column" = .column))
   } else if (!is.null(.metadata_row)) {
     box1 <- box1 %>%
-      left_join(.metadata_row, by = c("row" = .row))
+      dplyr::mutate(row = as.character(row)) %>%
+      dplyr::left_join(.metadata_row, by = c("row" = .row))
 
     interaction_coords <- interaction_coords %>%
-      left_join(.metadata_row, by = c("row" = .row))
+      dplyr::mutate(
+        row = as.character(row),
+        column = as.character(column)
+      ) %>%
+      dplyr::left_join(.metadata_row, by = c("row" = .row))
   }
 
   return(list(
@@ -218,7 +239,7 @@ construct_bn_coordination <- function(
 #'
 #' # Example stub for `to_longer()` if not available:
 #' to_longer <- function(.mat) {
-#'   tibble::as_tibble(as.data.frame(as.table(.mat))) |>
+#'   tibble::as_tibble(as.data.frame(as.table(.mat))) %>%
 #'     dplyr::rename(row = Var1, column = Var2, interaction_size = Freq)
 #' }
 #'
@@ -231,10 +252,10 @@ construct_bn_coordination <- function(
 #' @export
 bipartite_network <- function(.mat) {
   # Calculate row/column sums.
-  rsf <- rowSums(.mat) |>
+  rsf <- rowSums(.mat) %>%
     tibble::enframe(name = "row", value = "interaction_size")
 
-  csf <- colSums(.mat) |>
+  csf <- colSums(.mat) %>%
     tibble::enframe(name = "column", value = "interaction_size")
 
   # Convert to longer tibble (expects a `to_longer()` helper to exist).

@@ -1,45 +1,31 @@
 # README
 
 
-## Purpose of ggbipartite package
+## 1. ライブラリ読み込みと基本データ生成
 
-- **(i) Matrix → data frame** conversion should be done *outside*
-  geoms.  
-  Prepare tidy data frames for each of the row sums, column sums, and
-  interactions (row × column).
-- **(ii) Data frame → visualization** should be done *inside* geoms.  
-  Delegate position calculations and shape generation to geoms (and
-  their helper functions).
-- Defining the **relative positioning** between rows and columns (gaps,
-  stacking order, etc.) is the key point.
-
-This document shows the workflow of converting an `interaction_matrix`
-into tidy format, building drawing coordinates via
-`construct_bn_coordination()`, and visualizing with `geom_bipnet_*` (or
-the companion `stat_bipnet()`).
-
-## Prerequisites
-
-- R (tidyverse)
-- `construct_bn_coordination()`, `geom_bipnet_interaction()`, and
-  `geom_bipnet_box()` are available (i.e., load *ggbipartite* or source
-  files that provide these functions).
-
-## Data preparation
-
-> **Design policy**  
-> Perform reshaping from the matrix *outside* geoms and prepare the
-> values needed for drawing (row sums, column sums, interactions) in
-> tidy form.  
-> Visualization uses these data frames as **inputs**, and geoms compute
-> coordinates and shapes.
+最初に必要パッケージを読み込み、植物側・菌側の系統樹を作成します。
+続いて、系統樹の tip 順に合わせて相互作用行列を並べ替え、 可視化に使う
+long 形式データと `metadata_row` を準備します。 最後に abundance
+表示の基本プロット `p` と、座標計算結果 `bn_coords` を作成します。
 
 ``` r
 library(tidyverse)
+library(ggtree)
+library(marquee)
 library(patchwork)
-devtools::load_all(".")
+library(ggbipartite)
 
-# Example matrix --------------------------------------------------------------
+set.seed(123)
+## host (plants) phylogeny.
+host_phylo <- rtree(10)
+host_phylo$tip.label <- LETTERS[1:10]
+## symbiont (fungal) phylogeny.
+symbiont_phylo <- rtree(4)
+symbiont_phylo$tip.label <- sprintf("otu%d", 1:4)
+
+host_order <- get_tip_order(host_phylo) |> rev()
+symbiont_order <- get_tip_order(symbiont_phylo) |> rev()
+
 interaction_matrix <- tibble(
   host = LETTERS[1:10],
   otu1 = c(1, 0, 100, 2, 1, 500, 40, 0, 1, 0),
@@ -47,312 +33,575 @@ interaction_matrix <- tibble(
   otu3 = c(350, 10, 0, 0, 0, 0, 0, 1, 3, 0),
   otu4 = c(0, 0, 0, 0, 1, 0, 1, 0, 0, 150)
 ) %>%
-  as.data.frame() %>%
+  arrange(factor(host, host_order)) |>
+  relocate(host, all_of(symbiont_order)) |>
   column_to_rownames("host") %>%
   as.matrix()
 
-# Row metadata ---------------------------------------------------------------
-metadata_row <- tibble(
-  host = LETTERS[1:10],
-  family = c("A", "A", "A", "B", "B", "B", "B", "B", "C", "C")
-)
-```
-
-### Tidy representation of interactions
-
-``` r
-# Convert matrix to tidy long format (row, column, weight).
-interaction_df <-
-  interaction_matrix %>%
+interaction_df <- interaction_matrix %>%
   as_tibble(rownames = "host") %>%
   pivot_longer(
     cols = -host,
     names_to = "otu",
     values_to = "num_seq"
   ) %>%
-  filter(num_seq > 0)
+  filter(num_seq > 0) %>%
+  mutate(
+    host = factor(host, host_order),
+    otu = factor(otu, symbiont_order)
+  )
 
-interaction_df
-```
-
-    # A tibble: 20 × 3
-       host  otu   num_seq
-       <chr> <chr>   <dbl>
-     1 A     otu1        1
-     2 A     otu2       10
-     3 A     otu3      350
-     4 B     otu3       10
-     5 C     otu1      100
-     6 C     otu2        1
-     7 D     otu1        2
-     8 D     otu2        5
-     9 E     otu1        1
-    10 E     otu2        1
-    11 E     otu4        1
-    12 F     otu1      500
-    13 G     otu1       40
-    14 G     otu2       10
-    15 G     otu4        1
-    16 H     otu3        1
-    17 I     otu1        1
-    18 I     otu2        4
-    19 I     otu3        3
-    20 J     otu4      150
-
-## Coordinate generation: this is where relative positioning is defined
-
-- `construct_bn_coordination()` returns coordinates to place interaction
-  polygons and the two side boxes on a consistent coordinate system.
-- Main arguments:
-  - `.mat`: the original matrix (scale reference)
-  - `.metadata_row`: grouping on the row side (e.g., family)
-  - `.gap`: parameters controlling relative positioning such as group
-    spacing
-
-> **Key point**  
-> Allocate lengths on both row and column sides based on the “weights”
-> (row sums and column sums), and secure whitespace between groups with
-> `.gap`.  
-> Each data frame returned by this function (`interaction_coords`,
-> `box1`, `box2`) already contains **drawable coordinate columns**
-> (e.g., `x`, `y`, `xmin`, `xmax`, `ymin`, `ymax`).
-
-``` r
-# Build drawing coordinates from the matrix and metadata.
-bn_coords <- construct_bn_coordination(
-  .mat = interaction_matrix,
-  .metadata_row = metadata_row,
-  .row = "host",
-  .gap = 100
+metadata_row <- tibble(
+  host = LETTERS[1:10],
+  family = c("A", "A", "A", "B", "B", "B", "B", "B", "C", "C")
 )
 
-# For reference only: expected columns (may vary by implementation)
-# - bn_coords$interaction_coords: x, y, row, column, family, ...
-# - bn_coords$box1: xmin, xmax, ymin, ymax, row, family, ...
-# - bn_coords$box2: xmin, xmax, ymin, ymax, column, ...
-```
-
-Even though the geoms below compute coordinates internally through
-`stat_bipnet()`, pre-computing them with `construct_bn_coordination()`
-is useful when you need to inspect, tweak, or reuse the positioning
-logic outside of a plot.
-
-## Visualization: drawing with geoms
-
-> **Design policy**  
-> From here on, finish visualization *inside* geoms.  
-> Because `construct_bn_coordination()` has already computed positions,
-> you only need to bind columns via `mapping`.
-
-``` r
-p <- ggplot(
-  interaction_df,
-  aes(row = host, column = otu, count = num_seq)
-) +
-  # Draw row-side boxes (hosts) with metadata-driven fill.
-  geom_bipnet_box(
-    type = "box1",
-    alpha = 0.6,
-    fill = "steelblue",
-    linewidth = 0.4,
-    linetype = "dotted"
+p <-
+  ggplot(
+    interaction_df,
+    aes(row = host, column = otu, count = num_seq),
   ) +
-  # Draw column-side boxes (OTUs).
   geom_bipnet_box(
     type = "box2",
-    alpha = 0.8,
-    fill = "navy"
+    fill = "navy",
+    linewidth = .1
   ) +
-  # Draw interaction polygons linking rows and columns.
   geom_bipnet_interaction(
     type = "interaction",
-    alpha = 0.4,
+    alpha = 0.6,
     show.legend = FALSE,
-    colour = NA
+    linewidth = .1
   ) +
-  coord_equal() +
-  labs(
-    title = "Bipartite interaction (rows × columns)"
+  geom_bipnet_box(
+    aes(fill = after_stat(family)),
+    type = "box1",
+    row_nm = "host",
+    metadata_row = metadata_row,
+    show.legend = FALSE,
+    linewidth = .1
   ) +
-  theme_bw()
+  theme_void()
 
-p
+# -------------------------------------------------------------------------
+
+bn_coords <- construct_bn_coordination(
+  .mat = interaction_matrix,
+  .row = "host",
+  .metadata_row = metadata_row,
+  .gap = sum(interaction_matrix) / 10,
+  .adjust_box_height = FALSE
+)
+```
+
+## 2. 箱ラベル位置の算出と注釈表示
+
+`bn_coords$box1` と `bn_coords$box2` からラベル用の代表座標を計算し、
+`annotate()` で左右に host / otu ラベルを付与します。
+
+``` r
+# -------------------------------------------------------------------------
+
+label_df_box1 <- bn_coords$box1 %>%
+  pivot_longer(
+    cols = c(xmin, xmax, ymin, ymax),
+    names_to = c("axis", "end"),
+    names_pattern = "([xy])(min|max)"
+  ) %>%
+  pivot_wider(
+    names_from = axis,
+    values_from = value
+  ) %>%
+  summarise(
+    x = min(x),
+    y = mean(y),
+    .by = c(row, family)
+  )
+
+label_df_box2 <- bn_coords$box2 %>%
+  pivot_longer(
+    cols = c(xmin, xmax, ymin, ymax),
+    names_to = c("axis", "end"),
+    names_pattern = "([xy])(min|max)"
+  ) %>%
+  pivot_wider(
+    names_from = axis,
+    values_from = value
+  ) %>%
+  summarise(
+    x = max(x),
+    y = mean(y),
+    .by = c(column)
+  )
+
+p +
+  annotate(
+    geom = "text",
+    x = label_df_box1$x - 100,
+    y = label_df_box1$y,
+    label = label_df_box1$row
+  ) +
+  annotate(
+    geom = "text",
+    x = label_df_box2$x + 100,
+    y = label_df_box2$y,
+    label = label_df_box2$column
+  ) +
+  theme_void()
+```
+
+![](README_files/figure-commonmark/unnamed-chunk-2-1.png)
+
+## 3. 系統樹とネットワークの統合（リンク線あり）
+
+左右の系統樹を `adjust_tree()` で箱の高さに合わせ、 `create_link()`
+で箱中心と tip をつなぐ点線リンクを生成します。
+最後に、5パネル（tree-link-network-link-tree）を横並びで出力します。
+
+``` r
+# -------------------------------------------------------------------------
+
+t1 <- adjust_tree(
+  .phylo = host_phylo,
+  .box = bn_coords$box1,
+  .tree_position = "left",
+  .adjust = 1
+) +
+  geom_tiplab()
+
+t2 <- adjust_tree(
+  .phylo = symbiont_phylo,
+  .box = bn_coords$box2,
+  .tree_position = "right",
+  .adjust = 1
+) +
+  geom_tiplab(hjust = 1)
+
+df_link1 <- create_link(
+  box = bn_coords$box1,
+  ggtree = t1,
+  direction = "left",
+  x = 1e+05 / 8,
+  xend = 0
+)
+
+df_link2 <- create_link(
+  box = bn_coords$box2,
+  ggtree = t2,
+  direction = "right",
+  x = 0,
+  xend = 1e+05 / 8
+)
+
+p_link1 <- ggplot() +
+  geom_segment(
+    data = df_link1,
+    mapping = aes(x = x, y = y1, xend = xend, yend = y2, group = row),
+    linetype = "dotted",
+    linewidth = .5
+  ) +
+  geom_point(
+    data = df_link1,
+    mapping = aes(x, y1),
+    size = 0.5
+  ) +
+  geom_point(
+    data = df_link1,
+    mapping = aes(xend, y2),
+    size = 0.5
+  ) +
+  theme_void()
+
+p_link2 <- ggplot() +
+  geom_segment(
+    data = df_link2,
+    mapping = aes(x = x, y = y1, xend = xend, yend = y2, group = column),
+    linetype = "dotted",
+    linewidth = .5
+  ) +
+  geom_point(
+    data = df_link2,
+    mapping = aes(x, y1),
+    size = 0.5
+  ) +
+  geom_point(
+    data = df_link2,
+    mapping = aes(xend, y2),
+    size = 0.5
+  ) +
+  theme_void()
+
+yr_t1 <- get_yrange(t1)
+yr_t2 <- get_yrange(t2)
+
+# Take the larger y-range (span) and apply it to both plots
+ylim_common <- if (diff(yr_t1) >= diff(yr_t2)) yr_t1 else yr_t2
+
+scale_y_common <- scale_y_continuous(
+  limits = ylim_common,
+  expand = expansion(mult = 0)
+)
+
+t1 <- t1 + scale_y_common
+t2 <- t2 + scale_y_common
+p_link1 <- p_link1 + scale_y_common
+p_link2 <- p_link2 + scale_y_common
+
+t1 +
+  p_link1 +
+  p +
+  p_link2 +
+  t2 +
+  plot_layout(nrow = 1, widths = c(1, 0.25, 1, 0.25, 1))
 ```
 
 ![](README_files/figure-commonmark/unnamed-chunk-3-1.png)
 
-### Add labels
+## 4. `align = T` 版（tip ラベル整列描画）
 
-The coordinates can be obtained with construct_bn_coordination(), so
-I’ll use that for adding labels.
+`adjust_tree()` の結果に対して、内部ヘルパー由来の
+ラベルセグメント・マーキー描画を加える版です。 先ほどと同じ 5
+パネル構成で比較できます。
 
 ``` r
-bn_coords <- construct_bn_coordination(
-  .mat = interaction_matrix,
-  .row = "host",
-  .metadata_row = metadata_row,
-  .gap = sum(interaction_matrix)/10
+# `align = T` version.
+t1 <- adjust_tree(
+  .phylo = host_phylo,
+  .box = bn_coords$box1,
+  .tree_position = "left",
+  .adjust = 1
 )
 
-label_df_box1 <- bn_coords$box1 %>% 
-  pivot_longer(
-    cols = c(xmin, xmax, ymin, ymax),
-    names_to = c("axis", "end"),
-    names_pattern = "([xy])(min|max)"
-  ) %>% 
-  pivot_wider(
-    names_from = axis,
-    values_from = value
-  ) %>%
-  summarise(
-    x = min(x), y = mean(y),
-    .by = c(row, family)
-  )
+t2 <- adjust_tree(
+  .phylo = symbiont_phylo,
+  .box = bn_coords$box2,
+  .tree_position = "right",
+  .adjust = 1
+)
 
-label_df_box2 <- bn_coords$box2 %>% 
-  pivot_longer(
-    cols = c(xmin, xmax, ymin, ymax),
-    names_to = c("axis", "end"),
-    names_pattern = "([xy])(min|max)"
-  ) %>% 
-  pivot_wider(
-    names_from = axis,
-    values_from = value
-  ) %>%
-  summarise(
-    x = max(x), y = mean(y),
-    .by = c(column)
-  )
+t1 <- t1 +
+  geom_segment(
+    data = function(df) .tiplab_segment_data(df, offset = 0),
+    aes(x = x, xend = xend, y = y, yend = yend),
+    linetype = "dotted",
+    linewidth = 0.5,
+    inherit.aes = FALSE
+  ) +
+  geom_marquee(
+    data = function(df) .tiplab_marquee_data(df, offset = 0),
+    aes(x = x_lab, y = y, label = label),
+    hjust = 0,
+    inherit.aes = FALSE
+  ) +
+  geom_nodelab(aes(label = label), hjust = 1, vjust = -1) +
+  coord_cartesian(clip = "off")
 
-p + annotate(
-  geom = "text",
-  x = label_df_box1$x - 100,
-  y = label_df_box1$y,
-  label = label_df_box1$row
-) +
-  annotate(
-  geom = "text",
-  x = label_df_box2$x + 100,
-  y = label_df_box2$y,
-  label = label_df_box2$column
-) +
-  theme_void()
+t2 <- t2 +
+  geom_segment(
+    data = function(df) .tiplab_segment_data(df, offset = 0),
+    aes(x = x, xend = xend, y = y, yend = yend),
+    linetype = "dotted",
+    linewidth = 0.5,
+    inherit.aes = FALSE
+  ) +
+  geom_marquee(
+    data = function(df) .tiplab_marquee_data(df, offset = 0),
+    aes(x = x_lab, y = y, label = label),
+    hjust = 1,
+    inherit.aes = FALSE
+  ) +
+  geom_nodelab(aes(label = label), hjust = 1, vjust = -1) +
+  coord_cartesian(clip = "off")
+
+t1 <- t1 + scale_y_common
+t2 <- t2 + scale_y_common
+p_link1 <- p_link1 + scale_y_common
+p_link2 <- p_link2 + scale_y_common
+
+t1 +
+  p_link1 +
+  p +
+  p_link2 +
+  t2 +
+  plot_layout(nrow = 1, widths = c(1, 0.25, 1, 0.25, 1))
 ```
 
 ![](README_files/figure-commonmark/unnamed-chunk-4-1.png)
 
-### Incorporate matadata.
+## 5. binary モード（リンク線あり）
 
-If you want to add metadata corresponding to rows or columns, you can
-use　the `row` and  `metadat_row` , `column`
-and `metadat_column` arguments. Internally, a metadata data-frame is
-attached during the computation stage in `stat_bipnet()`, so you can
-access it using `after_stat()`.
+相互作用行列を 0/1 に変換し、`interaction_type = "binary"` を使って
+二値相互作用を描画します。系統樹・リンク線の組み合わせは abundance
+版と同様に維持します。
 
 ``` r
-p <- 
-ggplot(
-  interaction_df,
-  aes(row = host, column = otu, count = num_seq),
-  linewidth = .1
+# binary ------------------------------------------------------------------
+
+bmat <- (interaction_matrix != 0) * 1L
+
+interaction_df <- bmat %>%
+  as_tibble(rownames = "host") %>%
+  pivot_longer(
+    cols = -host,
+    names_to = "otu",
+    values_to = "num_seq"
+  ) %>%
+  filter(num_seq > 0) |>
+  mutate(
+    host = factor(host, host_order),
+    otu = factor(otu, symbiont_order)
+  )
+
+bn_coords <- construct_bn_coordination(
+  .mat = bmat,
+  .row = "host",
+  .metadata_row = metadata_row,
+  .gap = sum(bmat) / 10
+)
+
+t1 <- adjust_tree(
+  .phylo = host_phylo,
+  .box = bn_coords$box1,
+  .tree_position = "left",
+  .adjust = 1
 ) +
-  geom_bipnet_box(
-    type = "box2",
-    alpha = 0.8,
-    fill = "navy"
+  geom_tiplab()
+
+t2 <- adjust_tree(
+  .phylo = symbiont_phylo,
+  .box = bn_coords$box2,
+  .tree_position = "right",
+  .adjust = 1
+) +
+  geom_tiplab(hjust = 1)
+
+df_link1 <- create_link(
+  box = bn_coords$box1,
+  ggtree = t1,
+  direction = "left",
+  x = 1e+05 / 8,
+  xend = 0
+)
+
+df_link2 <- create_link(
+  box = bn_coords$box2,
+  ggtree = t2,
+  direction = "right",
+  x = 0,
+  xend = 1e+05 / 8
+)
+
+p_link1 <- ggplot() +
+  geom_segment(
+    data = df_link1,
+    mapping = aes(x = x, y = y1, xend = xend, yend = y2, group = row),
+    linetype = "dotted",
+    linewidth = .5
   ) +
+  geom_point(
+    data = df_link1,
+    mapping = aes(x, y1),
+    size = 0.5
+  ) +
+  geom_point(
+    data = df_link1,
+    mapping = aes(xend, y2),
+    size = 0.5
+  ) +
+  theme_void()
+
+p_link2 <- ggplot() +
+  geom_segment(
+    data = df_link2,
+    mapping = aes(x = x, y = y1, xend = xend, yend = y2, group = column),
+    linetype = "dotted",
+    linewidth = .5
+  ) +
+  geom_point(
+    data = df_link2,
+    mapping = aes(x, y1),
+    size = 0.5
+  ) +
+  geom_point(
+    data = df_link2,
+    mapping = aes(xend, y2),
+    size = 0.5
+  ) +
+  scale_x_continuous(expand = expansion(mult = 0.5)) +
+  theme_void()
+
+yr_t1 <- get_yrange(t1)
+yr_t2 <- get_yrange(t2)
+
+# Take the larger y-range (span) and apply it to both plots
+ylim_common <- if (diff(yr_t1) >= diff(yr_t2)) yr_t1 else yr_t2
+
+scale_y_common <- scale_y_continuous(
+  limits = ylim_common,
+  expand = expansion(mult = 0)
+)
+
+t1 <- t1 + scale_y_common
+t2 <- t2 + scale_y_common
+p_link1 <- p_link1 + scale_y_common
+p_link2 <- p_link2 + scale_y_common
+
+p_binary <- ggplot(
+  interaction_df,
+  aes(row = host, column = otu, count = num_seq)
+) +
   geom_bipnet_interaction(
     type = "interaction",
-    alpha = 0.4,
-    show.legend = FALSE,
-    colour = NA
+    interaction_type = "binary",
+    linewidth = .5,
+    show.legend = FALSE
   ) +
-  coord_equal() +
-  labs(
-    title = "Bipartite interaction (rows × columns)"
-  ) +
-  theme_bw()
-
-# metadata_row は群集行列の行名に対応するメタデータ
-metadata_row
-```
-
-    # A tibble: 10 × 2
-       host  family
-       <chr> <chr> 
-     1 A     A     
-     2 B     A     
-     3 C     A     
-     4 D     B     
-     5 E     B     
-     6 F     B     
-     7 G     B     
-     8 H     B     
-     9 I     C     
-    10 J     C     
-
-``` r
-p + geom_bipnet_box(
-    aes(fill= after_stat(family)),
+  geom_bipnet_point(
     type = "box1",
-    alpha = 0.6,
-    row_nm = "host",
-    metadata_row = metadata_row,
-    linetype = "dotted"
-  )
+    fill = "steelblue"
+  ) +
+  geom_bipnet_point(
+    type = "box2",
+    fill = "navy"
+  ) +
+  theme_void()
+
+t1 +
+  p_link1 +
+  p_binary +
+  p_link2 +
+  t2 +
+  plot_layout(nrow = 1, widths = c(1, 0.25, 1, 0.25, 1))
 ```
 
 ![](README_files/figure-commonmark/unnamed-chunk-5-1.png)
 
+## 6. binary: 明示的リンク線なしの整列表示
+
+`.adjust_tip_position = TRUE` を使い、リンク線を描かずに tree と binary
+ノードを同じ y スケールで直接整列させます。
+
 ``` r
-# sort.
-interaction_df2 <- interaction_df %>% 
-  mutate(
-    host = factor(host, levels = c("A", "C", "B", "D", "E", "F", "G", "H", "I", "J")),
-    otu = factor(otu, levels = c("otu1", "otu3", "otu4", "otu2"))
-  )
+# binary without explicit link segments -----------------------------------
 
-p1 <- ggplot(
-  interaction_df,
-  aes(row = host, column = otu, count = num_seq),
-  linewidth = .1
+t1_binary_aligned <- adjust_tree(
+  .phylo = host_phylo,
+  .box = bn_coords$box1,
+  .tree_position = "left",
+  .adjust = 1,
+  .adjust_tip_position = TRUE
 ) +
-  geom_bipnet_box(
-    type = "box2",
-    alpha = 0.8,
-    fill = "navy"
-  ) +
-  coord_equal() +
-  labs(
-    title = "Original"
-  ) +
-  theme_bw()
+  geom_tiplab()
 
-p2 <- ggplot(
-  interaction_df2,
-  aes(row = host, column = otu, count = num_seq),
-  linewidth = .1
+t2_binary_aligned <- adjust_tree(
+  .phylo = symbiont_phylo,
+  .box = bn_coords$box2,
+  .tree_position = "right",
+  .adjust = 1,
+  .adjust_tip_position = TRUE
 ) +
-  geom_bipnet_box(
-    type = "box2",
-    alpha = 0.8,
-    fill = "navy"
-  ) +
-  coord_equal() +
-  labs(
-    title = "Sorted"
-  ) +
-  theme_bw()
+  geom_tiplab(hjust = 1)
 
-p1 + p2
+ylim_binary_aligned <- range(
+  c(
+    get_yrange(t1_binary_aligned),
+    get_yrange(t2_binary_aligned),
+    get_yrange(p_binary)
+  ),
+  na.rm = TRUE
+)
+
+scale_y_binary_aligned <- scale_y_continuous(
+  limits = ylim_binary_aligned,
+  expand = expansion(mult = 0)
+)
+
+t1_binary_aligned +
+  scale_y_binary_aligned +
+  p_binary +
+  scale_y_binary_aligned +
+  t2_binary_aligned +
+  scale_y_binary_aligned +
+  plot_layout(nrow = 1, widths = c(1, 1, 1))
 ```
 
-![](README_files/figure-commonmark/unnamed-chunk-5-2.png)
+![](README_files/figure-commonmark/unnamed-chunk-6-1.png)
 
-## Summary
+## 7. binary: 系統樹スケールを保持した tip 対応表示
 
-- **Outside (preprocessing)**: keep community data matrix reshaping, row
-  totals, and column totals in tidy data frames (`interaction_df`,
-  `row_sum_df`, `col_sum_df`).
-- **Inside (drawing)**: let `geom_bipnet_*` (or `stat_bipnet()`) handle
-  coordinate construction while you focus on aesthetics.
+系統樹の tip 座標を `tip_positions_row` / `tip_positions_column`
+に渡し、 binary ノード位置を tree スケールに厳密対応させる版です。
+
+``` r
+# binary with tree-scale preservation -------------------------------------
+
+host_tip_positions <- ggtree::ggtree(host_phylo)$data |>
+  dplyr::filter(!is.na(.data$isTip) & .data$isTip) |>
+  dplyr::transmute(
+    label = as.character(.data$label),
+    y = as.numeric(.data$y)
+  )
+
+symbiont_tip_positions <- ggtree::ggtree(symbiont_phylo)$data |>
+  dplyr::filter(!is.na(.data$isTip) & .data$isTip) |>
+  dplyr::transmute(
+    label = as.character(.data$label),
+    y = as.numeric(.data$y)
+  )
+
+p_binary_tree_scale <- ggplot(
+  interaction_df,
+  aes(row = host, column = otu, count = num_seq)
+) +
+  geom_bipnet_interaction(
+    type = "interaction",
+    interaction_type = "binary",
+    linewidth = .5,
+    show.legend = FALSE,
+    tip_positions_row = host_tip_positions,
+    tip_positions_column = symbiont_tip_positions
+  ) +
+  geom_bipnet_point(
+    type = "box1",
+    fill = "steelblue",
+    tip_positions_row = host_tip_positions,
+    tip_positions_column = symbiont_tip_positions
+  ) +
+  geom_bipnet_point(
+    type = "box2",
+    fill = "navy",
+    tip_positions_row = host_tip_positions,
+    tip_positions_column = symbiont_tip_positions
+  ) +
+  theme_void()
+
+t1_tree_scale <- ggtree::ggtree(host_phylo) +
+  geom_tiplab()
+
+t2_tree_scale <- ggtree::ggtree(symbiont_phylo) +
+  geom_tiplab(hjust = 1) +
+  scale_x_reverse()
+
+ylim_tree_scale <- range(
+  c(
+    get_yrange(t1_tree_scale),
+    get_yrange(t2_tree_scale),
+    get_yrange(p_binary_tree_scale)
+  ),
+  na.rm = TRUE
+)
+
+scale_y_tree_scale <- scale_y_continuous(
+  limits = ylim_tree_scale,
+  expand = expansion(mult = 0)
+)
+
+t1_tree_scale +
+  scale_y_tree_scale +
+  p_binary_tree_scale +
+  scale_y_tree_scale +
+  t2_tree_scale +
+  scale_y_tree_scale +
+  plot_layout(nrow = 1, widths = c(1, 1, 1))
+```
+
+![](README_files/figure-commonmark/unnamed-chunk-7-1.png)

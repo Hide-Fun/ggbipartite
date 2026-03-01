@@ -7,12 +7,23 @@ execute:
   message: false
 ---
 
+この README は、`ggbipartite` を使って「二部ネットワーク＋系統樹」を段階的に可視化するためのガイドです。
+
+-   1〜3 節では abundance 表示の基本的な流れを確認します
+-   4 節では tip ラベルを整列させたバリアントとの違いを見ていきます
+-   5〜7 節では binary 表示の 3 つのパターンを比較します
+
 ## 1. ライブラリ読み込みと基本データ生成
 
-最初に必要パッケージを読み込み、植物側・菌側の系統樹を作成します。
-続いて、系統樹の tip 順に合わせて相互作用行列を並べ替え、
-可視化に使う long 形式データと `metadata_row` を準備します。
-最後に abundance 表示の基本プロット `p` と、座標計算結果 `bn_coords` を作成します。
+まず必要なパッケージを読み込み、植物側・菌側の系統樹を作成します。次に、各系統樹の tip 順に合わせて相互作用行列を並べ替え、可視化に使う long 形式データと `metadata_row` を準備します。最後に、abundance 表示の基本プロット `p` と座標計算結果 `bn_coords` を作成します。
+
+この節で作成する主なオブジェクトは以下のとおりです。
+
+-   `interaction_matrix`: 描画の基準となる行列データ
+-   `interaction_df`: `ggplot` に直接渡す long 形式データ
+-   `metadata_row`: `box1` 側の色分けに使う行メタデータ
+-   `p`: abundance 表示の基本ネットワーク
+-   `bn_coords`: 箱座標と相互作用ポリゴン座標の計算結果
 
 ```{r}
 #| label: setup-data
@@ -102,8 +113,9 @@ bn_coords <- construct_bn_coordination(
 
 ## 2. 箱ラベル位置の算出と注釈表示
 
-`bn_coords$box1` と `bn_coords$box2` からラベル用の代表座標を計算し、
-`annotate()` で左右に host / otu ラベルを付与します。
+`bn_coords$box1` と `bn_coords$box2` からラベル用の代表座標を計算し、`annotate()` で左右に host / otu のラベルを付与します。
+
+`xmin/xmax/ymin/ymax` を一度 long 形式に変換してから `x` と `y` を復元することで、箱ごとの中心高さを安定して取得できます。左側は `x = min(x)`、右側は `x = max(x)` を基準にし、ラベルを箱の外側へオフセットして重なりを防いでいます。
 
 ```{r}
 #| label: box-label-annotation
@@ -162,9 +174,17 @@ p +
 
 ## 3. 系統樹とネットワークの統合（リンク線あり）
 
-左右の系統樹を `adjust_tree()` で箱の高さに合わせ、
-`create_link()` で箱中心と tip をつなぐ点線リンクを生成します。
-最後に、5パネル（tree-link-network-link-tree）を横並びで出力します。
+`adjust_tree()` で左右の系統樹を箱の高さに合わせ、`create_link()` で箱の中心と tip をつなぐ点線リンクを生成します。最後に、tree・link・network・link・tree の 5 パネルを横一列に並べて出力します。
+
+この構成の目的は、ネットワーク側のノードと系統樹の tip の対応関係を視覚的に明示することです。`get_yrange()` で y 範囲を揃える処理を共通化しているため、左右でスケールがずれることを防げます。
+
+5 パネルの役割は次のとおりです。
+
+-   左 tree: host 側の系統情報
+-   左 link: host 箱と tip の対応線
+-   中央 network: 二部ネットワーク本体
+-   右 link: symbiont 箱と tip の対応線
+-   右 tree: symbiont 側の系統情報
 
 ```{r}
 #| label: phylo-network-links-abundance
@@ -269,9 +289,9 @@ t1 +
 
 ## 4. `align = T` 版（tip ラベル整列描画）
 
-`adjust_tree()` の結果に対して、内部ヘルパー由来の
-ラベルセグメント・マーキー描画を加える版です。
-先ほどと同じ 5 パネル構成で比較できます。
+`adjust_tree()` の結果に対し、`.tiplab_segment_data()` と `.tiplab_marquee_data()` を使ってラベル位置を整列させながら補助セグメントを引く版です。パネル構成は 3 節と同じ 5 パネルで比較できます。
+
+3 節との主な違いは tip ラベルの描画方法です。ラベルを揃えたまま補助線を引くことで可読性が向上するため、ラベルの見やすさを重視したい場面で特に有効です。
 
 ```{r}
 #| label: align-true-version
@@ -342,9 +362,9 @@ t1 +
 
 ## 5. binary モード（リンク線あり）
 
-相互作用行列を 0/1 に変換し、`interaction_type = "binary"` を使って
-二値相互作用を描画します。系統樹・リンク線の組み合わせは
-abundance 版と同様に維持します。
+相互作用行列を 0/1 に変換し、`interaction_type = "binary"` で二値の相互作用を描画します。系統樹とリンク線の組み合わせは abundance 版と同様です。
+
+abundance 表示では相互作用量が面積や厚みに反映されますが、binary 表示では「存在するかどうか」だけに情報を絞ります。強度の差よりも接続パターンの有無を重視したい解析に向いています。
 
 ```{r}
 #| label: binary-with-links
@@ -492,8 +512,9 @@ t1 +
 
 ## 6. binary: 明示的リンク線なしの整列表示
 
-`.adjust_tip_position = TRUE` を使い、リンク線を描かずに
-tree と binary ノードを同じ y スケールで直接整列させます。
+`.adjust_tip_position = TRUE` を使い、リンク線を描かずに tree と binary ノードを同じ y スケールで直接整列させます。
+
+補助線をなくすことで図がすっきりしますが、どの tip とどのノードが対応するかが一目ではわかりにくくなります。対象数が多い場合は、5 節のリンク線あり版の方が読みやすいこともあるため、目的に応じて使い分けてください。
 
 ```{r}
 #| label: binary-aligned-no-links
@@ -545,8 +566,9 @@ t1_binary_aligned +
 
 ## 7. binary: 系統樹スケールを保持した tip 対応表示
 
-系統樹の tip 座標を `tip_positions_row` / `tip_positions_column` に渡し、
-binary ノード位置を tree スケールに厳密対応させる版です。
+系統樹の tip 座標を `tip_positions_row` / `tip_positions_column` に渡すことで、binary ノードの位置を tree スケールに厳密に対応させます。
+
+6 節が整列表示を優先するのに対し、この節では系統樹の元スケールを維持したまま座標を対応させる点が主眼です。比較する系統樹に意味のある枝長情報が含まれる場合は、このアプローチの方が解釈しやすくなります。
 
 ```{r}
 #| label: binary-tree-scale
@@ -624,3 +646,13 @@ t1_tree_scale +
   scale_y_tree_scale +
   plot_layout(nrow = 1, widths = c(1, 1, 1))
 ```
+
+## まとめ
+
+この README では、同一データから次の 3 系統の可視化を比較しました。
+
+-   abundance ベースで相互作用量を表現する方法
+-   binary ベースで接続の有無を強調する方法
+-   系統樹との対応をリンク線または座標整列で示す方法
+
+実際の解析では、「情報量を優先するか、可読性を優先するか」を図の目的に応じて使い分けることで、結果をより正確に伝えられるようになります。

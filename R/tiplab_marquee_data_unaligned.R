@@ -6,8 +6,7 @@
 #' @param offset Numeric scalar added to the label x-position.
 #'
 #' @return A tip-only data frame with added `x_lab` column.
-#' @keywords internal
-#' @noRd
+#' @export
 .tiplab_marquee_data_unaligned <- function(df, offset = 0) {
   required_cols <- c("isTip", "x", "y")
   missing_cols <- setdiff(required_cols, names(df))

@@ -6,8 +6,7 @@
 #' @param x A tree-like object accepted by `.extract_tree_data()`.
 #'
 #' @return A character vector of unique tip labels.
-#' @keywords internal
-#' @noRd
+#' @export
 get_tip_order <- function(x) {
   tree_data <- .extract_tree_data(x)
   required_cols <- c("isTip", "label", "y")

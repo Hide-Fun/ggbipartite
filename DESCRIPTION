@@ -1,17 +1,22 @@
 Package: ggbipartite
 Type: Package
-Title: Plot bipartite network from community data matrix
-Version: 0.1.0
+Title: Visualize Bipartite Networks with ggplot2
+Version: 0.1.2
 Authors@R: c(
     person("Hidehito", "Okada", , "hidefungi@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3210-2736"))
   )
-Description: Plot bipartite network from community data matrix.
+Description: Provides tools to visualize bipartite interaction matrices on
+    top of ggplot2. It includes stat/geom layers to draw row and column
+    boxes and interaction polygons, coordinate constructors for custom
+    workflows, and helpers to align bipartite layouts with phylogenetic
+    trees.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
 Depends:
+    R (>= 4.1.0),
     ggplot2
 Imports: 
     dplyr,

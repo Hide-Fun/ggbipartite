@@ -6,8 +6,7 @@
 #' @param offset Numeric scalar passed to `.tiplab_align_x()`.
 #'
 #' @return A tip-only data frame with added `x_lab` column.
-#' @keywords internal
-#' @noRd
+#' @export
 .tiplab_marquee_data <- function(df, offset = 0) {
   required_cols <- c("isTip", "y")
   missing_cols <- setdiff(required_cols, names(df))

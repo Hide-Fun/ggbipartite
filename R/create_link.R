@@ -12,8 +12,7 @@
 #' @param xend Numeric scalar used as segment end x.
 #'
 #' @return A data frame with columns `x`, `xend`, `y1`, and `y2`.
-#' @keywords internal
-#' @noRd
+#' @export
 create_link <- function(box, ggtree, direction, x = 0, xend = 1) {
   direction <- match.arg(direction, choices = c("left", "right"))
 

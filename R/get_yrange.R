@@ -6,8 +6,7 @@
 #' @param p A ggplot object.
 #'
 #' @return A numeric vector of length 2 containing y-axis limits.
-#' @keywords internal
-#' @noRd
+#' @export
 get_yrange <- function(p) {
   if (!.is_ggplot_obj(p)) {
     stop("`p` must be a ggplot object.")

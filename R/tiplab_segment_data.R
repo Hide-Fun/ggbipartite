@@ -7,8 +7,7 @@
 #' @param offset Numeric scalar passed to `.tiplab_align_x()`.
 #'
 #' @return A tip-only data frame with added `xend` and `yend` columns.
-#' @keywords internal
-#' @noRd
+#' @export
 .tiplab_segment_data <- function(df, offset = 0) {
   required_cols <- c("isTip", "y")
   missing_cols <- setdiff(required_cols, names(df))

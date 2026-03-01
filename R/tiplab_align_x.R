@@ -7,8 +7,7 @@
 #' @param offset Numeric scalar added to the aligned x-position.
 #'
 #' @return A numeric scalar x-position for aligned labels.
-#' @keywords internal
-#' @noRd
+#' @export
 .tiplab_align_x <- function(df, offset = 0) {
   if (!is.data.frame(df) || !("x" %in% names(df))) {
     stop("`df` must be a data frame containing column `x`.")

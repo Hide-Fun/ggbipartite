@@ -52,7 +52,7 @@ m <- matrix(c(1, 0, 2,
 
 # Example stub for `to_longer()` if not available:
 to_longer <- function(.mat) {
-  tibble::as_tibble(as.data.frame(as.table(.mat))) |>
+  tibble::as_tibble(as.data.frame(as.table(.mat))) \%>\%
     dplyr::rename(row = Var1, column = Var2, interaction_size = Freq)
 }
 

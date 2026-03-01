@@ -89,7 +89,7 @@ interaction_df <- tibble::tibble(
   host = LETTERS[1:4],
   otu1 = c(1, 0, 1, 1),
   otu2 = c(0, 1, 1, 0)
-) |>
+) \%>\%
   tidyr::pivot_longer(
     cols = !host,
     names_to = "otu",

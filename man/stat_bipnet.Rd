@@ -126,7 +126,7 @@ interaction_df <- tibble::tibble(
   host = LETTERS[1:4],
   otu1 = c(1, 0, 3, 2),
   otu2 = c(0, 2, 1, 0)
-) |>
+) \%>\%
   pivot_longer(!host, names_to = "otu", values_to = "num_seq")
 
 ggplot(interaction_df, aes(row = host, column = otu, count = num_seq)) +

@@ -4,20 +4,30 @@
 \alias{compute_interaction_coords}
 \title{Compute interaction polygon coordinates for a bipartite layout}
 \usage{
-compute_interaction_coords(.box1, .box2, .interation_cell)
+compute_interaction_coords(
+  .row_box = NULL,
+  .column_box = NULL,
+  .interation_cell,
+  .box1 = NULL,
+  .box2 = NULL
+)
 }
 \arguments{
-\item{.box1}{A data frame/tibble describing the row-side boxes. Must contain
+\item{.row_box}{A data frame/tibble describing the row-side boxes. Must
+contain
 at least a `row` identifier, the x coordinate to join on, and the vertical
 span information required by `split_y_by_interaction()`.}
 
-\item{.box2}{A data frame/tibble describing the column-side boxes. Must
+\item{.column_box}{A data frame/tibble describing the column-side boxes. Must
 contain at least a `column` identifier, the x coordinate to join on, and
 the matching vertical span information.}
 
 \item{.interation_cell}{A data frame/tibble of interaction cells (retains the
 original argument spelling). Requires, at minimum, the `row`, `column`, and
 per-cell interaction size used for splitting.}
+
+\item{.box1, .box2}{Backward-compatible aliases for `.row_box` and
+`.column_box`.}
 }
 \value{
 A tibble with columns:
@@ -39,11 +49,11 @@ the column box. Each polygon is returned as four points in counter-clockwise
 \details{
 The workflow is:
 \enumerate{
-  \item Join `.box1` and `.interation_cell`, then call
+  \item Join `.row_box` and `.interation_cell`, then call
         \code{split_y_by_interaction(x_side = "xmax", var = "row")} to obtain
         \code{y_start}/\code{y_end} for each \code{row}–\code{column} cell on
         the row side and duplicate the x coordinate into \code{x1}/\code{x2}.
-  \item Join `.box2` and `.interation_cell`, then call
+  \item Join `.column_box` and `.interation_cell`, then call
         \code{split_y_by_interaction(x_side = "xmin", var = "column")} to obtain
         the analogous \code{y3}/\code{y4} and \code{x3}/\code{x4} for the column side.
   \item Merge both sides, pivot the four vertex columns to long format, and
@@ -61,7 +71,7 @@ No NA values are permitted in the polygon vertex coordinates.
 \section{Required inputs}{
 
 \describe{
-  \item{`.box1`}{A tibble/data frame describing the \emph{row-side} boxes.
+  \item{`.row_box`}{A tibble/data frame describing the \emph{row-side} boxes.
     Must contain at least:
     \itemize{
       \item \code{row}: row identifier (key used to join with `.interation_cell`).
@@ -73,7 +83,8 @@ No NA values are permitted in the polygon vertex coordinates.
             they are produced by \code{split_y_by_interaction()}.
       \item \code{interaction_size}: will be dropped if present.
     }}
-  \item{`.box2`}{A tibble/data frame describing the \emph{column-side} boxes.
+  \item{`.column_box`}{A tibble/data frame describing the \emph{column-side}
+    boxes.
     Must contain at least:
     \itemize{
       \item \code{column}: column identifier (key used to join).
@@ -88,16 +99,18 @@ No NA values are permitted in the polygon vertex coordinates.
     that \code{split_y_by_interaction()} uses to subdivide vertical spans.
     (The original spelling \code{.interation_cell} is retained to match the
     calling code.)}
+  \item{`.box1`, `.box2`}{Backward-compatible argument aliases. Prefer
+    \code{.row_box} and \code{.column_box}.}
 }
 }
 
 \examples{
 \dontrun{
 # Minimal example (requires user-defined split_y_by_interaction()):
-box1 <- tibble::tibble(row = 1:2, x = 0.0, xmin = 0.0, xmax = 0.4, interaction_size = c(NA, NA))
-box2 <- tibble::tibble(column = 1:2, x = 1.0, xmin = 0.6, xmax = 1.0, interaction_size = c(NA, NA))
+row_box <- tibble::tibble(row = 1:2, x = 0.0, xmin = 0.0, xmax = 0.4, interaction_size = c(NA, NA))
+column_box <- tibble::tibble(column = 1:2, x = 1.0, xmin = 0.6, xmax = 1.0, interaction_size = c(NA, NA))
 cells <- tibble::tibble(row = c(1,1,2,2), column = c(1,2,1,2), interaction_size = c(2,1,1,3))
-coords <- compute_interaction_coords(box1, box2, cells)
+coords <- compute_interaction_coords(row_box, column_box, cells)
 }
 
 }

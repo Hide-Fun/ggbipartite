@@ -200,6 +200,64 @@ prepare_interaction_cells <- function(data) {
     dplyr::filter(is.finite(.data$interaction), .data$interaction > 0)
 }
 
+#' Normalize bipartite side type values
+#'
+#' Converts backward-compatible values (`"box1"`, `"box2"`) to canonical side
+#' names (`"row"`, `"column"`).
+#'
+#' @param type Side selector passed to `stat_bipnet()`.
+#'
+#' @return One of `"row"`, `"column"`, or `"interaction"`.
+#' @keywords internal
+#' @noRd
+normalize_bipnet_type <- function(type) {
+  if (is.null(type)) {
+    return("interaction")
+  }
+
+  normalized_type <- match.arg(
+    type,
+    choices = c("row", "column", "interaction", "box1", "box2")
+  )
+
+  if (identical(normalized_type, "box1")) {
+    return("row")
+  }
+  if (identical(normalized_type, "box2")) {
+    return("column")
+  }
+
+  normalized_type
+}
+
+#' Extract row/column box tables from bipartite coordinates
+#'
+#' @param .bn_coords Coordinate list from `construct_bn_coordination()`.
+#'
+#' @return A list with `row_box` and `column_box`.
+#' @keywords internal
+#' @noRd
+extract_side_boxes <- function(.bn_coords) {
+  row_box <- .bn_coords$row_box
+  column_box <- .bn_coords$column_box
+
+  if (is.null(row_box) && "box1" %in% names(.bn_coords)) {
+    row_box <- .bn_coords$box1
+  }
+  if (is.null(column_box) && "box2" %in% names(.bn_coords)) {
+    column_box <- .bn_coords$box2
+  }
+
+  if (is.null(row_box) || is.null(column_box)) {
+    stop("`.bn_coords` must contain row and column box tables.")
+  }
+
+  list(
+    row_box = row_box,
+    column_box = column_box
+  )
+}
+
 #' Shift box coordinates to match target tip positions
 #'
 #' Computes per-id vertical shifts from current box centres to target tip
@@ -286,8 +344,9 @@ align_box_to_tip_positions <- function(box_df, id_col, tip_positions, side_name)
 #' @param .tip_positions_column Optional column-side tip positions.
 #' @param .interaction_cells Canonical interaction-cell table.
 #'
-#' @return Updated `.bn_coords` with aligned `box1`/`box2` and refreshed
-#'   `interaction_coords`.
+#' @return Updated `.bn_coords` with aligned `row_box`/`column_box` and
+#'   refreshed `interaction_coords`. Backward-compatible aliases `box1`/`box2`
+#'   are also updated.
 #' @keywords internal
 #' @noRd
 adjust_bn_coords_to_tip_positions <- function(
@@ -300,20 +359,27 @@ adjust_bn_coords_to_tip_positions <- function(
     return(.bn_coords)
   }
 
-  .bn_coords$box1 <- align_box_to_tip_positions(
-    box_df = .bn_coords$box1,
+  side_boxes <- extract_side_boxes(.bn_coords)
+
+  row_box <- align_box_to_tip_positions(
+    box_df = side_boxes$row_box,
     id_col = "row",
     tip_positions = .tip_positions_row,
     side_name = "row"
   )
-  .bn_coords$box2 <- align_box_to_tip_positions(
-    box_df = .bn_coords$box2,
+
+  column_box <- align_box_to_tip_positions(
+    box_df = side_boxes$column_box,
     id_col = "column",
     tip_positions = .tip_positions_column,
     side_name = "column"
   )
 
   if (nrow(.interaction_cells) == 0) {
+    .bn_coords$row_box <- row_box
+    .bn_coords$column_box <- column_box
+    .bn_coords$box1 <- row_box
+    .bn_coords$box2 <- column_box
     .bn_coords$interaction_coords <- .bn_coords$interaction_coords[0, ]
     return(.bn_coords)
   }
@@ -323,8 +389,8 @@ adjust_bn_coords_to_tip_positions <- function(
   )
 
   interaction_coords <- compute_interaction_coords_fn(
-    .box1 = .bn_coords$box1,
-    .box2 = .bn_coords$box2,
+    .row_box = row_box,
+    .column_box = column_box,
     .interation_cell = .interaction_cells
   ) %>%
     dplyr::mutate(
@@ -354,6 +420,10 @@ adjust_bn_coords_to_tip_positions <- function(
       dplyr::left_join(metadata_lookup, by = c("row", "column"))
   }
 
+  .bn_coords$row_box <- row_box
+  .bn_coords$column_box <- column_box
+  .bn_coords$box1 <- row_box
+  .bn_coords$box2 <- column_box
   .bn_coords$interaction_coords <- interaction_coords
   .bn_coords
 }
@@ -363,22 +433,24 @@ adjust_bn_coords_to_tip_positions <- function(
 #' Computes box centres for row and column partitions and joins them to unique
 #' interaction cells to produce segment endpoints.
 #'
-#' @param .bn_coords A coordinate list containing `box1`, `box2`, and
-#'   `interaction_coords`.
+#' @param .bn_coords A coordinate list containing `row_box`, `column_box`, and
+#'   `interaction_coords` (or backward-compatible aliases `box1`, `box2`).
 #'
 #' @return A data frame with one row per interaction and columns
 #'   `row`, `column`, `x`, `y`, `xend`, and `yend` plus any retained metadata.
 #' @keywords internal
 #' @noRd
 compute_binary_interaction_coords <- function(.bn_coords) {
-  row_points <- .bn_coords$box1 %>%
+  side_boxes <- extract_side_boxes(.bn_coords)
+
+  row_points <- side_boxes$row_box %>%
     dplyr::transmute(
       row = as.character(row),
       x = (xmin + xmax) / 2,
       y = (ymin + ymax) / 2
     )
 
-  column_points <- .bn_coords$box2 %>%
+  column_points <- side_boxes$column_box %>%
     dplyr::transmute(
       column = as.character(column),
       xend = (xmin + xmax) / 2,
@@ -423,12 +495,13 @@ compute_binary_interaction_coords <- function(.bn_coords) {
 #'
 #' @section Output by `type`:
 #' \describe{
-#'   \item{`"box1"`}{Rectangles for the row set with columns
+#'   \item{`"row"`}{Rectangles for the row set with columns
 #'     `xmin`, `xmax`, `ymin`, `ymax`, plus `row`.}
-#'   \item{`"box2"`}{Rectangles for the column set with columns
+#'   \item{`"column"`}{Rectangles for the column set with columns
 #'     `xmin`, `xmax`, `ymin`, `ymax`, plus `column`.}
 #'   \item{`"interaction"`}{Polygons spanning the two boxes with columns
 #'     `x`, `y`, `row`, `column`, and a `group` id per interaction.}
+#'   \item{`"box1"`/`"box2"`}{Backward-compatible aliases for `"row"`/`"column"`.}
 #' }
 #'
 #' @details
@@ -438,7 +511,7 @@ compute_binary_interaction_coords <- function(.bn_coords) {
 #' extents of boxes are adjusted to reflect totals within each partition.
 #'
 #' The function `construct_bn_coordination()` must be available in scope and is
-#' expected to return a list with elements `box1`, `box2`, and
+#' expected to return a list with elements `row_box`, `column_box`, and
 #' `interaction_coords` containing the columns described above.
 #'
 #' @section Parameters handled:
@@ -492,6 +565,8 @@ StatBipnet <- ggplot2::ggproto(
     tip_positions_column = NULL,
     na.rm = FALSE
   ) {
+    type <- normalize_bipnet_type(type)
+
     interaction_type <- match.arg(
       interaction_type,
       choices = c("abundance", "binary")
@@ -549,12 +624,13 @@ StatBipnet <- ggplot2::ggproto(
       .tip_positions_column = tip_positions_column,
       .interaction_cells = interaction_cells
     )
+    side_boxes <- extract_side_boxes(bn_coords)
 
-    if (type == "box1") {
-      out <- bn_coords$box1
+    if (type == "row") {
+      out <- side_boxes$row_box
       out$group <- out$row
-    } else if (type == "box2") {
-      out <- bn_coords$box2
+    } else if (type == "column") {
+      out <- side_boxes$column_box
       out$group <- out$column
     } else if (type == "interaction") {
       if (interaction_type == "binary") {
@@ -564,7 +640,7 @@ StatBipnet <- ggplot2::ggproto(
       }
       out$group <- as.factor(paste0(out$row, out$column))
     } else {
-      rlang::abort("`type` must be one of 'box1', 'box2', or 'interaction'.")
+      rlang::abort("`type` must be one of 'row', 'column', or 'interaction'.")
     }
     out
   }
@@ -574,11 +650,12 @@ StatBipnet <- ggplot2::ggproto(
 #'
 #' `stat_bipnet()` adds the computed coordinates for a bipartite
 #' “box–interaction” layout to a plot. Use together with
-#' [geom_bipnet_box()] (for `"box1"`/`"box2"`) and
+#' [geom_bipnet_box()] (for `"row"`/`"column"`) and
 #' [geom_bipnet_interaction()] (for `"interaction"`).
 #'
 #' @inheritParams ggplot2::layer
-#' @param type One of `"box1"`, `"box2"`, or `"interaction"`.
+#' @param type One of `"row"`, `"column"`, or `"interaction"`. Backward-
+#'   compatible aliases `"box1"` and `"box2"` are also accepted.
 #' @param row_nm A single string giving the key column name in
 #'   `metadata_row` used to join row metadata.
 #' @param column_nm A single string giving the key column name in
@@ -623,8 +700,8 @@ StatBipnet <- ggplot2::ggproto(
 #'   pivot_longer(!host, names_to = "otu", values_to = "num_seq")
 #'
 #' ggplot(interaction_df, aes(row = host, column = otu, count = num_seq)) +
-#'   geom_bipnet_box(type = "box1") +
-#'   geom_bipnet_box(type = "box2") +
+#'   geom_bipnet_box(type = "row") +
+#'   geom_bipnet_box(type = "column") +
 #'   geom_bipnet_interaction(type = "interaction") +
 #'   coord_fixed()
 #'
@@ -651,6 +728,7 @@ stat_bipnet <- function(
   inherit.aes = FALSE,
   ...
 ) {
+  type <- normalize_bipnet_type(type)
   interaction_type <- match.arg(interaction_type)
   if (
     type == "interaction" &&

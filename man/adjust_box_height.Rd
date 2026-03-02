@@ -16,17 +16,18 @@ adjust_box_height(.interaction, .nrow, .ncol, .gap)
 \value{
 A named list with elements:
 \itemize{
-  \item `.gap1`: gap for box 1 (rows).
-  \item `.gap2`: gap for box 2 (columns).
+  \item `.gap_row`: gap for the row-side box.
+  \item `.gap_column`: gap for the column-side box.
+  \item `.gap1` and `.gap2`: backward-compatible aliases.
 }
 If the two heights are already equal, the function only emits a message and
 returns `NULL`.
 }
 \description{
 Given the total mass (`.interaction`), matrix dimensions, and a baseline gap,
-compute per-box gaps (`.gap1`, `.gap2`) so that the total heights for the
-two boxes are equal. If the heights are already equal, a message is emitted
-and no value is returned.
+compute per-side gaps (`.gap_row`, `.gap_column`) so that the total heights
+for the two boxes are equal. If the heights are already equal, a message is
+emitted and no value is returned.
 }
 \examples{
 adjust_box_height(.interaction = 10, .nrow = 4, .ncol = 3, .gap = 0.2)

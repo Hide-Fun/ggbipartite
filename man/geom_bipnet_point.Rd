@@ -81,8 +81,8 @@ the default plot specification, e.g. \code{\link[ggplot2:annotation_borders]{ann
 A ggplot2 layer using `GeomBipnetPoint`.
 }
 \description{
-Convenience layer to draw row (`type = "box1"`) or column
-(`type = "box2"`) points for binary-data style visualisation.
+Convenience layer to draw row (`type = "row"`) or column
+(`type = "column"`) points for binary-data style visualisation.
 }
 \examples{
 interaction_df <- tibble::tibble(
@@ -97,8 +97,8 @@ interaction_df <- tibble::tibble(
   )
 
 ggplot(interaction_df, aes(row = host, column = otu, count = is_present)) +
-  geom_bipnet_point(type = "box1") +
-  geom_bipnet_point(type = "box2") +
+  geom_bipnet_point(type = "row") +
+  geom_bipnet_point(type = "column") +
   coord_fixed()
 
 }

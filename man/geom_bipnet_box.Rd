@@ -81,8 +81,8 @@ the default plot specification, e.g. \code{\link[ggplot2:annotation_borders]{ann
 A ggplot2 layer using `GeomBipnetBox`.
 }
 \description{
-Convenience layer to draw row (`type = "box1"`) or column
-(`type = "box2"`) rectangles from `stat_bipnet()`.
+Convenience layer to draw row (`type = "row"`) or column
+(`type = "column"`) rectangles from `stat_bipnet()`.
 }
 \examples{
 interaction_df <- tibble::tibble(
@@ -100,7 +100,7 @@ ggplot() +
   geom_bipnet_box(
     data = interaction_df,
     mapping = aes(row = host, column = otu, count = num_seq),
-    type = "box1",
+    type = "row",
     alpha = 0.5
   ) +
   coord_fixed()

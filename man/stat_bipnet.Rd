@@ -48,7 +48,8 @@ the plot data. The return value must be a \code{data.frame}, and
 will be used as the layer data. A \code{function} can be created
 from a \code{formula} (e.g. \code{~ head(.x, 10)}).}
 
-\item{type}{One of `"box1"`, `"box2"`, or `"interaction"`.}
+\item{type}{One of `"row"`, `"column"`, or `"interaction"`. Backward-
+compatible aliases `"box1"` and `"box2"` are also accepted.}
 
 \item{row_nm}{A single string giving the key column name in
 `metadata_row` used to join row metadata.}
@@ -107,7 +108,7 @@ A ggplot2 layer using `StatBipnet`.
 \description{
 `stat_bipnet()` adds the computed coordinates for a bipartite
 “box–interaction” layout to a plot. Use together with
-[geom_bipnet_box()] (for `"box1"`/`"box2"`) and
+[geom_bipnet_box()] (for `"row"`/`"column"`) and
 [geom_bipnet_interaction()] (for `"interaction"`).
 }
 \section{Aesthetics}{
@@ -130,8 +131,8 @@ interaction_df <- tibble::tibble(
   pivot_longer(!host, names_to = "otu", values_to = "num_seq")
 
 ggplot(interaction_df, aes(row = host, column = otu, count = num_seq)) +
-  geom_bipnet_box(type = "box1") +
-  geom_bipnet_box(type = "box2") +
+  geom_bipnet_box(type = "row") +
+  geom_bipnet_box(type = "column") +
   geom_bipnet_interaction(type = "interaction") +
   coord_fixed()
 

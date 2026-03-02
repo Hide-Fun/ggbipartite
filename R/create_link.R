@@ -6,15 +6,33 @@
 #' @param box A data frame with `xmin`, `xmax`, `ymin`, `ymax`, and one id
 #'   column (`row` or `column`).
 #' @param ggtree A tree-like object accepted by `.extract_tree_data()`.
-#' @param direction One of `"left"` or `"right"`; controls which id column is
-#'   used in `box`.
+#' @param side One of `"row"` or `"column"` (preferred). Backward-compatible
+#'   values `"left"`/`"right"` are also accepted.
 #' @param x Numeric scalar used as segment start x.
 #' @param xend Numeric scalar used as segment end x.
+#' @param direction Backward-compatible alias for `side`.
 #'
 #' @return A data frame with columns `x`, `xend`, `y1`, and `y2`.
 #' @export
-create_link <- function(box, ggtree, direction, x = 0, xend = 1) {
-  direction <- match.arg(direction, choices = c("left", "right"))
+create_link <- function(
+  box,
+  ggtree,
+  side = c("row", "column", "left", "right"),
+  x = 0,
+  xend = 1,
+  direction = NULL
+) {
+  if (!is.null(direction)) {
+    side <- direction
+  }
+
+  side <- match.arg(side)
+  side <- switch(
+    side,
+    left = "row",
+    right = "column",
+    side
+  )
 
   if (!is.data.frame(box)) {
     stop("`box` must be a data frame.")
@@ -36,13 +54,13 @@ create_link <- function(box, ggtree, direction, x = 0, xend = 1) {
     )
   }
 
-  id_col <- if (identical(direction, "left")) "row" else "column"
+  id_col <- if (identical(side, "row")) "row" else "column"
   if (!(id_col %in% names(box))) {
     stop(
       "`box` must contain `",
       id_col,
-      "` when `direction = \"",
-      direction,
+      "` when `side = \"",
+      side,
       "\"`."
     )
   }

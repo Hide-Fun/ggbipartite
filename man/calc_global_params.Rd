@@ -21,7 +21,8 @@ calc_global_params(
 box.}
 
 \item{.gap}{Non-negative numeric scalar; the baseline vertical gap between
-items (rows for box 1, columns for box 2) before any adjustment.}
+items (rows for the row side, columns for the column side) before any
+adjustment.}
 
 \item{.box_ratio}{Positive numeric scalar; the divisor used to derive the
 box width as `sum(.mat) / .box_ratio`.}
@@ -37,11 +38,14 @@ A named list with elements:
 \itemize{
   \item `width`: overall width computed as `sum(.mat) / .ratio`.
   \item `box_width`: width of an individual box, `sum(.mat) / .box_ratio`.
-  \item `box1`: numeric length-2 vector `(x0, y0)` for the first box origin.
-  \item `box2`: numeric length-2 vector `(x, y)` for the second box origin,
-        where `x = width - box_width` and `y = y0`.
-  \item `gap1`: vertical gap used for box 1 (rows).
-  \item `gap2`: vertical gap used for box 2 (columns).
+  \item `row_box`: numeric length-2 vector `(x0, y0)` for the row-side box
+        origin.
+  \item `column_box`: numeric length-2 vector `(x, y)` for the column-side
+        box origin, where `x = width - box_width` and `y = y0`.
+  \item `gap_row`: vertical gap used on the row side.
+  \item `gap_column`: vertical gap used on the column side.
+  \item `box1`/`box2` and `gap1`/`gap2`: backward-compatible aliases for
+        `row_box`/`column_box` and `gap_row`/`gap_column`.
 }
 }
 \description{
@@ -55,14 +59,14 @@ boxes match (based on the matrix's row/column counts).
 Internally, the variable `.interaction` is used for `sum(.mat)` (total mass).
 If `.adjust_box_height` is `TRUE`, gaps are computed by
 [adjust_box_height()] to equalize the total height:
-\deqn{\text{height}_\mathrm{box1} = \sum(\mathtt{.mat}) + (\mathtt{.nrow}-1)\times \mathtt{gap1}}
-\deqn{\text{height}_\mathrm{box2} = \sum(\mathtt{.mat}) + (\mathtt{.ncol}-1)\times \mathtt{gap2}}
+\deqn{\text{height}_\mathrm{row} = \sum(\mathtt{.mat}) + (\mathtt{.nrow}-1)\times \mathtt{gap\_row}}
+\deqn{\text{height}_\mathrm{column} = \sum(\mathtt{.mat}) + (\mathtt{.ncol}-1)\times \mathtt{gap\_column}}
 }
 \note{
 This function relies on [adjust_box_height()]. As currently written,
 if the two computed heights are already equal, that helper emits a message
 and does not return a list of gaps (i.e., returns `NULL`). Callers expecting
-`gap1`/`gap2` should handle that case accordingly.
+`gap_row`/`gap_column` should handle that case accordingly.
 }
 \examples{
 m <- matrix(c(1, 2, 1,

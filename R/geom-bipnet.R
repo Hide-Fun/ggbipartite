@@ -1,7 +1,7 @@
 #' Geom for bipartite boxes (rows or columns)
 #'
 #' `GeomBipnetBox` draws the rectangular boxes for either the row set
-#' (`type = "box1"`) or the column set (`type = "box2"`), using the rectangle
+#' (`type = "row"`) or the column set (`type = "column"`), using the rectangle
 #' coordinates computed by `StatBipnet`.
 #'
 #' @section Required aesthetics:
@@ -29,8 +29,8 @@ GeomBipnetBox <- ggproto(
 
 #' Draw bipartite boxes
 #'
-#' Convenience layer to draw row (`type = "box1"`) or column
-#' (`type = "box2"`) rectangles from `stat_bipnet()`.
+#' Convenience layer to draw row (`type = "row"`) or column
+#' (`type = "column"`) rectangles from `stat_bipnet()`.
 #'
 #' @inheritParams ggplot2::layer
 #' @inheritParams stat_bipnet
@@ -55,7 +55,7 @@ GeomBipnetBox <- ggproto(
 #'   geom_bipnet_box(
 #'     data = interaction_df,
 #'     mapping = aes(row = host, column = otu, count = num_seq),
-#'     type = "box1",
+#'     type = "row",
 #'     alpha = 0.5
 #'   ) +
 #'   coord_fixed()
@@ -93,8 +93,8 @@ geom_bipnet_box <- function(
 
 #' Geom for bipartite points (rows or columns)
 #'
-#' `GeomBipnetPoint` draws one point per row-side (`type = "box1"`) or
-#' column-side (`type = "box2"`) element. The point position is the centre of
+#' `GeomBipnetPoint` draws one point per row-side (`type = "row"`) or
+#' column-side (`type = "column"`) element. The point position is the centre of
 #' the rectangle coordinates computed by `StatBipnet`.
 #'
 #' @section Required aesthetics:
@@ -128,8 +128,8 @@ GeomBipnetPoint <- ggproto(
 
 #' Draw bipartite points
 #'
-#' Convenience layer to draw row (`type = "box1"`) or column
-#' (`type = "box2"`) points for binary-data style visualisation.
+#' Convenience layer to draw row (`type = "row"`) or column
+#' (`type = "column"`) points for binary-data style visualisation.
 #'
 #' @inheritParams ggplot2::layer
 #' @inheritParams stat_bipnet
@@ -151,8 +151,8 @@ GeomBipnetPoint <- ggproto(
 #'   )
 #'
 #' ggplot(interaction_df, aes(row = host, column = otu, count = is_present)) +
-#'   geom_bipnet_point(type = "box1") +
-#'   geom_bipnet_point(type = "box2") +
+#'   geom_bipnet_point(type = "row") +
+#'   geom_bipnet_point(type = "column") +
 #'   coord_fixed()
 #'
 #' @seealso [geom_bipnet_box()], [geom_bipnet_interaction()], [stat_bipnet()]
@@ -284,8 +284,8 @@ GeomBipnetInteractionBinary <- ggproto(
 #'   data = interaction_df,
 #'   mapping = aes(row = host, column = otu, count = num_seq)
 #' ) +
-#'   geom_bipnet_box(type = "box1") +
-#'   geom_bipnet_box(type = "box2") +
+#'   geom_bipnet_box(type = "row") +
+#'   geom_bipnet_box(type = "column") +
 #'   geom_bipnet_interaction(type = "interaction", alpha = 0.7) +
 #'   coord_fixed()
 #'
@@ -293,8 +293,8 @@ GeomBipnetInteractionBinary <- ggproto(
 #'   data = interaction_df,
 #'   mapping = aes(row = host, column = otu, count = as.integer(num_seq > 0))
 #' ) +
-#'   geom_bipnet_point(type = "box1") +
-#'   geom_bipnet_point(type = "box2") +
+#'   geom_bipnet_point(type = "row") +
+#'   geom_bipnet_point(type = "column") +
 #'   geom_bipnet_interaction(
 #'     type = "interaction",
 #'     interaction_type = "binary",

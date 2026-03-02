@@ -4,7 +4,7 @@
 \alias{compute_box_label_coords}
 \title{Compute representative label coordinates from box rectangles}
 \usage{
-compute_box_label_coords(.box, .by, .x_side = c("left", "right"))
+compute_box_label_coords(.box, .by, .side = c("row", "column"))
 }
 \arguments{
 \item{.box}{A data frame/tibble containing rectangle coordinates and grouping
@@ -13,8 +13,9 @@ columns.}
 \item{.by}{Character vector of one or more column names used to define label
 groups (for example `c("row", "family")` or `"column"`).}
 
-\item{.x_side}{One of `"left"` or `"right"`. Chooses which outer x edge is
-used as the label anchor.}
+\item{.side}{One of `"row"` or `"column"`. Chooses the bipartite side that
+`.box` represents. `"row"` anchors labels to `xmin`; `"column"` anchors to
+`xmax`.}
 }
 \value{
 A tibble with grouping columns from `.by` plus:
@@ -26,11 +27,11 @@ A tibble with grouping columns from `.by` plus:
 \description{
 Summarize rectangle coordinates (`xmin`, `xmax`, `ymin`, `ymax`) into one
 representative label position per group. The x coordinate is taken from the
-outer edge of each side (`xmin` for `"left"`, `xmax` for `"right"`), and the
-y coordinate is computed as the mean of per-box vertical centres.
+outer edge of each side (`xmin` for `"row"`, `xmax` for `"column"`), and the
+y coordinate is computed as the mean of vertical centres.
 }
 \examples{
-box1 <- tibble::tibble(
+row_box <- tibble::tibble(
   row = c("A", "B"),
   xmin = c(0, 0),
   xmax = c(5, 5),
@@ -39,9 +40,9 @@ box1 <- tibble::tibble(
 )
 
 compute_box_label_coords(
-  .box = box1,
+  .box = row_box,
   .by = "row",
-  .x_side = "left"
+  .side = "row"
 )
 
 }

@@ -11,8 +11,8 @@ An object of class \code{GeomBipnetPoint} (inherits from \code{GeomPoint}, \code
 GeomBipnetPoint
 }
 \description{
-`GeomBipnetPoint` draws one point per row-side (`type = "box1"`) or
-column-side (`type = "box2"`) element. The point position is the centre of
+`GeomBipnetPoint` draws one point per row-side (`type = "row"`) or
+column-side (`type = "column"`) element. The point position is the centre of
 the rectangle coordinates computed by `StatBipnet`.
 }
 \section{Required aesthetics}{

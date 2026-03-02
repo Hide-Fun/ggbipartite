@@ -12,11 +12,11 @@
 #' @param .column A single string giving the key column name in
 #'   `.metadata_column` used to join column metadata to column identifiers.
 #' @param .metadata_row Optional tibble/data frame of row-level metadata to join
-#'   to the **row-side** box table (`box1`). Must contain the column specified
-#'   by `.row`.
+#'   to the **row-side** box table (`row_box`). Must contain the column
+#'   specified by `.row`.
 #' @param .metadata_column Optional tibble/data frame of column-level metadata to
-#'   join to the **column-side** box table (`box2`) and to `interaction_coords`.
-#'   Must contain the column specified by `.column`.
+#'   join to the **column-side** box table (`column_box`) and to
+#'   `interaction_coords`. Must contain the column specified by `.column`.
 #' @param .x0,.y0 Numeric scalars; global origin for the left/bottom corner of
 #'   the first box.
 #' @param .gap Non-negative numeric scalar; baseline vertical gap between
@@ -45,7 +45,7 @@
 #' If metadata is supplied:
 #' \itemize{
 #'   \item When both row and column metadata are provided, they are left-joined
-#'         into \code{box1}, \code{box2}, and \code{interaction_coords}
+#'         into \code{row_box}, \code{column_box}, and \code{interaction_coords}
 #'         (first columns, then rows for the latter).
 #'   \item When only one side is provided, it is joined to the corresponding box
 #'         table; \code{interaction_coords} is left unchanged.
@@ -63,11 +63,13 @@
 #'
 #' @return A named list with three components:
 #' \describe{
-#'   \item{\code{box1}}{Tibble/data frame of row-side box coordinates.}
-#'   \item{\code{box2}}{Tibble/data frame of column-side box coordinates.}
+#'   \item{\code{row_box}}{Tibble/data frame of row-side box coordinates.}
+#'   \item{\code{column_box}}{Tibble/data frame of column-side box coordinates.}
 #'   \item{\code{interaction_coords}}{Tibble/data frame of CCW-ordered polygon
 #'         vertices (\code{x}, \code{y}) for each \code{row}–\code{column}
 #'         interaction, including an \code{area} column.}
+#'   \item{\code{box1}, \code{box2}}{Backward-compatible aliases for
+#'         \code{row_box} and \code{column_box}.}
 #' }
 #'
 #' @seealso \code{\link{bipartite_network}}, \code{\link{calc_global_params}},
@@ -95,7 +97,7 @@
 #'   .ratio = 1 / 1.618,
 #'   .adjust_box_height = TRUE
 #' )
-#' str(res$box1); str(res$box2); str(res$interaction_coords)
+#' str(res$row_box); str(res$column_box); str(res$interaction_coords)
 #' }
 #'
 #' @importFrom dplyr left_join
@@ -125,36 +127,36 @@ construct_bn_coordination <- function(
     .adjust_box_height = .adjust_box_height
   )
 
-  box1 <- compute_box_coords(
+  row_box <- compute_box_coords(
     .df = dfs$rsf,
     .var = "row",
     .size = "interaction_size",
-    .x0 = params$box1[[1]],
+    .x0 = params$row_box[[1]],
     .width = params$box_width,
-    .gap = params$gap1
+    .gap = params$gap_row
   )
 
-  box2 <- compute_box_coords(
+  column_box <- compute_box_coords(
     .df = dfs$csf,
     .var = "column",
     .size = "interaction_size",
-    .x0 = params$box2[[1]],
+    .x0 = params$column_box[[1]],
     .width = params$box_width,
-    .gap = params$gap2
+    .gap = params$gap_column
   )
 
   interaction_coords <- compute_interaction_coords(
-    .box1 = box1,
-    .box2 = box2,
+    .row_box = row_box,
+    .column_box = column_box,
     .interation_cell = dfs$ilf
   )
 
   if (!is.null(.metadata_row) && !is.null(.metadata_column)) {
-    box1 <- box1 %>%
+    row_box <- row_box %>%
       dplyr::mutate(row = as.character(row)) %>%
       dplyr::left_join(.metadata_row, by = c("row" = .row))
 
-    box2 <- box2 %>%
+    column_box <- column_box %>%
       dplyr::mutate(column = as.character(column)) %>%
       dplyr::left_join(.metadata_column, by = c("column" = .column))
 
@@ -166,7 +168,7 @@ construct_bn_coordination <- function(
       dplyr::left_join(.metadata_column, by = c("column" = .column)) %>%
       dplyr::left_join(.metadata_row, by = c("row" = .row))
   } else if (!is.null(.metadata_column)) {
-    box2 <- box2 %>%
+    column_box <- column_box %>%
       dplyr::mutate(column = as.character(column)) %>%
       dplyr::left_join(.metadata_column, by = c("column" = .column))
 
@@ -177,7 +179,7 @@ construct_bn_coordination <- function(
       ) %>%
       dplyr::left_join(.metadata_column, by = c("column" = .column))
   } else if (!is.null(.metadata_row)) {
-    box1 <- box1 %>%
+    row_box <- row_box %>%
       dplyr::mutate(row = as.character(row)) %>%
       dplyr::left_join(.metadata_row, by = c("row" = .row))
 
@@ -190,9 +192,11 @@ construct_bn_coordination <- function(
   }
 
   return(list(
-    box1 = box1,
-    box2 = box2,
-    interaction_coords = interaction_coords
+    row_box = row_box,
+    column_box = column_box,
+    interaction_coords = interaction_coords,
+    box1 = row_box,
+    box2 = column_box
   ))
 }
 

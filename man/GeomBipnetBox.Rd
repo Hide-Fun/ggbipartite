@@ -12,7 +12,7 @@ GeomBipnetBox
 }
 \description{
 `GeomBipnetBox` draws the rectangular boxes for either the row set
-(`type = "box1"`) or the column set (`type = "box2"`), using the rectangle
+(`type = "row"`) or the column set (`type = "column"`), using the rectangle
 coordinates computed by `StatBipnet`.
 }
 \section{Required aesthetics}{

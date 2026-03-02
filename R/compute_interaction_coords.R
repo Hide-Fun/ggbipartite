@@ -6,19 +6,22 @@
 #' the column box. Each polygon is returned as four points in counter-clockwise
 #' (CCW) order along with its area.
 #'
-#' @param .box1 A data frame/tibble describing the row-side boxes. Must contain
+#' @param .row_box A data frame/tibble describing the row-side boxes. Must
+#'   contain
 #'   at least a `row` identifier, the x coordinate to join on, and the vertical
 #'   span information required by `split_y_by_interaction()`.
-#' @param .box2 A data frame/tibble describing the column-side boxes. Must
+#' @param .column_box A data frame/tibble describing the column-side boxes. Must
 #'   contain at least a `column` identifier, the x coordinate to join on, and
 #'   the matching vertical span information.
 #' @param .interation_cell A data frame/tibble of interaction cells (retains the
 #'   original argument spelling). Requires, at minimum, the `row`, `column`, and
 #'   per-cell interaction size used for splitting.
+#' @param .box1,.box2 Backward-compatible aliases for `.row_box` and
+#'   `.column_box`.
 #'
 #' @section Required inputs:
 #' \describe{
-#'   \item{`.box1`}{A tibble/data frame describing the \emph{row-side} boxes.
+#'   \item{`.row_box`}{A tibble/data frame describing the \emph{row-side} boxes.
 #'     Must contain at least:
 #'     \itemize{
 #'       \item \code{row}: row identifier (key used to join with `.interation_cell`).
@@ -30,7 +33,8 @@
 #'             they are produced by \code{split_y_by_interaction()}.
 #'       \item \code{interaction_size}: will be dropped if present.
 #'     }}
-#'   \item{`.box2`}{A tibble/data frame describing the \emph{column-side} boxes.
+#'   \item{`.column_box`}{A tibble/data frame describing the \emph{column-side}
+#'     boxes.
 #'     Must contain at least:
 #'     \itemize{
 #'       \item \code{column}: column identifier (key used to join).
@@ -45,16 +49,18 @@
 #'     that \code{split_y_by_interaction()} uses to subdivide vertical spans.
 #'     (The original spelling \code{.interation_cell} is retained to match the
 #'     calling code.)}
+#'   \item{`.box1`, `.box2`}{Backward-compatible argument aliases. Prefer
+#'     \code{.row_box} and \code{.column_box}.}
 #' }
 #'
 #' @details
 #' The workflow is:
 #' \enumerate{
-#'   \item Join `.box1` and `.interation_cell`, then call
+#'   \item Join `.row_box` and `.interation_cell`, then call
 #'         \code{split_y_by_interaction(x_side = "xmax", var = "row")} to obtain
 #'         \code{y_start}/\code{y_end} for each \code{row}–\code{column} cell on
 #'         the row side and duplicate the x coordinate into \code{x1}/\code{x2}.
-#'   \item Join `.box2` and `.interation_cell`, then call
+#'   \item Join `.column_box` and `.interation_cell`, then call
 #'         \code{split_y_by_interaction(x_side = "xmin", var = "column")} to obtain
 #'         the analogous \code{y3}/\code{y4} and \code{x3}/\code{x4} for the column side.
 #'   \item Merge both sides, pivot the four vertex columns to long format, and
@@ -81,10 +87,10 @@
 #' @examples
 #' \dontrun{
 #' # Minimal example (requires user-defined split_y_by_interaction()):
-#' box1 <- tibble::tibble(row = 1:2, x = 0.0, xmin = 0.0, xmax = 0.4, interaction_size = c(NA, NA))
-#' box2 <- tibble::tibble(column = 1:2, x = 1.0, xmin = 0.6, xmax = 1.0, interaction_size = c(NA, NA))
+#' row_box <- tibble::tibble(row = 1:2, x = 0.0, xmin = 0.0, xmax = 0.4, interaction_size = c(NA, NA))
+#' column_box <- tibble::tibble(column = 1:2, x = 1.0, xmin = 0.6, xmax = 1.0, interaction_size = c(NA, NA))
 #' cells <- tibble::tibble(row = c(1,1,2,2), column = c(1,2,1,2), interaction_size = c(2,1,1,3))
-#' coords <- compute_interaction_coords(box1, box2, cells)
+#' coords <- compute_interaction_coords(row_box, column_box, cells)
 #' }
 #'
 #' @importFrom dplyr select right_join full_join mutate arrange
@@ -93,31 +99,51 @@
 #' @importFrom purrr map map_dbl
 #' @export
 compute_interaction_coords <- function(
-  .box1,
-  .box2,
-  .interation_cell
+  .row_box = NULL,
+  .column_box = NULL,
+  .interation_cell,
+  .box1 = NULL,
+  .box2 = NULL
 ) {
-  row <- .box1 %>%
+  if (!is.null(.box1) && !is.null(.row_box)) {
+    stop("Specify only one of `.row_box` and `.box1`.")
+  }
+  if (!is.null(.box2) && !is.null(.column_box)) {
+    stop("Specify only one of `.column_box` and `.box2`.")
+  }
+
+  if (is.null(.row_box)) {
+    .row_box <- .box1
+  }
+  if (is.null(.column_box)) {
+    .column_box <- .box2
+  }
+
+  if (is.null(.row_box) || is.null(.column_box)) {
+    stop("`.row_box` and `.column_box` are required.")
+  }
+
+  row_side <- .row_box %>%
     dplyr::select(!interaction_size) %>%
     dplyr::right_join(
       .interation_cell,
-      by = dplyr::intersect(names(.box1), names(.interation_cell))
+      by = dplyr::intersect(names(.row_box), names(.interation_cell))
     ) %>%
     split_y_by_interaction(x_side = "xmax", var = "row") %>%
     dplyr::select(row, column, y1 = y_start, y2 = y_end, x1 = x, x2 = x)
 
-  column <- .box2 %>%
+  column_side <- .column_box %>%
     dplyr::select(!interaction_size) %>%
     dplyr::right_join(
       .interation_cell,
-      by = dplyr::intersect(names(.box2), names(.interation_cell))
+      by = dplyr::intersect(names(.column_box), names(.interation_cell))
     ) %>%
     split_y_by_interaction(x_side = "xmin", var = "column") %>%
     dplyr::select(row, column, y3 = y_start, y4 = y_end, x3 = x, x4 = x)
 
   interaction_coords <- dplyr::full_join(
-    row,
-    column,
+    row_side,
+    column_side,
     by = c("row", "column")
   ) %>%
     tidyr::pivot_longer(

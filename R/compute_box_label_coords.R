@@ -2,15 +2,16 @@
 #'
 #' Summarize rectangle coordinates (`xmin`, `xmax`, `ymin`, `ymax`) into one
 #' representative label position per group. The x coordinate is taken from the
-#' outer edge of each side (`xmin` for `"left"`, `xmax` for `"right"`), and the
-#' y coordinate is computed as the mean of per-box vertical centres.
+#' outer edge of each side (`xmin` for `"row"`, `xmax` for `"column"`), and the
+#' y coordinate is computed as the mean of vertical centres.
 #'
 #' @param .box A data frame/tibble containing rectangle coordinates and grouping
 #'   columns.
 #' @param .by Character vector of one or more column names used to define label
 #'   groups (for example `c("row", "family")` or `"column"`).
-#' @param .x_side One of `"left"` or `"right"`. Chooses which outer x edge is
-#'   used as the label anchor.
+#' @param .side One of `"row"` or `"column"`. Chooses the bipartite side that
+#'   `.box` represents. `"row"` anchors labels to `xmin`; `"column"` anchors to
+#'   `xmax`.
 #'
 #' @return A tibble with grouping columns from `.by` plus:
 #' \itemize{
@@ -19,7 +20,7 @@
 #' }
 #'
 #' @examples
-#' box1 <- tibble::tibble(
+#' row_box <- tibble::tibble(
 #'   row = c("A", "B"),
 #'   xmin = c(0, 0),
 #'   xmax = c(5, 5),
@@ -28,9 +29,9 @@
 #' )
 #'
 #' compute_box_label_coords(
-#'   .box = box1,
+#'   .box = row_box,
 #'   .by = "row",
-#'   .x_side = "left"
+#'   .side = "row"
 #' )
 #'
 #' @importFrom dplyr all_of mutate summarise
@@ -38,7 +39,7 @@
 compute_box_label_coords <- function(
   .box,
   .by,
-  .x_side = c("left", "right")
+  .side = c("row", "column")
 ) {
   if (!is.data.frame(.box)) {
     stop("`.box` must be a data frame or tibble.")
@@ -48,7 +49,7 @@ compute_box_label_coords <- function(
     stop("`.by` must be a non-empty character vector of column names.")
   }
 
-  .x_side <- match.arg(.x_side)
+  .side <- match.arg(.side)
   .by <- unique(.by)
 
   required_cols <- c(.by, "xmin", "xmax", "ymin", "ymax")
@@ -80,8 +81,8 @@ compute_box_label_coords <- function(
     stop("Rectangle coordinate columns cannot contain NA values.")
   }
 
-  x_col <- if (.x_side == "left") "xmin" else "xmax"
-  x_summary <- if (.x_side == "left") min else max
+  x_col <- if (.side == "row") "xmin" else "xmax"
+  x_summary <- if (.side == "row") min else max
 
   .box |>
     tibble::as_tibble() |>

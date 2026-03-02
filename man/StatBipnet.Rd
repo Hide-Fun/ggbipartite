@@ -27,7 +27,7 @@ finite or non-positive. When `adjust_box_height = TRUE`, the vertical
 extents of boxes are adjusted to reflect totals within each partition.
 
 The function `construct_bn_coordination()` must be available in scope and is
-expected to return a list with elements `box1`, `box2`, and
+expected to return a list with elements `row_box`, `column_box`, and
 `interaction_coords` containing the columns described above.
 }
 \section{Required aesthetics}{
@@ -42,12 +42,13 @@ expected to return a list with elements `box1`, `box2`, and
 \section{Output by `type`}{
 
 \describe{
-  \item{`"box1"`}{Rectangles for the row set with columns
+  \item{`"row"`}{Rectangles for the row set with columns
     `xmin`, `xmax`, `ymin`, `ymax`, plus `row`.}
-  \item{`"box2"`}{Rectangles for the column set with columns
+  \item{`"column"`}{Rectangles for the column set with columns
     `xmin`, `xmax`, `ymin`, `ymax`, plus `column`.}
   \item{`"interaction"`}{Polygons spanning the two boxes with columns
     `x`, `y`, `row`, `column`, and a `group` id per interaction.}
+  \item{`"box1"`/`"box2"`}{Backward-compatible aliases for `"row"`/`"column"`.}
 }
 }
 

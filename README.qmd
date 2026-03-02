@@ -21,7 +21,7 @@ execute:
 
 -   `interaction_matrix`: 描画の基準となる行列データ
 -   `interaction_df`: `ggplot` に直接渡す long 形式データ
--   `metadata_row`: `box1` 側の色分けに使う行メタデータ
+-   `metadata_row`: `row_box` 側の色分けに使う行メタデータ
 -   `p`: abundance 表示の基本ネットワーク
 -   `bn_coords`: 箱座標と相互作用ポリゴン座標の計算結果
 
@@ -80,7 +80,7 @@ p <-
     aes(row = host, column = otu, count = num_seq),
   ) +
   geom_bipnet_box(
-    type = "box2",
+    type = "column",
     fill = "navy",
     linewidth = .1
   ) +
@@ -92,7 +92,7 @@ p <-
   ) +
   geom_bipnet_box(
     aes(fill = after_stat(family)),
-    type = "box1",
+    type = "row",
     row_nm = "host",
     metadata_row = metadata_row,
     show.legend = FALSE,
@@ -105,6 +105,7 @@ p <-
 bn_coords <- construct_bn_coordination(
   .mat = interaction_matrix,
   .row = "host",
+  .column = "otu",
   .metadata_row = metadata_row,
   .gap = sum(interaction_matrix) / 10,
   .adjust_box_height = FALSE
@@ -113,9 +114,9 @@ bn_coords <- construct_bn_coordination(
 
 ## 2. 箱ラベル位置の算出と注釈表示
 
-`compute_box_label_coords()` で `bn_coords$box1` と `bn_coords$box2` からラベル用の代表座標を計算し、`annotate()` で左右に host / otu のラベルを付与します。
+`compute_box_label_coords()` で row/column 側の箱データからラベル用の代表座標を計算し、`annotate()` で左右に host / otu のラベルを付与します。
 
-この関数は、`xmin/xmax/ymin/ymax` から箱の外側 x 座標（left/right）と中心 y 座標を集約して返します。ラベル描画時は、箱の外側へさらにオフセットして重なりを防いでいます。
+この関数は、`xmin/xmax/ymin/ymax` から side ごとの外側 x 座標（row は `xmin`、column は `xmax`）と中心 y 座標を集約して返します。ラベル描画時は、箱の外側へさらにオフセットして重なりを防いでいます。
 
 ```{r}
 #| label: box-label-annotation
@@ -124,30 +125,33 @@ bn_coords <- construct_bn_coordination(
 #| fig-dpi: 300
 # -------------------------------------------------------------------------
 
-label_df_box1 <- compute_box_label_coords(
-  .box = bn_coords$box1,
+row_box <- bn_coords$row_box
+column_box <- bn_coords$column_box
+
+label_df_row <- compute_box_label_coords(
+  .box = row_box,
   .by = "row",
-  .x_side = "left"
+  .side = "row"
 )
 
-label_df_box2 <- compute_box_label_coords(
-  .box = bn_coords$box2,
+label_df_column <- compute_box_label_coords(
+  .box = column_box,
   .by = "column",
-  .x_side = "right"
+  .side = "column"
 )
 
 p +
   annotate(
     geom = "text",
-    x = label_df_box1$x - 100,
-    y = label_df_box1$y,
-    label = label_df_box1$row
+    x = label_df_row$x - 100,
+    y = label_df_row$y,
+    label = label_df_row$row
   ) +
   annotate(
     geom = "text",
-    x = label_df_box2$x + 100,
-    y = label_df_box2$y,
-    label = label_df_box2$column
+    x = label_df_column$x + 100,
+    y = label_df_column$y,
+    label = label_df_column$column
   ) +
   theme_void()
 ```
@@ -175,7 +179,7 @@ p +
 
 t1 <- adjust_tree(
   .phylo = host_phylo,
-  .box = bn_coords$box1,
+  .box = bn_coords$row_box,
   .tree_position = "left",
   .adjust = 1
 ) +
@@ -183,24 +187,24 @@ t1 <- adjust_tree(
 
 t2 <- adjust_tree(
   .phylo = symbiont_phylo,
-  .box = bn_coords$box2,
+  .box = bn_coords$column_box,
   .tree_position = "right",
   .adjust = 1
 ) +
   geom_tiplab(hjust = 1)
 
 df_link1 <- create_link(
-  box = bn_coords$box1,
+  box = bn_coords$row_box,
   ggtree = t1,
-  direction = "left",
+  side = "row",
   x = 1e+05 / 8,
   xend = 0
 )
 
 df_link2 <- create_link(
-  box = bn_coords$box2,
+  box = bn_coords$column_box,
   ggtree = t2,
-  direction = "right",
+  side = "column",
   x = 0,
   xend = 1e+05 / 8
 )
@@ -281,14 +285,14 @@ t1 +
 # `align = T` version.
 t1 <- adjust_tree(
   .phylo = host_phylo,
-  .box = bn_coords$box1,
+  .box = bn_coords$row_box,
   .tree_position = "left",
   .adjust = 1
 )
 
 t2 <- adjust_tree(
   .phylo = symbiont_phylo,
-  .box = bn_coords$box2,
+  .box = bn_coords$column_box,
   .tree_position = "right",
   .adjust = 1
 )
@@ -371,13 +375,14 @@ interaction_df <- bmat |>
 bn_coords <- construct_bn_coordination(
   .mat = bmat,
   .row = "host",
+  .column = "otu",
   .metadata_row = metadata_row,
   .gap = sum(bmat) / 10
 )
 
 t1 <- adjust_tree(
   .phylo = host_phylo,
-  .box = bn_coords$box1,
+  .box = bn_coords$row_box,
   .tree_position = "left",
   .adjust = 1
 ) +
@@ -385,24 +390,24 @@ t1 <- adjust_tree(
 
 t2 <- adjust_tree(
   .phylo = symbiont_phylo,
-  .box = bn_coords$box2,
+  .box = bn_coords$column_box,
   .tree_position = "right",
   .adjust = 1
 ) +
   geom_tiplab(hjust = 1)
 
 df_link1 <- create_link(
-  box = bn_coords$box1,
+  box = bn_coords$row_box,
   ggtree = t1,
-  direction = "left",
+  side = "row",
   x = 1e+05 / 8,
   xend = 0
 )
 
 df_link2 <- create_link(
-  box = bn_coords$box2,
+  box = bn_coords$column_box,
   ggtree = t2,
-  direction = "right",
+  side = "column",
   x = 0,
   xend = 1e+05 / 8
 )
@@ -473,11 +478,11 @@ p_binary <- ggplot(
     show.legend = FALSE
   ) +
   geom_bipnet_point(
-    type = "box1",
+    type = "row",
     fill = "steelblue"
   ) +
   geom_bipnet_point(
-    type = "box2",
+    type = "column",
     fill = "navy"
   ) +
   theme_void()
@@ -505,7 +510,7 @@ t1 +
 
 t1_binary_aligned <- adjust_tree(
   .phylo = host_phylo,
-  .box = bn_coords$box1,
+  .box = bn_coords$row_box,
   .tree_position = "left",
   .adjust = 1,
   .adjust_tip_position = TRUE
@@ -514,7 +519,7 @@ t1_binary_aligned <- adjust_tree(
 
 t2_binary_aligned <- adjust_tree(
   .phylo = symbiont_phylo,
-  .box = bn_coords$box2,
+  .box = bn_coords$column_box,
   .tree_position = "right",
   .adjust = 1,
   .adjust_tip_position = TRUE
@@ -584,13 +589,13 @@ p_binary_tree_scale <- ggplot(
     tip_positions_column = symbiont_tip_positions
   ) +
   geom_bipnet_point(
-    type = "box1",
+    type = "row",
     fill = "steelblue",
     tip_positions_row = host_tip_positions,
     tip_positions_column = symbiont_tip_positions
   ) +
   geom_bipnet_point(
-    type = "box2",
+    type = "column",
     fill = "navy",
     tip_positions_row = host_tip_positions,
     tip_positions_column = symbiont_tip_positions

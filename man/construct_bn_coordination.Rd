@@ -29,12 +29,12 @@ used to join row metadata to row identifiers.}
 `.metadata_column` used to join column metadata to column identifiers.}
 
 \item{.metadata_row}{Optional tibble/data frame of row-level metadata to join
-to the **row-side** box table (`box1`). Must contain the column specified
-by `.row`.}
+to the **row-side** box table (`row_box`). Must contain the column
+specified by `.row`.}
 
 \item{.metadata_column}{Optional tibble/data frame of column-level metadata to
-join to the **column-side** box table (`box2`) and to `interaction_coords`.
-Must contain the column specified by `.column`.}
+join to the **column-side** box table (`column_box`) and to
+`interaction_coords`. Must contain the column specified by `.column`.}
 
 \item{.x0, .y0}{Numeric scalars; global origin for the left/bottom corner of
 the first box.}
@@ -55,11 +55,13 @@ side are adjusted so that the total heights of the two sides match (uses
 \value{
 A named list with three components:
 \describe{
-  \item{\code{box1}}{Tibble/data frame of row-side box coordinates.}
-  \item{\code{box2}}{Tibble/data frame of column-side box coordinates.}
+  \item{\code{row_box}}{Tibble/data frame of row-side box coordinates.}
+  \item{\code{column_box}}{Tibble/data frame of column-side box coordinates.}
   \item{\code{interaction_coords}}{Tibble/data frame of CCW-ordered polygon
         vertices (\code{x}, \code{y}) for each \code{row}–\code{column}
         interaction, including an \code{area} column.}
+  \item{\code{box1}, \code{box2}}{Backward-compatible aliases for
+        \code{row_box} and \code{column_box}.}
 }
 }
 \description{
@@ -84,7 +86,7 @@ Pipeline:
 If metadata is supplied:
 \itemize{
   \item When both row and column metadata are provided, they are left-joined
-        into \code{box1}, \code{box2}, and \code{interaction_coords}
+        into \code{row_box}, \code{column_box}, and \code{interaction_coords}
         (first columns, then rows for the latter).
   \item When only one side is provided, it is joined to the corresponding box
         table; \code{interaction_coords} is left unchanged.
@@ -122,7 +124,7 @@ res <- construct_bn_coordination(
   .ratio = 1 / 1.618,
   .adjust_box_height = TRUE
 )
-str(res$box1); str(res$box2); str(res$interaction_coords)
+str(res$row_box); str(res$column_box); str(res$interaction_coords)
 }
 
 }

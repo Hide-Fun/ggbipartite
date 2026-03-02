@@ -105,8 +105,8 @@ ggplot(
   data = interaction_df,
   mapping = aes(row = host, column = otu, count = num_seq)
 ) +
-  geom_bipnet_box(type = "box1") +
-  geom_bipnet_box(type = "box2") +
+  geom_bipnet_box(type = "row") +
+  geom_bipnet_box(type = "column") +
   geom_bipnet_interaction(type = "interaction", alpha = 0.7) +
   coord_fixed()
 
@@ -114,8 +114,8 @@ ggplot(
   data = interaction_df,
   mapping = aes(row = host, column = otu, count = as.integer(num_seq > 0))
 ) +
-  geom_bipnet_point(type = "box1") +
-  geom_bipnet_point(type = "box2") +
+  geom_bipnet_point(type = "row") +
+  geom_bipnet_point(type = "column") +
   geom_bipnet_interaction(
     type = "interaction",
     interaction_type = "binary",

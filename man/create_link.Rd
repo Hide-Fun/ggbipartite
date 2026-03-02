@@ -4,7 +4,14 @@
 \alias{create_link}
 \title{Build Link Coordinates Between Bipartite Boxes and Tree Tips}
 \usage{
-create_link(box, ggtree, direction, x = 0, xend = 1)
+create_link(
+  box,
+  ggtree,
+  side = c("row", "column", "left", "right"),
+  x = 0,
+  xend = 1,
+  direction = NULL
+)
 }
 \arguments{
 \item{box}{A data frame with `xmin`, `xmax`, `ymin`, `ymax`, and one id
@@ -12,12 +19,14 @@ column (`row` or `column`).}
 
 \item{ggtree}{A tree-like object accepted by `.extract_tree_data()`.}
 
-\item{direction}{One of `"left"` or `"right"`; controls which id column is
-used in `box`.}
+\item{side}{One of `"row"` or `"column"` (preferred). Backward-compatible
+values `"left"`/`"right"` are also accepted.}
 
 \item{x}{Numeric scalar used as segment start x.}
 
 \item{xend}{Numeric scalar used as segment end x.}
+
+\item{direction}{Backward-compatible alias for `side`.}
 }
 \value{
 A data frame with columns `x`, `xend`, `y1`, and `y2`.

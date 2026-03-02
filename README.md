@@ -110,49 +110,28 @@ bn_coords <- construct_bn_coordination(
 
 ## 2. 箱ラベル位置の算出と注釈表示
 
-`bn_coords$box1` と `bn_coords$box2`
+`compute_box_label_coords()` で `bn_coords$box1` と `bn_coords$box2`
 からラベル用の代表座標を計算し、`annotate()` で左右に host / otu
 のラベルを付与します。
 
-`xmin/xmax/ymin/ymax` を一度 long 形式に変換してから `x` と `y`
-を復元することで、箱ごとの中心高さを安定して取得できます。左側は
-`x = min(x)`、右側は `x = max(x)`
-を基準にし、ラベルを箱の外側へオフセットして重なりを防いでいます。
+この関数は、`xmin/xmax/ymin/ymax` から箱の外側 x
+座標（left/right）と中心 y
+座標を集約して返します。ラベル描画時は、箱の外側へさらにオフセットして重なりを防いでいます。
 
 ``` r
 # -------------------------------------------------------------------------
 
-label_df_box1 <- bn_coords$box1 |>
-  pivot_longer(
-    cols = c(xmin, xmax, ymin, ymax),
-    names_to = c("axis", "end"),
-    names_pattern = "([xy])(min|max)"
-  ) |>
-  pivot_wider(
-    names_from = axis,
-    values_from = value
-  ) |>
-  summarise(
-    x = min(x),
-    y = mean(y),
-    .by = c(row, family)
-  )
+label_df_box1 <- compute_box_label_coords(
+  .box = bn_coords$box1,
+  .by = "row",
+  .x_side = "left"
+)
 
-label_df_box2 <- bn_coords$box2 |>
-  pivot_longer(
-    cols = c(xmin, xmax, ymin, ymax),
-    names_to = c("axis", "end"),
-    names_pattern = "([xy])(min|max)"
-  ) |>
-  pivot_wider(
-    names_from = axis,
-    values_from = value
-  ) |>
-  summarise(
-    x = max(x),
-    y = mean(y),
-    .by = c(column)
-  )
+label_df_box2 <- compute_box_label_coords(
+  .box = bn_coords$box2,
+  .by = "column",
+  .x_side = "right"
+)
 
 p +
   annotate(

@@ -31,4 +31,7 @@ Imports:
     tidyselect,
     vctrs
 Suggests:
-    ape
+    ape,
+    marquee,
+    quarto
+VignetteBuilder: quarto

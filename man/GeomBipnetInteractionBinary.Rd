@@ -11,8 +11,8 @@ An object of class \code{GeomBipnetInteractionBinary} (inherits from \code{GeomS
 GeomBipnetInteractionBinary
 }
 \description{
-`GeomBipnetInteractionBinary` draws one segment per row-column interaction.
-It is used when `interaction_type = "binary"` in
-[geom_bipnet_interaction()].
+\code{GeomBipnetInteractionBinary} draws one segment per row-column interaction.
+It is used when \code{interaction_type = "binary"} in
+\code{\link[=geom_bipnet_interaction]{geom_bipnet_interaction()}}.
 }
 \keyword{internal}

@@ -7,7 +7,7 @@
 .tiplab_align_x(df, offset = 0)
 }
 \arguments{
-\item{df}{A data frame containing numeric column `x`.}
+\item{df}{A data frame containing numeric column \code{x}.}
 
 \item{offset}{Numeric scalar added to the aligned x-position.}
 }
@@ -15,6 +15,8 @@
 A numeric scalar x-position for aligned labels.
 }
 \description{
-Computes a right-aligned x-position for tip labels from the range of `df$x`
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
+Computes a right-aligned x-position for tip labels from the range of \code{df$x}
 plus a small epsilon and optional offset.
 }

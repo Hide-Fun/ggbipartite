@@ -11,23 +11,23 @@ compute_box_label_coords(.box, .by, .side = c("row", "column"))
 columns.}
 
 \item{.by}{Character vector of one or more column names used to define label
-groups (for example `c("row", "family")` or `"column"`).}
+groups (for example \code{c("row", "family")} or \code{"column"}).}
 
-\item{.side}{One of `"row"` or `"column"`. Chooses the bipartite side that
-`.box` represents. `"row"` anchors labels to `xmin`; `"column"` anchors to
-`xmax`.}
+\item{.side}{One of \code{"row"} or \code{"column"}. Chooses the bipartite side that
+\code{.box} represents. \code{"row"} anchors labels to \code{xmin}; \code{"column"} anchors to
+\code{xmax}.}
 }
 \value{
-A tibble with grouping columns from `.by` plus:
+A tibble with grouping columns from \code{.by} plus:
 \itemize{
-  \item `x`: representative x coordinate on the selected outer edge.
-  \item `y`: representative y coordinate (mean vertical centre).
+\item \code{x}: representative x coordinate on the selected outer edge.
+\item \code{y}: representative y coordinate (mean vertical centre).
 }
 }
 \description{
-Summarize rectangle coordinates (`xmin`, `xmax`, `ymin`, `ymax`) into one
+Summarize rectangle coordinates (\code{xmin}, \code{xmax}, \code{ymin}, \code{ymax}) into one
 representative label position per group. The x coordinate is taken from the
-outer edge of each side (`xmin` for `"row"`, `xmax` for `"column"`), and the
+outer edge of each side (\code{xmin} for \code{"row"}, \code{xmax} for \code{"column"}), and the
 y coordinate is computed as the mean of vertical centres.
 }
 \examples{

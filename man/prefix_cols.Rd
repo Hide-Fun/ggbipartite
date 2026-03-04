@@ -2,7 +2,7 @@
 % Please edit documentation in R/hetero_df.R
 \name{prefix_cols}
 \alias{prefix_cols}
-\title{Prefix all column names with "<prefix><sep>"}
+\title{Prefix all column names with "\if{html}{\out{<prefix>}}\if{html}{\out{<sep>}}"}
 \usage{
 prefix_cols(df, prefix, sep = "__")
 }
@@ -17,5 +17,5 @@ prefix_cols(df, prefix, sep = "__")
 A tibble with renamed columns.
 }
 \description{
-Prefix all column names with "<prefix><sep>"
+Prefix all column names with "\if{html}{\out{<prefix>}}\if{html}{\out{<sep>}}"
 }

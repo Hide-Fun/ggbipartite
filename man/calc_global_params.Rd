@@ -25,48 +25,48 @@ items (rows for the row side, columns for the column side) before any
 adjustment.}
 
 \item{.box_ratio}{Positive numeric scalar; the divisor used to derive the
-box width as `sum(.mat) / .box_ratio`.}
+box width as \code{sum(.mat) / .box_ratio}.}
 
 \item{.ratio}{Positive numeric scalar; the aspect-like divisor used to derive
-the overall width as `sum(.mat) / .ratio`.}
+the overall width as \code{sum(.mat) / .ratio}.}
 
-\item{.adjust_box_height}{Logical; if `TRUE`, per-box gaps are adjusted via
-[adjust_box_height()] so that the two boxes have equal total height.}
+\item{.adjust_box_height}{Logical; if \code{TRUE}, per-box gaps are adjusted via
+\code{\link[=adjust_box_height]{adjust_box_height()}} so that the two boxes have equal total height.}
 }
 \value{
 A named list with elements:
 \itemize{
-  \item `width`: overall width computed as `sum(.mat) / .ratio`.
-  \item `box_width`: width of an individual box, `sum(.mat) / .box_ratio`.
-  \item `row_box`: numeric length-2 vector `(x0, y0)` for the row-side box
-        origin.
-  \item `column_box`: numeric length-2 vector `(x, y)` for the column-side
-        box origin, where `x = width - box_width` and `y = y0`.
-  \item `gap_row`: vertical gap used on the row side.
-  \item `gap_column`: vertical gap used on the column side.
-  \item `box1`/`box2` and `gap1`/`gap2`: backward-compatible aliases for
-        `row_box`/`column_box` and `gap_row`/`gap_column`.
+\item \code{width}: overall width computed as \code{sum(.mat) / .ratio}.
+\item \code{box_width}: width of an individual box, \code{sum(.mat) / .box_ratio}.
+\item \code{row_box}: numeric length-2 vector \verb{(x0, y0)} for the row-side box
+origin.
+\item \code{column_box}: numeric length-2 vector \verb{(x, y)} for the column-side
+box origin, where \code{x = width - box_width} and \code{y = y0}.
+\item \code{gap_row}: vertical gap used on the row side.
+\item \code{gap_column}: vertical gap used on the column side.
+\item \code{box1}/\code{box2} and \code{gap1}/\code{gap2}: backward-compatible aliases for
+\code{row_box}/\code{column_box} and \code{gap_row}/\code{gap_column}.
 }
 }
 \description{
 Compute overall layout parameters (widths, origins, and vertical gaps) for a
 two-box layout derived from a matrix input. The total "size" used for layout
-is the sum of all entries in `.mat`. When `.adjust_box_height` is `TRUE`,
+is the sum of all entries in \code{.mat}. When \code{.adjust_box_height} is \code{TRUE},
 vertical gaps for each box are adjusted so that the total heights of the two
 boxes match (based on the matrix's row/column counts).
 }
 \details{
-Internally, the variable `.interaction` is used for `sum(.mat)` (total mass).
-If `.adjust_box_height` is `TRUE`, gaps are computed by
-[adjust_box_height()] to equalize the total height:
+Internally, the variable \code{.interaction} is used for \code{sum(.mat)} (total mass).
+If \code{.adjust_box_height} is \code{TRUE}, gaps are computed by
+\code{\link[=adjust_box_height]{adjust_box_height()}} to equalize the total height:
 \deqn{\text{height}_\mathrm{row} = \sum(\mathtt{.mat}) + (\mathtt{.nrow}-1)\times \mathtt{gap\_row}}
 \deqn{\text{height}_\mathrm{column} = \sum(\mathtt{.mat}) + (\mathtt{.ncol}-1)\times \mathtt{gap\_column}}
 }
 \note{
-This function relies on [adjust_box_height()]. As currently written,
+This function relies on \code{\link[=adjust_box_height]{adjust_box_height()}}. As currently written,
 if the two computed heights are already equal, that helper emits a message
-and does not return a list of gaps (i.e., returns `NULL`). Callers expecting
-`gap_row`/`gap_column` should handle that case accordingly.
+and does not return a list of gaps (i.e., returns \code{NULL}). Callers expecting
+\code{gap_row}/\code{gap_column} should handle that case accordingly.
 }
 \examples{
 m <- matrix(c(1, 2, 1,
@@ -89,5 +89,5 @@ calc_global_params(
 
 }
 \seealso{
-[adjust_box_height()]
+\code{\link[=adjust_box_height]{adjust_box_height()}}
 }

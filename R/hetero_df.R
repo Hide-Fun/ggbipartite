@@ -52,6 +52,8 @@ escape_regex <- function(x) {
 #' Column-bind heterogeneous data frames with typed NA padding
 #'
 #' @description
+#' `r lifecycle::badge("deprecated")`
+#'
 #' Column-binds a list of data frames / tibbles (possibly different row counts)
 #' after prefixing each element's columns. Returns a single tibble.
 #'
@@ -81,6 +83,11 @@ escape_regex <- function(x) {
 #' @importFrom purrr map imap imap_int map2
 #' @importFrom dplyr bind_cols
 combine_hetero_df <- function(x, prefixes = NULL, separator = "__") {
+  lifecycle::deprecate_warn(
+    when = "0.9.2",
+    what = "combine_hetero_df()"
+  )
+
   # Validate input list
   if (!is.list(x)) {
     stop("`x` must be a list of data frames / tibbles.")
@@ -164,6 +171,8 @@ combine_hetero_df(x, separator = "::")
 #' Reconstruct a named list of tibbles from a combined tibble
 #'
 #' @description
+#' `r lifecycle::badge("deprecated")`
+#'
 #' Split a combined tibble created by `combine_hetero_df()` back into a
 #' named list of tibbles by parsing column name prefixes. Row counts are
 #' inferred by trimming trailing all-NA rows per prefix group, or can be
@@ -212,6 +221,11 @@ reconstruct_hetero_df <- function(
   rows = NULL,
   drop_empty = FALSE
 ) {
+  lifecycle::deprecate_warn(
+    when = "0.9.2",
+    what = "reconstruct_hetero_df()"
+  )
+
   # Ensure tibble
   combined <- tibble::as_tibble(combined)
 

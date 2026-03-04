@@ -1,5 +1,8 @@
 #' Compute Shared X Position for Tip Labels
 #'
+#' @description
+#' `r lifecycle::badge("experimental")`
+#'
 #' Computes a right-aligned x-position for tip labels from the range of `df$x`
 #' plus a small epsilon and optional offset.
 #'

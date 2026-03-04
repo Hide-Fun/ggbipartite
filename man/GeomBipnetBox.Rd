@@ -11,20 +11,20 @@ An object of class \code{GeomBipnetBox} (inherits from \code{GeomRect}, \code{Ge
 GeomBipnetBox
 }
 \description{
-`GeomBipnetBox` draws the rectangular boxes for either the row set
-(`type = "row"`) or the column set (`type = "column"`), using the rectangle
-coordinates computed by `StatBipnet`.
+\code{GeomBipnetBox} draws the rectangular boxes for either the row set
+(\code{type = "row"}) or the column set (\code{type = "column"}), using the rectangle
+coordinates computed by \code{StatBipnet}.
 }
 \section{Required aesthetics}{
 
-The underlying stat requires `row`, `column`, and `count`. This geom itself
-consumes `xmin`, `xmax`, `ymin`, and `ymax` (provided by the stat).
+The underlying stat requires \code{row}, \code{column}, and \code{count}. This geom itself
+consumes \code{xmin}, \code{xmax}, \code{ymin}, and \code{ymax} (provided by the stat).
 }
 
 \section{Aesthetics}{
 
 In addition to the required aesthetics, this geom understands:
-`fill`, `colour`, `linewidth`, `linetype`, and `alpha`.
+\code{fill}, \code{colour}, \code{linewidth}, \code{linetype}, and \code{alpha}.
 }
 
 \keyword{internal}

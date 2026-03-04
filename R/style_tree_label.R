@@ -287,11 +287,14 @@ style_sciname <- function(x) {
 
 #' Style tree labels into Markdown
 #'
-#' Scientific-name parts are styled by [style_sciname()].
+#' @description
+#' `r lifecycle::badge("experimental")`
 #'
+#' Scientific-name parts are styled by [style_sciname()].
 #' Empty strings and numeric-like strings (for example, `"100"` and `"100/98"`)
-#' are returned unchanged. If a trailing token should be treated as a taxon
-#' name, its rank can be given with `last_taxon_rank`.
+#' are returned unchanged.
+#' If a trailing token should be treated as a taxon name, its rank can be
+#' given with `last_taxon_rank`.
 #'
 #' @param x Character vector of labels.
 #' @param last_taxon_rank Character scalar indicating the rank of the final

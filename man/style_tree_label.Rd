@@ -10,19 +10,20 @@ style_tree_label(x, last_taxon_rank = NA_character_)
 \item{x}{Character vector of labels.}
 
 \item{last_taxon_rank}{Character scalar indicating the rank of the final
-token (for example, `"genus"`, `"species"`, `"family"`). Use
-`NA_character_` or `""` to disable this behavior.}
+token (for example, \code{"genus"}, \code{"species"}, \code{"family"}). Use
+\code{NA_character_} or \code{""} to disable this behavior.}
 }
 \value{
 Character vector of Markdown-styled labels.
 }
 \description{
-Scientific-name parts are styled by [style_sciname()].
-}
-\details{
-Empty strings and numeric-like strings (for example, `"100"` and `"100/98"`)
-are returned unchanged. If a trailing token should be treated as a taxon
-name, its rank can be given with `last_taxon_rank`.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
+Scientific-name parts are styled by \code{\link[=style_sciname]{style_sciname()}}.
+Empty strings and numeric-like strings (for example, \code{"100"} and \code{"100/98"})
+are returned unchanged.
+If a trailing token should be treated as a taxon name, its rank can be
+given with \code{last_taxon_rank}.
 }
 \examples{
 x <- c(

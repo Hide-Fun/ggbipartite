@@ -1,5 +1,8 @@
 #' Build Link Coordinates Between Bipartite Boxes and Tree Tips
 #'
+#' @description
+#' `r lifecycle::badge("experimental")`
+#'
 #' Summarises box coordinates into one y-value per id and joins them to tip
 #' y-values extracted from tree data.
 #'

@@ -8,59 +8,62 @@ compute_box_coords(.df, .var, .size, .width = 1, .x0 = 0, .y0 = 0, .gap = 0)
 }
 \arguments{
 \item{.df}{A data frame or tibble containing at least:
-- a numeric, non-negative column for heights referenced by `.size` with no `NA`s;
-- a column referenced by `.var`.}
+\itemize{
+\item a numeric, non-negative column for heights referenced by \code{.size} with no \code{NA}s;
+\item a column referenced by \code{.var}.
+}}
 
-\item{.var}{Bare column name in `.df` giving the grouping/category whose
+\item{.var}{Bare column name in \code{.df} giving the grouping/category whose
 values define the stacked boxes. Captured with tidy evaluation.}
 
-\item{.size}{Bare column name in `.df` giving the height for each box
-(previously hard-coded `interaction_size`). Captured with tidy evaluation.}
+\item{.size}{Bare column name in \code{.df} giving the height for each box
+(previously hard-coded \code{interaction_size}). Captured with tidy evaluation.}
 
 \item{.width}{Positive numeric scalar. The common width of all boxes on
-the x-axis. Default: `1`.}
+the x-axis. Default: \code{1}.}
 
-\item{.x0}{Numeric scalar. The left edge (x) of all boxes. Default: `0`.}
+\item{.x0}{Numeric scalar. The left edge (x) of all boxes. Default: \code{0}.}
 
 \item{.y0}{Numeric scalar. The baseline (y) from which stacking starts.
-Default: `0`.}
+Default: \code{0}.}
 
 \item{.gap}{Non-negative numeric scalar. Vertical gap inserted between
-adjacent stacked boxes. Applied to the cumulative offset. Default: `0`.}
+adjacent stacked boxes. Applied to the cumulative offset. Default: \code{0}.}
 }
 \value{
 A tibble with the following columns, in the original row order:
 \itemize{
-  \item \code{.var} — the chosen grouping column, with its original name;
-  \item \code{.size} — the input heights;
-  \item \code{xmin}, \code{xmax}, \code{ymin}, \code{ymax} — rectangle
-        boundaries suitable for \code{ggplot2::geom_rect()}.
+\item \code{.var} — the chosen grouping column, with its original name;
+\item \code{.size} — the input heights;
+\item \code{xmin}, \code{xmax}, \code{ymin}, \code{ymax} — rectangle
+boundaries suitable for \code{ggplot2::geom_rect()}.
 }
 }
 \description{
-Given a data frame with a numeric `.size` column and a categorical variable,
-compute rectangle coordinates (`xmin`, `xmax`, `ymin`, `ymax`) for a vertical
-stack of boxes whose heights equal `.size`. This is useful for drawing stacked
-bars or custom block diagrams with `ggplot2::geom_rect()`.
+Given a data frame with a numeric \code{.size} column and a categorical variable,
+compute rectangle coordinates (\code{xmin}, \code{xmax}, \code{ymin}, \code{ymax}) for a vertical
+stack of boxes whose heights equal \code{.size}. This is useful for drawing stacked
+bars or custom block diagrams with \code{ggplot2::geom_rect()}.
 }
 \details{
-Boxes are stacked along the y-axis starting at `.y0`. If `.var` is a factor,
-its level order governs the stacking order. If `.var` is not a factor, the
+Boxes are stacked along the y-axis starting at \code{.y0}. If \code{.var} is a factor,
+its level order governs the stacking order. If \code{.var} is not a factor, the
 stacking order is the reverse of the first-appearance order of the values.
 The returned rows are reordered back to the original input row order; the
 factor handling only affects how the cumulative offsets are computed.
 
-
-Input validation ensures `.size` is numeric, non-negative, and contains
-no missing values. Scalars `.width`, `.gap`, `.x0`, and `.y0` are checked
+Input validation ensures \code{.size} is numeric, non-negative, and contains
+no missing values. Scalars \code{.width}, \code{.gap}, \code{.x0}, and \code{.y0} are checked
 for appropriate types and domains.
 
 Internally, the function:
-1) captures `.var` and `.size` via `rlang::enquo()`;
-2) establishes stacking order (factor levels preserved; otherwise reverse
-   first-appearance order);
-3) computes cumulative offsets with optional `.gap`;
-4) returns coordinates while restoring the original input row order.
+\enumerate{
+\item captures \code{.var} and \code{.size} via \code{rlang::enquo()};
+\item establishes stacking order (factor levels preserved; otherwise reverse
+first-appearance order);
+\item computes cumulative offsets with optional \code{.gap};
+\item returns coordinates while restoring the original input row order.
+}
 }
 \examples{
 library(tibble)
@@ -83,5 +86,5 @@ ggplot(coords1) +
   coord_fixed() + theme_minimal()
 }
 \seealso{
-[ggplot2::geom_rect()], [rlang::enquo()]
+\code{\link[ggplot2:geom_tile]{ggplot2::geom_rect()}}, \code{\link[rlang:enquo]{rlang::enquo()}}
 }

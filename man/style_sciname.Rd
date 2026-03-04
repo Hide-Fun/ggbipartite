@@ -14,8 +14,8 @@ Character vector of Markdown-styled labels.
 }
 \description{
 Scientific-name parts are converted to Markdown italics and normalized for
-common qualifiers (`cf.`, `aff.`, `nr.`), infraspecific rank markers
-(`subsp.`, `var.`, `f.`), and hybrid notation (`×`).
+common qualifiers (\code{cf.}, \code{aff.}, \code{nr.}), infraspecific rank markers
+(\code{subsp.}, \code{var.}, \code{f.}), and hybrid notation (\verb{×}).
 }
 \details{
 Numeric-like labels (for example, node support values) are returned

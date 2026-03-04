@@ -11,21 +11,21 @@ An object of class \code{GeomBipnetPoint} (inherits from \code{GeomPoint}, \code
 GeomBipnetPoint
 }
 \description{
-`GeomBipnetPoint` draws one point per row-side (`type = "row"`) or
-column-side (`type = "column"`) element. The point position is the centre of
-the rectangle coordinates computed by `StatBipnet`.
+\code{GeomBipnetPoint} draws one point per row-side (\code{type = "row"}) or
+column-side (\code{type = "column"}) element. The point position is the centre of
+the rectangle coordinates computed by \code{StatBipnet}.
 }
 \section{Required aesthetics}{
 
-The underlying stat requires `row`, `column`, and `count`. This geom itself
-consumes `xmin`, `xmax`, `ymin`, and `ymax` (provided by the stat) and
+The underlying stat requires \code{row}, \code{column}, and \code{count}. This geom itself
+consumes \code{xmin}, \code{xmax}, \code{ymin}, and \code{ymax} (provided by the stat) and
 converts them to point centres.
 }
 
 \section{Aesthetics}{
 
 In addition to the required aesthetics, this geom understands:
-`shape`, `size`, `fill`, `colour`, `stroke`, and `alpha`.
+\code{shape}, \code{size}, \code{fill}, \code{colour}, \code{stroke}, and \code{alpha}.
 }
 
 \keyword{internal}

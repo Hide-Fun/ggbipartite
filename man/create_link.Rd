@@ -14,24 +14,26 @@ create_link(
 )
 }
 \arguments{
-\item{box}{A data frame with `xmin`, `xmax`, `ymin`, `ymax`, and one id
-column (`row` or `column`).}
+\item{box}{A data frame with \code{xmin}, \code{xmax}, \code{ymin}, \code{ymax}, and one id
+column (\code{row} or \code{column}).}
 
-\item{ggtree}{A tree-like object accepted by `.extract_tree_data()`.}
+\item{ggtree}{A tree-like object accepted by \code{.extract_tree_data()}.}
 
-\item{side}{One of `"row"` or `"column"` (preferred). Backward-compatible
-values `"left"`/`"right"` are also accepted.}
+\item{side}{One of \code{"row"} or \code{"column"} (preferred). Backward-compatible
+values \code{"left"}/\code{"right"} are also accepted.}
 
 \item{x}{Numeric scalar used as segment start x.}
 
 \item{xend}{Numeric scalar used as segment end x.}
 
-\item{direction}{Backward-compatible alias for `side`.}
+\item{direction}{Backward-compatible alias for \code{side}.}
 }
 \value{
-A data frame with columns `x`, `xend`, `y1`, and `y2`.
+A data frame with columns \code{x}, \code{xend}, \code{y1}, and \code{y2}.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
 Summarises box coordinates into one y-value per id and joins them to tip
 y-values extracted from tree data.
 }

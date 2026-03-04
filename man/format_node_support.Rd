@@ -30,7 +30,7 @@ format_node_support(
 
 \item{sig_digits}{Number of significant digits used for output formatting.}
 
-\item{keep_na}{Logical scalar. If `TRUE`, keep `NA` as `NA`.}
+\item{keep_na}{Logical scalar. If \code{TRUE}, keep \code{NA} as \code{NA}.}
 }
 \value{
 Character vector of formatted support labels.
@@ -39,12 +39,12 @@ Character vector of formatted support labels.
 Parses node-support labels and applies cutoffs to suppress weak values.
 }
 \details{
-For two-value labels (`"SH/UFBoot"`), each side is compared against its
-cutoff and weak values are replaced by `missing_mark`. If both sides are
+For two-value labels (\code{"SH/UFBoot"}), each side is compared against its
+cutoff and weak values are replaced by \code{missing_mark}. If both sides are
 weak, an empty string is returned.
 
 For one-value labels, the value can be interpreted as either UFBoot
-(`single_value = "ufboot"`) or SH-aLRT (`single_value = "sh_alrt"`).
+(\code{single_value = "ufboot"}) or SH-aLRT (\code{single_value = "sh_alrt"}).
 }
 \examples{
 x <- c("66.6/59", "90/94", "70/96", "85/97", "55", "90", NA, "")

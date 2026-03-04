@@ -15,28 +15,28 @@ compute_interaction_coords(
 \arguments{
 \item{.row_box}{A data frame/tibble describing the row-side boxes. Must
 contain
-at least a `row` identifier, the x coordinate to join on, and the vertical
-span information required by `split_y_by_interaction()`.}
+at least a \code{row} identifier, the x coordinate to join on, and the vertical
+span information required by \code{split_y_by_interaction()}.}
 
 \item{.column_box}{A data frame/tibble describing the column-side boxes. Must
-contain at least a `column` identifier, the x coordinate to join on, and
+contain at least a \code{column} identifier, the x coordinate to join on, and
 the matching vertical span information.}
 
 \item{.interation_cell}{A data frame/tibble of interaction cells (retains the
-original argument spelling). Requires, at minimum, the `row`, `column`, and
+original argument spelling). Requires, at minimum, the \code{row}, \code{column}, and
 per-cell interaction size used for splitting.}
 
-\item{.box1, .box2}{Backward-compatible aliases for `.row_box` and
-`.column_box`.}
+\item{.box1, .box2}{Backward-compatible aliases for \code{.row_box} and
+\code{.column_box}.}
 }
 \value{
 A tibble with columns:
 \describe{
-  \item{\code{row}}{Row identifier.}
-  \item{\code{column}}{Column identifier.}
-  \item{\code{x}, \code{y}}{Polygon vertex coordinates in CCW order (four rows
-                             per \code{row}–\code{column} cell).}
-  \item{\code{area}}{Polygon area (repeated across the four vertices of a cell).}
+\item{\code{row}}{Row identifier.}
+\item{\code{column}}{Column identifier.}
+\item{\code{x}, \code{y}}{Polygon vertex coordinates in CCW order (four rows
+per \code{row}–\code{column} cell).}
+\item{\code{area}}{Polygon area (repeated across the four vertices of a cell).}
 }
 }
 \description{
@@ -49,18 +49,18 @@ the column box. Each polygon is returned as four points in counter-clockwise
 \details{
 The workflow is:
 \enumerate{
-  \item Join `.row_box` and `.interation_cell`, then call
-        \code{split_y_by_interaction(x_side = "xmax", var = "row")} to obtain
-        \code{y_start}/\code{y_end} for each \code{row}–\code{column} cell on
-        the row side and duplicate the x coordinate into \code{x1}/\code{x2}.
-  \item Join `.column_box` and `.interation_cell`, then call
-        \code{split_y_by_interaction(x_side = "xmin", var = "column")} to obtain
-        the analogous \code{y3}/\code{y4} and \code{x3}/\code{x4} for the column side.
-  \item Merge both sides, pivot the four vertex columns to long format, and
-        reconstruct (x, y) pairs for the 4 vertices.
-  \item Order each 4-point set counter-clockwise (\code{\link{order_ccw_df}}),
-        compute its area via the shoelace formula
-        (\code{\link{polygon_area_xy}}), then unnest.
+\item Join \code{.row_box} and \code{.interation_cell}, then call
+\code{split_y_by_interaction(x_side = "xmax", var = "row")} to obtain
+\code{y_start}/\code{y_end} for each \code{row}–\code{column} cell on
+the row side and duplicate the x coordinate into \code{x1}/\code{x2}.
+\item Join \code{.column_box} and \code{.interation_cell}, then call
+\code{split_y_by_interaction(x_side = "xmin", var = "column")} to obtain
+the analogous \code{y3}/\code{y4} and \code{x3}/\code{x4} for the column side.
+\item Merge both sides, pivot the four vertex columns to long format, and
+reconstruct (x, y) pairs for the 4 vertices.
+\item Order each 4-point set counter-clockwise (\code{\link{order_ccw_df}}),
+compute its area via the shoelace formula
+(\code{\link{polygon_area_xy}}), then unnest.
 }
 }
 \note{
@@ -71,36 +71,36 @@ No NA values are permitted in the polygon vertex coordinates.
 \section{Required inputs}{
 
 \describe{
-  \item{`.row_box`}{A tibble/data frame describing the \emph{row-side} boxes.
-    Must contain at least:
-    \itemize{
-      \item \code{row}: row identifier (key used to join with `.interation_cell`).
-      \item \code{x}: the x coordinate of the row-side vertical edge.
-      \item \code{xmin}/\code{xmax} (if present): \code{split_y_by_interaction()}
-            may use these; this function passes \code{x_side = "xmax"} when
-            splitting the row side.
-      \item \code{y} or precomputed vertical extents per row are not required;
-            they are produced by \code{split_y_by_interaction()}.
-      \item \code{interaction_size}: will be dropped if present.
-    }}
-  \item{`.column_box`}{A tibble/data frame describing the \emph{column-side}
-    boxes.
-    Must contain at least:
-    \itemize{
-      \item \code{column}: column identifier (key used to join).
-      \item \code{x}: the x coordinate of the column-side vertical edge.
-      \item \code{xmin}/\code{xmax} (if present): \code{split_y_by_interaction()}
-            may use these; this function passes \code{x_side = "xmin"} when
-            splitting the column side.
-      \item \code{interaction_size}: will be dropped if present.
-    }}
-  \item{`.interation_cell`}{(sic) A tibble/data frame of interaction cells with
-    at least \code{row}, \code{column}, and the per-cell "interaction size"
-    that \code{split_y_by_interaction()} uses to subdivide vertical spans.
-    (The original spelling \code{.interation_cell} is retained to match the
-    calling code.)}
-  \item{`.box1`, `.box2`}{Backward-compatible argument aliases. Prefer
-    \code{.row_box} and \code{.column_box}.}
+\item{\code{.row_box}}{A tibble/data frame describing the \emph{row-side} boxes.
+Must contain at least:
+\itemize{
+\item \code{row}: row identifier (key used to join with \code{.interation_cell}).
+\item \code{x}: the x coordinate of the row-side vertical edge.
+\item \code{xmin}/\code{xmax} (if present): \code{split_y_by_interaction()}
+may use these; this function passes \code{x_side = "xmax"} when
+splitting the row side.
+\item \code{y} or precomputed vertical extents per row are not required;
+they are produced by \code{split_y_by_interaction()}.
+\item \code{interaction_size}: will be dropped if present.
+}}
+\item{\code{.column_box}}{A tibble/data frame describing the \emph{column-side}
+boxes.
+Must contain at least:
+\itemize{
+\item \code{column}: column identifier (key used to join).
+\item \code{x}: the x coordinate of the column-side vertical edge.
+\item \code{xmin}/\code{xmax} (if present): \code{split_y_by_interaction()}
+may use these; this function passes \code{x_side = "xmin"} when
+splitting the column side.
+\item \code{interaction_size}: will be dropped if present.
+}}
+\item{\code{.interation_cell}}{(sic) A tibble/data frame of interaction cells with
+at least \code{row}, \code{column}, and the per-cell "interaction size"
+that \code{split_y_by_interaction()} uses to subdivide vertical spans.
+(The original spelling \code{.interation_cell} is retained to match the
+calling code.)}
+\item{\code{.box1}, \code{.box2}}{Backward-compatible argument aliases. Prefer
+\code{.row_box} and \code{.column_box}.}
 }
 }
 

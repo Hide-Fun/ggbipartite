@@ -21,6 +21,7 @@ Depends:
 Imports: 
     dplyr,
     ggtree,
+    lifecycle,
     magrittr,
     methods,
     purrr,
@@ -36,3 +37,4 @@ Suggests:
     quarto,
     RPANDA
 VignetteBuilder: quarto
+Roxygen: list(markdown = TRUE)

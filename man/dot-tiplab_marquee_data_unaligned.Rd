@@ -7,13 +7,15 @@
 .tiplab_marquee_data_unaligned(df, offset = 0)
 }
 \arguments{
-\item{df}{A data frame containing `isTip`, `x`, and `y`.}
+\item{df}{A data frame containing \code{isTip}, \code{x}, and \code{y}.}
 
 \item{offset}{Numeric scalar added to the label x-position.}
 }
 \value{
-A tip-only data frame with added `x_lab` column.
+A tip-only data frame with added \code{x_lab} column.
 }
 \description{
-Filters tip rows and computes `x_lab` by nudging each tip's own x-position.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
+Filters tip rows and computes \code{x_lab} by nudging each tip's own x-position.
 }

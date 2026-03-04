@@ -11,19 +11,19 @@ An object of class \code{GeomBipnetInteraction} (inherits from \code{GeomPolygon
 GeomBipnetInteraction
 }
 \description{
-`GeomBipnetInteraction` draws the polygons that connect the row and column
-boxes, using the `interaction_coords` computed by `StatBipnet`.
+\code{GeomBipnetInteraction} draws the polygons that connect the row and column
+boxes, using the \code{interaction_coords} computed by \code{StatBipnet}.
 }
 \section{Required aesthetics}{
 
-The stat requires `row`, `column`, and `count`. This geom itself consumes
-`x`, `y`, and `group` (provided by the stat).
+The stat requires \code{row}, \code{column}, and \code{count}. This geom itself consumes
+\code{x}, \code{y}, and \code{group} (provided by the stat).
 }
 
 \section{Aesthetics}{
 
 In addition to the required aesthetics, this geom understands:
-`fill`, `colour`, `linewidth`, `linetype`, and `alpha`.
+\code{fill}, \code{colour}, \code{linewidth}, \code{linetype}, and \code{alpha}.
 }
 
 \keyword{internal}

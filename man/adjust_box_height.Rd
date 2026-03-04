@@ -7,25 +7,25 @@
 adjust_box_height(.interaction, .nrow, .ncol, .gap)
 }
 \arguments{
-\item{.interaction}{Numeric scalar; the total mass (typically `sum(.mat)`).}
+\item{.interaction}{Numeric scalar; the total mass (typically \code{sum(.mat)}).}
 
-\item{.nrow, .ncol}{Positive integers; number of rows/columns in `.mat`.}
+\item{.nrow, .ncol}{Positive integers; number of rows/columns in \code{.mat}.}
 
 \item{.gap}{Baseline gap used for whichever box is treated as fixed.}
 }
 \value{
 A named list with elements:
 \itemize{
-  \item `.gap_row`: gap for the row-side box.
-  \item `.gap_column`: gap for the column-side box.
-  \item `.gap1` and `.gap2`: backward-compatible aliases.
+\item \code{.gap_row}: gap for the row-side box.
+\item \code{.gap_column}: gap for the column-side box.
+\item \code{.gap1} and \code{.gap2}: backward-compatible aliases.
 }
 If the two heights are already equal, the function only emits a message and
-returns `NULL`.
+returns \code{NULL}.
 }
 \description{
-Given the total mass (`.interaction`), matrix dimensions, and a baseline gap,
-compute per-side gaps (`.gap_row`, `.gap_column`) so that the total heights
+Given the total mass (\code{.interaction}), matrix dimensions, and a baseline gap,
+compute per-side gaps (\code{.gap_row}, \code{.gap_column}) so that the total heights
 for the two boxes are equal. If the heights are already equal, a message is
 emitted and no value is returned.
 }

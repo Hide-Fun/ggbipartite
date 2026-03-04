@@ -33,5 +33,6 @@ Imports:
 Suggests:
     ape,
     marquee,
-    quarto
+    quarto,
+    RPANDA
 VignetteBuilder: quarto

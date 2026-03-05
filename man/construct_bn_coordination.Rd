@@ -22,19 +22,19 @@ construct_bn_coordination(
 \item{.mat}{A numeric matrix of interactions; rows and columns represent the
 two node sets.}
 
-\item{.row}{A single string giving the key column name in `.metadata_row`
+\item{.row}{A single string giving the key column name in \code{.metadata_row}
 used to join row metadata to row identifiers.}
 
 \item{.column}{A single string giving the key column name in
-`.metadata_column` used to join column metadata to column identifiers.}
+\code{.metadata_column} used to join column metadata to column identifiers.}
 
 \item{.metadata_row}{Optional tibble/data frame of row-level metadata to join
-to the **row-side** box table (`row_box`). Must contain the column
-specified by `.row`.}
+to the \strong{row-side} box table (\code{row_box}). Must contain the column
+specified by \code{.row}.}
 
 \item{.metadata_column}{Optional tibble/data frame of column-level metadata to
-join to the **column-side** box table (`column_box`) and to
-`interaction_coords`. Must contain the column specified by `.column`.}
+join to the \strong{column-side} box table (\code{column_box}) and to
+\code{interaction_coords}. Must contain the column specified by \code{.column}.}
 
 \item{.x0, .y0}{Numeric scalars; global origin for the left/bottom corner of
 the first box.}
@@ -55,13 +55,13 @@ side are adjusted so that the total heights of the two sides match (uses
 \value{
 A named list with three components:
 \describe{
-  \item{\code{row_box}}{Tibble/data frame of row-side box coordinates.}
-  \item{\code{column_box}}{Tibble/data frame of column-side box coordinates.}
-  \item{\code{interaction_coords}}{Tibble/data frame of CCW-ordered polygon
-        vertices (\code{x}, \code{y}) for each \code{row}–\code{column}
-        interaction, including an \code{area} column.}
-  \item{\code{box1}, \code{box2}}{Backward-compatible aliases for
-        \code{row_box} and \code{column_box}.}
+\item{\code{row_box}}{Tibble/data frame of row-side box coordinates.}
+\item{\code{column_box}}{Tibble/data frame of column-side box coordinates.}
+\item{\code{interaction_coords}}{Tibble/data frame of CCW-ordered polygon
+vertices (\code{x}, \code{y}) for each \code{row}–\code{column}
+interaction, including an \code{area} column.}
+\item{\code{box1}, \code{box2}}{Backward-compatible aliases for
+\code{row_box} and \code{column_box}.}
 }
 }
 \description{
@@ -73,28 +73,28 @@ Optionally, row/column metadata can be joined onto the resulting frames.
 \details{
 Pipeline:
 \enumerate{
-  \item \code{\link{bipartite_network}()} produces row/column summaries and a
-        long-form interaction table.
-  \item \code{\link{calc_global_params}()} computes layout constants (box
-        positions, widths, and side-specific gaps).
-  \item \code{\link{compute_box_coords}()} builds the boxes for rows
-        (\code{.var = "row"}) and columns (\code{.var = "column"}).
-  \item \code{\link{compute_interaction_coords}()} constructs a 4-vertex
-        polygon for each nonzero interaction cell connecting the two sides.
+\item \code{\link{bipartite_network}()} produces row/column summaries and a
+long-form interaction table.
+\item \code{\link{calc_global_params}()} computes layout constants (box
+positions, widths, and side-specific gaps).
+\item \code{\link{compute_box_coords}()} builds the boxes for rows
+(\code{.var = "row"}) and columns (\code{.var = "column"}).
+\item \code{\link{compute_interaction_coords}()} constructs a 4-vertex
+polygon for each nonzero interaction cell connecting the two sides.
 }
 
 If metadata is supplied:
 \itemize{
-  \item When both row and column metadata are provided, they are left-joined
-        into \code{row_box}, \code{column_box}, and \code{interaction_coords}
-        (first columns, then rows for the latter).
-  \item When only one side is provided, it is joined to the corresponding box
-        table; \code{interaction_coords} is left unchanged.
+\item When both row and column metadata are provided, they are left-joined
+into \code{row_box}, \code{column_box}, and \code{interaction_coords}
+(first columns, then rows for the latter).
+\item When only one side is provided, it is joined to the corresponding box
+table; \code{interaction_coords} is left unchanged.
 }
 }
 \note{
 Row/column identifiers are coerced to character before joining metadata.
-Ensure that key values in the columns specified by `.row` and `.column`
+Ensure that key values in the columns specified by \code{.row} and \code{.column}
 match those character identifiers.
 
 The helper \code{compute_box_coords()} is expected to accept arguments
@@ -130,5 +130,5 @@ str(res$row_box); str(res$column_box); str(res$interaction_coords)
 }
 \seealso{
 \code{\link{bipartite_network}}, \code{\link{calc_global_params}},
-  \code{\link{compute_box_coords}}, \code{\link{compute_interaction_coords}}
+\code{\link{compute_box_coords}}, \code{\link{compute_interaction_coords}}
 }

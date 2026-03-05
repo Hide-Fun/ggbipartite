@@ -13,32 +13,38 @@ reconstruct_hetero_df(
 )
 }
 \arguments{
-\item{combined}{A tibble returned by `combine_hetero_df()`.}
+\item{combined}{A tibble returned by \code{combine_hetero_df()}.}
 
 \item{prefixes}{Optional character vector of prefixes to reconstruct.
-- If `NULL` (default): auto-detect from column names.
-- If supplied: only these prefixes are reconstructed (order preserved).}
+\itemize{
+\item If \code{NULL} (default): auto-detect from column names.
+\item If supplied: only these prefixes are reconstructed (order preserved).
+}}
 
 \item{separator}{String separator between prefix and original name
-(default `"__"`).}
+(default \code{"__"}).}
 
 \item{rows}{Optional integer vector of original row counts per prefix.
-- If named: matched by prefix name.
-- If unnamed: must have length equal to `length(prefixes)` and is
-  matched by position.
-When provided, `rows` overrides inference.}
+\itemize{
+\item If named: matched by prefix name.
+\item If unnamed: must have length equal to \code{length(prefixes)} and is
+matched by position.
+When provided, \code{rows} overrides inference.
+}}
 
-\item{drop_empty}{Logical; if `TRUE`, drop groups inferred to have 0 rows.
-Default `FALSE` (return 0-row tibbles).}
+\item{drop_empty}{Logical; if \code{TRUE}, drop groups inferred to have 0 rows.
+Default \code{FALSE} (return 0-row tibbles).}
 }
 \value{
 A named list of tibbles keyed by prefix.
 }
 \description{
-Split a combined tibble created by `combine_hetero_df()` back into a
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+Split a combined tibble created by \code{combine_hetero_df()} back into a
 named list of tibbles by parsing column name prefixes. Row counts are
 inferred by trimming trailing all-NA rows per prefix group, or can be
-explicitly provided via `rows`.
+explicitly provided via \code{rows}.
 }
 \examples{
 x <- list(

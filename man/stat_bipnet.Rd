@@ -48,38 +48,38 @@ the plot data. The return value must be a \code{data.frame}, and
 will be used as the layer data. A \code{function} can be created
 from a \code{formula} (e.g. \code{~ head(.x, 10)}).}
 
-\item{type}{One of `"row"`, `"column"`, or `"interaction"`. Backward-
-compatible aliases `"box1"` and `"box2"` are also accepted.}
+\item{type}{One of \code{"row"}, \code{"column"}, or \code{"interaction"}. Backward-
+compatible aliases \code{"box1"} and \code{"box2"} are also accepted.}
 
 \item{row_nm}{A single string giving the key column name in
-`metadata_row` used to join row metadata.}
+\code{metadata_row} used to join row metadata.}
 
 \item{column_nm}{A single string giving the key column name in
-`metadata_column` used to join column metadata.}
+\code{metadata_column} used to join column metadata.}
 
 \item{metadata_row}{Optional data frame with row metadata used by the stat.}
 
 \item{metadata_column}{Optional data frame with column metadata used by the stat.}
 
-\item{gap}{Spacing between the two partitions (see Details of `StatBipnet`).}
+\item{gap}{Spacing between the two partitions (see Details of \code{StatBipnet}).}
 
 \item{box_ratio}{Width of boxes relative to the interaction band.}
 
 \item{ratio}{Overall aspect ratio of the layout.}
 
-\item{interaction_type}{One of `"abundance"` or `"binary"` for interaction
+\item{interaction_type}{One of \code{"abundance"} or \code{"binary"} for interaction
 rendering.}
 
-\item{adjust_box_height}{If `TRUE`, scale box heights by totals.}
+\item{adjust_box_height}{If \code{TRUE}, scale box heights by totals.}
 
 \item{tip_positions_row}{Optional row-side tip positions. Accepts either:
-(1) a data frame with columns `label` and `y`, or (2) a tree object
-(`phylo`/ggtree) from which tip positions are extracted.}
+(1) a data frame with columns \code{label} and \code{y}, or (2) a tree object
+(\code{phylo}/ggtree) from which tip positions are extracted.}
 
 \item{tip_positions_column}{Optional column-side tip positions. Accepts the
-same formats as `tip_positions_row`.}
+same formats as \code{tip_positions_row}.}
 
-\item{geom}{Geom to use. Defaults to `"polygon"` for convenience.}
+\item{geom}{Geom to use. Defaults to \code{"polygon"} for convenience.}
 
 \item{position}{A position adjustment to use on the data for this layer. This
 can be used in various ways, including to prevent overplotting and
@@ -94,27 +94,27 @@ to use \code{position_jitter()}, give the position as \code{"jitter"}.
 \link[ggplot2:layer_positions]{layer position} documentation.
 }}
 
-\item{na.rm}{Logical indicating whether to drop `NA`s.}
+\item{na.rm}{Logical indicating whether to drop \code{NA}s.}
 
-\item{show.legend}{Passed to [ggplot2::layer()].}
+\item{show.legend}{Passed to \code{\link[ggplot2:layer]{ggplot2::layer()}}.}
 
 \item{inherit.aes}{Should default aesthetics be inherited.}
 
 \item{...}{Additional parameters passed to the stat/geom.}
 }
 \value{
-A ggplot2 layer using `StatBipnet`.
+A ggplot2 layer using \code{StatBipnet}.
 }
 \description{
-`stat_bipnet()` adds the computed coordinates for a bipartite
+\code{stat_bipnet()} adds the computed coordinates for a bipartite
 “box–interaction” layout to a plot. Use together with
-[geom_bipnet_box()] (for `"row"`/`"column"`) and
-[geom_bipnet_interaction()] (for `"interaction"`).
+\code{\link[=geom_bipnet_box]{geom_bipnet_box()}} (for \code{"row"}/\code{"column"}) and
+\code{\link[=geom_bipnet_interaction]{geom_bipnet_interaction()}} (for \code{"interaction"}).
 }
 \section{Aesthetics}{
 
-The stat requires mappings `row`, `column`, and `count`. Other aesthetics are
-handled by the chosen geom (e.g., `fill`, `colour`, `alpha`).
+The stat requires mappings \code{row}, \code{column}, and \code{count}. Other aesthetics are
+handled by the chosen geom (e.g., \code{fill}, \code{colour}, \code{alpha}).
 }
 
 \examples{

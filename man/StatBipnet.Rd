@@ -11,55 +11,55 @@ An object of class \code{StatBipnet} (inherits from \code{Stat}, \code{ggproto},
 StatBipnet
 }
 \value{
-A data frame of coordinates appropriate for the selected `type`.
+A data frame of coordinates appropriate for the selected \code{type}.
 }
 \description{
-`StatBipnet` computes the coordinates required to draw two sets of
+\code{StatBipnet} computes the coordinates required to draw two sets of
 rectangles (one for rows, one for columns) and the interaction polygons
-that connect them. It expects long-format input carrying `row`, `column`,
-and `count`, internally pivots to a matrix, and then delegates the geometry
-calculation to `construct_bn_coordination()`.
+that connect them. It expects long-format input carrying \code{row}, \code{column},
+and \code{count}, internally pivots to a matrix, and then delegates the geometry
+calculation to \code{construct_bn_coordination()}.
 }
 \details{
-If `gap` is not provided, a robust default is chosen as
-`sum(count, na.rm = TRUE) / 10`, falling back to `1` when the sum is not
-finite or non-positive. When `adjust_box_height = TRUE`, the vertical
+If \code{gap} is not provided, a robust default is chosen as
+\code{sum(count, na.rm = TRUE) / 10}, falling back to \code{1} when the sum is not
+finite or non-positive. When \code{adjust_box_height = TRUE}, the vertical
 extents of boxes are adjusted to reflect totals within each partition.
 
-The function `construct_bn_coordination()` must be available in scope and is
-expected to return a list with elements `row_box`, `column_box`, and
-`interaction_coords` containing the columns described above.
+The function \code{construct_bn_coordination()} must be available in scope and is
+expected to return a list with elements \code{row_box}, \code{column_box}, and
+\code{interaction_coords} containing the columns described above.
 }
 \section{Required aesthetics}{
 
 \describe{
-  \item{row}{Row key (character or factor).}
-  \item{column}{Column key (character or factor).}
-  \item{count}{Non-negative numeric weight for the row–column interaction.}
+\item{row}{Row key (character or factor).}
+\item{column}{Column key (character or factor).}
+\item{count}{Non-negative numeric weight for the row–column interaction.}
 }
 }
 
-\section{Output by `type`}{
+\section{Output by \code{type}}{
 
 \describe{
-  \item{`"row"`}{Rectangles for the row set with columns
-    `xmin`, `xmax`, `ymin`, `ymax`, plus `row`.}
-  \item{`"column"`}{Rectangles for the column set with columns
-    `xmin`, `xmax`, `ymin`, `ymax`, plus `column`.}
-  \item{`"interaction"`}{Polygons spanning the two boxes with columns
-    `x`, `y`, `row`, `column`, and a `group` id per interaction.}
-  \item{`"box1"`/`"box2"`}{Backward-compatible aliases for `"row"`/`"column"`.}
+\item{\code{"row"}}{Rectangles for the row set with columns
+\code{xmin}, \code{xmax}, \code{ymin}, \code{ymax}, plus \code{row}.}
+\item{\code{"column"}}{Rectangles for the column set with columns
+\code{xmin}, \code{xmax}, \code{ymin}, \code{ymax}, plus \code{column}.}
+\item{\code{"interaction"}}{Polygons spanning the two boxes with columns
+\code{x}, \code{y}, \code{row}, \code{column}, and a \code{group} id per interaction.}
+\item{\code{"box1"}/\code{"box2"}}{Backward-compatible aliases for \code{"row"}/\code{"column"}.}
 }
 }
 
 \section{Parameters handled}{
 
-`StatBipnet` honours the arguments accepted by [stat_bipnet()], including
-`type`, `metadata_row`, `metadata_column`, `gap`, `box_ratio`, `ratio`,
-`adjust_box_height`, `tip_positions_row`, `tip_positions_column`, and
-`na.rm`. These are validated in
-`StatBipnet$setup_params()` before being forwarded to
-`construct_bn_coordination()`.
+\code{StatBipnet} honours the arguments accepted by \code{\link[=stat_bipnet]{stat_bipnet()}}, including
+\code{type}, \code{metadata_row}, \code{metadata_column}, \code{gap}, \code{box_ratio}, \code{ratio},
+\code{adjust_box_height}, \code{tip_positions_row}, \code{tip_positions_column}, and
+\code{na.rm}. These are validated in
+\code{StatBipnet$setup_params()} before being forwarded to
+\code{construct_bn_coordination()}.
 }
 
 \keyword{internal}

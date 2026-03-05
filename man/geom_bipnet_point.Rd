@@ -38,7 +38,7 @@ the plot data. The return value must be a \code{data.frame}, and
 will be used as the layer data. A \code{function} can be created
 from a \code{formula} (e.g. \code{~ head(.x, 10)}).}
 
-\item{stat}{The stat to use. Defaults to `"bipnet"` (i.e., `StatBipnet`).}
+\item{stat}{The stat to use. Defaults to \code{"bipnet"} (i.e., \code{StatBipnet}).}
 
 \item{position}{A position adjustment to use on the data for this layer. This
 can be used in various ways, including to prevent overplotting and
@@ -54,15 +54,15 @@ to use \code{position_jitter()}, give the position as \code{"jitter"}.
 }}
 
 \item{tip_positions_row}{Optional row-side tip positions. Accepts either:
-(1) a data frame with columns `label` and `y`, or (2) a tree object
-(`phylo`/ggtree) from which tip positions are extracted.}
+(1) a data frame with columns \code{label} and \code{y}, or (2) a tree object
+(\code{phylo}/ggtree) from which tip positions are extracted.}
 
 \item{tip_positions_column}{Optional column-side tip positions. Accepts the
-same formats as `tip_positions_row`.}
+same formats as \code{tip_positions_row}.}
 
 \item{...}{Additional aesthetics passed to the geom/stat.}
 
-\item{na.rm}{Logical indicating whether to drop `NA`s.}
+\item{na.rm}{Logical indicating whether to drop \code{NA}s.}
 
 \item{show.legend}{logical. Should this layer be included in the legends?
 \code{NA}, the default, includes if any aesthetics are mapped.
@@ -78,11 +78,11 @@ that define both data and aesthetics and shouldn't inherit behaviour from
 the default plot specification, e.g. \code{\link[ggplot2:annotation_borders]{annotation_borders()}}.}
 }
 \value{
-A ggplot2 layer using `GeomBipnetPoint`.
+A ggplot2 layer using \code{GeomBipnetPoint}.
 }
 \description{
-Convenience layer to draw row (`type = "row"`) or column
-(`type = "column"`) points for binary-data style visualisation.
+Convenience layer to draw row (\code{type = "row"}) or column
+(\code{type = "column"}) points for binary-data style visualisation.
 }
 \examples{
 interaction_df <- tibble::tibble(
@@ -103,5 +103,5 @@ ggplot(interaction_df, aes(row = host, column = otu, count = is_present)) +
 
 }
 \seealso{
-[geom_bipnet_box()], [geom_bipnet_interaction()], [stat_bipnet()]
+\code{\link[=geom_bipnet_box]{geom_bipnet_box()}}, \code{\link[=geom_bipnet_interaction]{geom_bipnet_interaction()}}, \code{\link[=stat_bipnet]{stat_bipnet()}}
 }

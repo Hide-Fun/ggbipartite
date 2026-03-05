@@ -14,12 +14,12 @@ interaction magnitudes (e.g., counts, weights).}
 \value{
 A list with three tibbles:
 \itemize{
-  \item `rsf`: row-sum features with columns `row` (row index) and
-    `interaction_size` (sum over the row).
-  \item `csf`: column-sum features with columns `column` (column index) and
-    `interaction_size` (sum over the column).
-  \item `ilf`: long-form interactions as returned by [to_longer()], typically
-    containing row/column identifiers and a value column.
+\item \code{rsf}: row-sum features with columns \code{row} (row index) and
+\code{interaction_size} (sum over the row).
+\item \code{csf}: column-sum features with columns \code{column} (column index) and
+\code{interaction_size} (sum over the column).
+\item \code{ilf}: long-form interactions as returned by \code{\link[=to_longer]{to_longer()}}, typically
+containing row/column identifiers and a value column.
 }
 }
 \description{
@@ -29,20 +29,20 @@ the bipartite interaction matrix.
 \details{
 This function is a light-weight helper that:
 \enumerate{
-  \item Computes row totals via [base::rowSums()] and wraps them with
-    [tibble::enframe()].
-  \item Computes column totals via [base::colSums()] and wraps them with
-    [tibble::enframe()].
-  \item Delegates reshaping to a user- or package-provided [to_longer()]
-    helper that converts the matrix to a long tibble.
+\item Computes row totals via \code{\link[base:colSums]{base::rowSums()}} and wraps them with
+\code{\link[tibble:enframe]{tibble::enframe()}}.
+\item Computes column totals via \code{\link[base:colSums]{base::colSums()}} and wraps them with
+\code{\link[tibble:enframe]{tibble::enframe()}}.
+\item Delegates reshaping to a user- or package-provided \code{\link[=to_longer]{to_longer()}}
+helper that converts the matrix to a long tibble.
 }
 
-The function assumes that [to_longer()] is available in scope; if not,
-provide your own implementation that accepts `.mat` and returns a tibble.
+The function assumes that \code{\link[=to_longer]{to_longer()}} is available in scope; if not,
+provide your own implementation that accepts \code{.mat} and returns a tibble.
 }
 \section{Input validation}{
 
-Minimal checks are performed. For robust workflows, validate that `.mat` is a
+Minimal checks are performed. For robust workflows, validate that \code{.mat} is a
 numeric matrix (or coercible) and contains non-missing values as needed.
 }
 

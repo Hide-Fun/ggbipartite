@@ -10,16 +10,20 @@ combine_hetero_df(x, prefixes = NULL, separator = "__")
 \item{x}{A list of data frames / tibbles.}
 
 \item{prefixes}{Optional character vector of prefixes to use:
-* If `NULL` (default): use `names(x)`; if missing/empty, use "df1", "df2", ...
-* If unnamed: must have length `length(x)` and is matched by position.
-* If named: matched by names of `x`; order is ignored.}
+\itemize{
+\item If \code{NULL} (default): use \code{names(x)}; if missing/empty, use "df1", "df2", ...
+\item If unnamed: must have length \code{length(x)} and is matched by position.
+\item If named: matched by names of \code{x}; order is ignored.
+}}
 
-\item{separator}{String separator between prefix and column name (default `"__"`).}
+\item{separator}{String separator between prefix and column name (default \code{"__"}).}
 }
 \value{
 A tibble formed by prefixing and padding, then column-binding.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
 Column-binds a list of data frames / tibbles (possibly different row counts)
 after prefixing each element's columns. Returns a single tibble.
 }

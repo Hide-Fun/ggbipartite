@@ -9,12 +9,12 @@ matrix_to_tibble(.mat, .rowname = NULL)
 \arguments{
 \item{.mat}{A matrix or data-frame-like object.}
 
-\item{.rowname}{A single string for the row-name column. If `NULL`,
+\item{.rowname}{A single string for the row-name column. If \code{NULL},
 row names are not added.}
 }
 \value{
 A tibble. If \code{.rowname} is non-NULL, the tibble includes a
-  leading column with that name containing row names.
+leading column with that name containing row names.
 }
 \description{
 Wraps coercion to tibble with an option to preserve row names as a column.

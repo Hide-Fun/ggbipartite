@@ -10,14 +10,14 @@ to_longer(.mat, .rowname = "row")
 \item{.mat}{A matrix or data-frame-like object to be reshaped.}
 
 \item{.rowname}{A single string giving the column name to store row names.
-If `NULL`, row names are not added. Defaults to `"row"`.}
+If \code{NULL}, row names are not added. Defaults to \code{"row"}.}
 }
 \value{
 A tibble with columns:
 \itemize{
-  \item \code{.rowname} (if provided): original row identifiers
-  \item \code{column}: original column names
-  \item \code{interaction}: cell values (filtered to nonzero)
+\item \code{.rowname} (if provided): original row identifiers
+\item \code{column}: original column names
+\item \code{interaction}: cell values (filtered to nonzero)
 }
 }
 \description{
@@ -37,5 +37,5 @@ to_longer(m, .rowname = "row")
 
 }
 \seealso{
-[matrix_to_tibble()]
+\code{\link[=matrix_to_tibble]{matrix_to_tibble()}}
 }

@@ -7,14 +7,16 @@
 .tiplab_segment_data(df, offset = 0)
 }
 \arguments{
-\item{df}{A data frame containing at least `isTip`, `x`, and `y`.}
+\item{df}{A data frame containing at least \code{isTip}, \code{x}, and \code{y}.}
 
-\item{offset}{Numeric scalar passed to `.tiplab_align_x()`.}
+\item{offset}{Numeric scalar passed to \code{.tiplab_align_x()}.}
 }
 \value{
-A tip-only data frame with added `xend` and `yend` columns.
+A tip-only data frame with added \code{xend} and \code{yend} columns.
 }
 \description{
-Filters tip rows and adds `xend`/`yend` columns used by guide segments for
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
+Filters tip rows and adds \code{xend}/\code{yend} columns used by guide segments for
 aligned labels.
 }

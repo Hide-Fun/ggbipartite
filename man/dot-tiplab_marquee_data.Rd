@@ -7,13 +7,15 @@
 .tiplab_marquee_data(df, offset = 0)
 }
 \arguments{
-\item{df}{A data frame containing at least `isTip`, `x`, and `y`.}
+\item{df}{A data frame containing at least \code{isTip}, \code{x}, and \code{y}.}
 
-\item{offset}{Numeric scalar passed to `.tiplab_align_x()`.}
+\item{offset}{Numeric scalar passed to \code{.tiplab_align_x()}.}
 }
 \value{
-A tip-only data frame with added `x_lab` column.
+A tip-only data frame with added \code{x_lab} column.
 }
 \description{
-Filters tip rows and adds an aligned `x_lab` column used by marquee labels.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
+Filters tip rows and adds an aligned \code{x_lab} column used by marquee labels.
 }

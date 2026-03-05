@@ -1,7 +1,7 @@
 Package: ggbipartite
 Type: Package
 Title: Visualize Bipartite Networks with ggplot2
-Version: 0.9.2
+Version: 0.9.5
 Authors@R: c(
     person("Hidehito", "Okada", , "hidefungi@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3210-2736"))
@@ -21,6 +21,7 @@ Depends:
 Imports: 
     dplyr,
     ggtree,
+    lifecycle,
     magrittr,
     methods,
     purrr,
@@ -31,4 +32,9 @@ Imports:
     tidyselect,
     vctrs
 Suggests:
-    ape
+    ape,
+    marquee,
+    quarto,
+    RPANDA
+VignetteBuilder: quarto
+Roxygen: list(markdown = TRUE)

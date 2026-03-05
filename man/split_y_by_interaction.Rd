@@ -7,31 +7,35 @@
 split_y_by_interaction(df, x_side = c("xmin", "xmax"), var)
 }
 \arguments{
-\item{df}{A `data.frame`/`tibble` containing the required columns.}
+\item{df}{A \code{data.frame}/\code{tibble} containing the required columns.}
 
-\item{x_side}{One of `c("xmin","xmax")`. Chooses which side provides the x coordinate.}
+\item{x_side}{One of \code{c("xmin","xmax")}. Chooses which side provides the x coordinate.}
 
 \item{var}{Character scalar giving the column name to group by.}
 }
 \value{
-A `tibble` with all original columns plus:
-- `y_start`, `y_end`: start/end of the y-slice
-- `x`, `xend`: x-coordinates for vertical segments (`xend == x`)
-- `.input_row_id`: internal row ID to preserve global input order
+A \code{tibble} with all original columns plus:
+\itemize{
+\item \code{y_start}, \code{y_end}: start/end of the y-slice
+\item \code{x}, \code{xend}: x-coordinates for vertical segments (\code{xend == x})
+\item \code{.input_row_id}: internal row ID to preserve global input order
+}
 }
 \description{
-Splits the y-range `[ymin, ymax]` within groups defined by a single key column
-(`var`), proportionally to strictly positive `interaction` values. Computes
-`y_start`/`y_end` and adds `x`/`xend` for vertical segment drawing.
+Splits the y-range \verb{[ymin, ymax]} within groups defined by a single key column
+(\code{var}), proportionally to strictly positive \code{interaction} values. Computes
+\code{y_start}/\code{y_end} and adds \code{x}/\code{xend} for vertical segment drawing.
 }
 \details{
-- **Required columns**: the grouping key `var`, `xmin`, `xmax`, `ymin`, `ymax`, `interaction`.
-  An error is raised if any are missing.
-- **Validation**: `interaction` must be strictly positive (`> 0`) and non-missing for all rows.
-- **Grouping**: by the single provided key `var` only. Bounds (`xmin/xmax/ymin/ymax`)
-  are assumed to be fixed upstream and therefore excluded from grouping.
-- **Coordinates**: if `x_side == "xmin"`, set `x = xmin`; if `"xmax"`, set `x = xmax`;
-  in both cases `xend = x` (vertical segments).
+\itemize{
+\item \strong{Required columns}: the grouping key \code{var}, \code{xmin}, \code{xmax}, \code{ymin}, \code{ymax}, \code{interaction}.
+An error is raised if any are missing.
+\item \strong{Validation}: \code{interaction} must be strictly positive (\verb{> 0}) and non-missing for all rows.
+\item \strong{Grouping}: by the single provided key \code{var} only. Bounds (\code{xmin/xmax/ymin/ymax})
+are assumed to be fixed upstream and therefore excluded from grouping.
+\item \strong{Coordinates}: if \code{x_side == "xmin"}, set \code{x = xmin}; if \code{"xmax"}, set \code{x = xmax};
+in both cases \code{xend = x} (vertical segments).
+}
 }
 \examples{
 library(dplyr)
@@ -55,5 +59,5 @@ split_y_by_interaction(df, x_side = "xmax", var = "row")
 
 }
 \seealso{
-[dplyr::group_by()], [dplyr::arrange()]
+\code{\link[dplyr:group_by]{dplyr::group_by()}}, \code{\link[dplyr:arrange]{dplyr::arrange()}}
 }

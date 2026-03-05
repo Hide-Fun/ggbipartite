@@ -1,0 +1,272 @@
+---
+title: "学名付きの系統樹ラベルを整える"
+format:
+  html:
+    toc: true
+    number-sections: false
+    theme: Darkly
+execute:
+  echo: true
+  warning: false
+  message: false
+  fig-dpi: 350
+embed-resources: true
+vignette: >
+  %\VignetteIndexEntry{学名付きの系統樹ラベルを整える}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+この vignette では、学名付きラベルを読みやすく整形しつつ、
+`ggtree` で tip label を綺麗に配置する最小例を示します。
+
+学名部分はすべてダミーデータです。
+
+## 事前準備
+
+この章で使う主な関数:
+
+- `ggbipartite::style_tree_label()`: 学名ラベルを Markdown 形式で整形します。
+- `ggbipartite::format_node_support()`: node support 値を閾値で整形します。
+- `marquee::geom_marquee()`: Markdown ラベルを安定して描画します。
+- `ggbipartite::.tiplab_*()`: tip label の x 座標と補助線を計算します。
+
+```{r}
+#| label: setup
+library(tidyverse)
+library(ape)
+library(ggtree)
+library(marquee)
+library(ggbipartite)
+```
+
+## ダミー系統樹とラベルを用意する
+
+```{r}
+#| label: make-dummy-tree
+set.seed(20260305)
+
+tree_raw <- ape::rtree(10)
+tree_raw$tip.label <- c(
+  "Cortinarius-violaceus_AB123456.1",
+  "Laccaria-bicolor_MN234567.1",
+  "Russula-cyanoxantha_LC345678.1",
+  "mycobiont_of_Fagus-crenata_OrM_OTU1_Psathyrella",
+  "mycobiont_of_Quercus-crispula_OrM_OTU2_Tomentella",
+  "mycobiont_of_Betula-ermanii_OrM_OTU3_Thelephoraceae",
+  "Amanita-muscaria_OP456789.1",
+  "Clavulina-cinerea_PP567890.1",
+  "Inocybe-geophylla_QQ678901.1",
+  "Hebeloma-crustuliniforme_RR789012.1"
+)
+
+support_pool <- c(
+  "98/100", "95/99", "92/97", "88/96", "84/95",
+  "79/90", "70/86", "66/82", "61/80"
+)
+tree_raw$node.label <- support_pool[seq_len(tree_raw$Nnode)]
+
+tree_rooted <- ape::root(
+  phy = tree_raw,
+  outgroup = tree_raw$tip.label[1],
+  resolve.root = TRUE
+)
+```
+
+## 学名とサポート値を整形する
+
+```{r}
+#| label: style-labels
+tree_pretty <- tree_rooted
+
+tree_pretty$tip.label <- tree_rooted$tip.label |>
+  stringr::str_replace_all("_OrM_", "_(OrM)_") |>
+  stringr::str_remove("\\.1$") |>
+  ggbipartite::style_tree_label(last_taxon_rank = "genus")
+
+tree_pretty$node.label <- ggbipartite::format_node_support(
+  x = tree_rooted$node.label,
+  sh_alrt_cutoff = 80,
+  boot_cutoff = 95
+)
+
+label_preview <- tibble::tibble(
+  raw_label = tree_rooted$tip.label,
+  styled_label = tree_pretty$tip.label
+)
+
+label_preview
+```
+
+## align = FALSE: tipごとにラベルを寄せる
+
+```{r}
+#| label: unaligned-labels
+#| fig-width: 9
+#| fig-height: 5
+base_tree <- ggtree::ggtree(tree_pretty) +
+  ggtree::hexpand(ratio = 0.55)
+
+p_unaligned <- base_tree +
+  marquee::geom_marquee(
+    data = function(df) {
+      ggbipartite::.tiplab_marquee_data_unaligned(df = df, offset = 0)
+    },
+    aes(x = x_lab, y = y, label = label),
+    hjust = 0,
+    size = 3.2,
+    family = "Arial",
+    inherit.aes = FALSE
+  ) +
+  ggtree::geom_nodelab(
+    aes(label = label),
+    hjust = 1,
+    vjust = -0.4,
+    size = 2.6
+  ) +
+  coord_cartesian(clip = "off")
+
+p_unaligned
+```
+
+## align = TRUE: 補助線を付けて整列する
+
+```{r}
+#| label: aligned-labels
+#| fig-width: 9
+#| fig-height: 5
+p_aligned <- base_tree +
+  geom_segment(
+    data = function(df) {
+      ggbipartite::.tiplab_segment_data(df = df, offset = 0)
+    },
+    aes(x = x, xend = xend, y = y, yend = yend),
+    linetype = "dotted",
+    linewidth = 0.35,
+    colour = "grey45",
+    inherit.aes = FALSE
+  ) +
+  marquee::geom_marquee(
+    data = function(df) {
+      ggbipartite::.tiplab_marquee_data(df = df, offset = 0)
+    },
+    aes(x = x_lab, y = y, label = label),
+    hjust = 0,
+    size = 3.2,
+    family = "Arial",
+    inherit.aes = FALSE
+  ) +
+  ggtree::geom_nodelab(
+    aes(label = label),
+    hjust = 1,
+    vjust = -0.4,
+    size = 2.6
+  ) +
+  coord_cartesian(clip = "off")
+
+p_aligned
+```
+
+## tipラベルの見切れを防ぐ（expand + clip + margin）
+
+`hexpand()` だけでは、デバイス幅や長い学名によって
+tip ラベルが見切れることがあります。  
+次の 3 点を同時に使うと安定します。
+
+1. `ggtree::hexpand()` で x 方向の余白を増やす
+1. `coord_cartesian(clip = "off")` で描画領域外の切り取りを抑える
+1. `theme(plot.margin = margin(...))` で外側余白を追加する
+
+```{r}
+#| label: avoid-tip-label-clipping
+#| fig-width: 9
+#| fig-height: 5
+base_tree_tight <- ggtree::ggtree(tree_pretty)
+
+p_clipping_control <- base_tree_tight +
+    geom_segment(
+    data = function(df) {
+      ggbipartite::.tiplab_segment_data(df = df, offset = 0)
+    },
+    aes(x = x, xend = xend, y = y, yend = yend),
+    linetype = "dotted",
+    linewidth = 0.35,
+    colour = "grey45",
+    inherit.aes = FALSE
+  ) +
+  marquee::geom_marquee(
+    data = function(df) {
+      ggbipartite::.tiplab_marquee_data(df = df, offset = 0)
+    },
+    aes(x = x_lab, y = y, label = label),
+    hjust = 0,
+    size = 3.2,
+    family = "Arial",
+    inherit.aes = FALSE
+  ) +
+  ggtree::hexpand(ratio = 0.65) +
+  coord_cartesian(clip = "off") +
+  theme(
+    plot.margin = margin(t = 5.5, r = 60, b = 5.5, l = 5.5)
+  )
+
+p_clipping_control
+```
+
+## `scale_x_reverse()`で左右反転する
+
+右側パネル用に系統樹を反転したい場合は、`scale_x_reverse()` を
+最後に追加します。  
+反転後は tip ラベルが左側へ出るため、`hjust = 1` と左余白の追加が
+有効です。
+
+```{r}
+#| label: reversed-tree
+#| fig-width: 9
+#| fig-height: 5
+p_reversed <- ggtree::ggtree(tree_pretty) +
+  ggtree::hexpand(ratio = 0.55) +
+  geom_segment(
+    data = function(df) {
+      ggbipartite::.tiplab_segment_data(df = df, offset = 0)
+    },
+    aes(x = x, xend = xend, y = y, yend = yend),
+    linetype = "dotted",
+    linewidth = 0.35,
+    colour = "grey45",
+    inherit.aes = FALSE
+  ) +
+  marquee::geom_marquee(
+    data = function(df) {
+      ggbipartite::.tiplab_marquee_data(df = df, offset = 0)
+    },
+    aes(x = x_lab, y = y, label = label),
+    hjust = 1,
+    size = 3.2,
+    family = "Arial",
+    inherit.aes = FALSE
+  ) +
+  ggtree::geom_nodelab(
+    aes(label = label),
+    hjust = 0,
+    vjust = -0.4,
+    size = 2.6
+  ) +
+  coord_cartesian(clip = "off") +
+  scale_x_reverse() +
+  theme(
+    plot.margin = margin(t = 5.5, r = 5.5, b = 5.5, l = 60)
+  )
+
+p_reversed
+```
+
+## 実務メモ
+
+- `style_tree_label()` の前に、`_OrM_` のような記号を
+  先に `str_replace_all()` で揃えると整形が安定します。
+- support 値は `format_node_support()` で閾値を固定しておくと、
+  図間比較時の解釈がぶれにくくなります。
+- `offset` を小さく調整すると、狭い図幅でもラベル同士の衝突を減らせます。
+- 反転パネルでは `scale_x_reverse()` と `hjust = 1` をセットで調整すると、
+  ラベルの位置合わせが安定します。

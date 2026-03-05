@@ -1,5 +1,8 @@
 #' Prepare Marquee Label Data Without Alignment
 #'
+#' @description
+#' `r lifecycle::badge("experimental")`
+#'
 #' Filters tip rows and computes `x_lab` by nudging each tip's own x-position.
 #'
 #' @param df A data frame containing `isTip`, `x`, and `y`.

@@ -14,14 +14,14 @@ adjust_tree(
 )
 }
 \arguments{
-\item{.phylo}{phylogenetic tree (`phylo`).}
+\item{.phylo}{phylogenetic tree (\code{phylo}).}
 
-\item{.box}{data.frame containing numeric `ymin` and `ymax` columns.}
+\item{.box}{data.frame containing numeric \code{ymin} and \code{ymax} columns.}
 
 \item{.adjust}{numeric scalar. Horizontal expansion factor (x only).}
 
-\item{.adjust_tip_position}{logical scalar. If `TRUE`, map tree tips to box
-centre y positions using matched labels (`row`/`column`/`label`).}
+\item{.adjust_tip_position}{logical scalar. If \code{TRUE}, map tree tips to box
+centre y positions using matched labels (\code{row}/\code{column}/\code{label}).}
 
 \item{.tree_position}{character, one of c("left", "right").}
 
@@ -29,14 +29,14 @@ centre y positions using matched labels (`row`/`column`/`label`).}
 }
 \value{
 A ggplot object (ggtree) with nodes/edges only (no tip labels),
-        vertically fit to `.box` (or tip-matched when requested), and
-        horizontally scaled by `.adjust`.
+vertically fit to \code{.box} (or tip-matched when requested), and
+horizontally scaled by \code{.adjust}.
 }
 \description{
 Scales a phylogenetic tree drawn by ggtree so that the vertical (y) extent
 fits exactly into a target box (.box$ymin ~ .box$ymax). Tip labels are NOT
-drawn. The horizontal (x) scale is expanded by `.adjust` relative to the
+drawn. The horizontal (x) scale is expanded by \code{.adjust} relative to the
 base uniform scale derived from the y-fit (aspect preserved, then widened).
-When `.adjust_tip_position = TRUE`, tree tip y positions are matched to the
-box-centre y positions (`(ymin + ymax) / 2`) by label.
+When \code{.adjust_tip_position = TRUE}, tree tip y positions are matched to the
+box-centre y positions (\code{(ymin + ymax) / 2}) by label.
 }

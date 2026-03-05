@@ -1,5 +1,8 @@
 #' Prepare Marquee Label Data for Aligned Labels
 #'
+#' @description
+#' `r lifecycle::badge("experimental")`
+#'
 #' Filters tip rows and adds an aligned `x_lab` column used by marquee labels.
 #'
 #' @param df A data frame containing at least `isTip`, `x`, and `y`.

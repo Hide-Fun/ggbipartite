@@ -1,5 +1,8 @@
 #' Prepare Tip Segment Data for Aligned Labels
 #'
+#' @description
+#' `r lifecycle::badge("experimental")`
+#'
 #' Filters tip rows and adds `xend`/`yend` columns used by guide segments for
 #' aligned labels.
 #'

@@ -7,12 +7,12 @@
 get_tip_order(x)
 }
 \arguments{
-\item{x}{A tree-like object accepted by `.extract_tree_data()`.}
+\item{x}{A tree-like object accepted by \code{.extract_tree_data()}.}
 }
 \value{
 A character vector of unique tip labels.
 }
 \description{
-Extracts tip labels from tree data and returns them ordered by `y` position
+Extracts tip labels from tree data and returns them ordered by \code{y} position
 and then by label.
 }

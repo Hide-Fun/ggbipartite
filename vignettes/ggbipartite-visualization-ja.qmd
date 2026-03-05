@@ -1,0 +1,891 @@
+---
+title: "ggbipartiteで始める二部ネットワーク可視化"
+format:
+  html:
+    toc: true
+    number-sections: false
+    theme: Darkly
+execute:
+  echo: true
+  warning: false
+  message: false
+  fig-dpi: 350
+embed-resources: true
+vignette: >
+  %\VignetteIndexEntry{ggbipartiteで始める二部ネットワーク可視化}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+この vignette は、`ggbipartite` を使った二部ネットワーク可視化を
+初心者向けに段階的に解説します。
+
+最終的に、次の 4 パターンを自分のデータで再現できる状態を目指します。
+
+1. abundance（量）を反映した基本可視化
+1. メタデータに基づく色分け
+1. binary（有無）に特化した可視化
+1. 系統樹とネットワークの対応づけ
+
+## 事前準備
+
+
+```{r}
+#| label: setup
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(tibble)
+library(ape)
+library(ggtree)
+library(ggbipartite)
+```
+
+## まず系統樹を可視化して全体像を掴む
+
+この章で使う主な関数:
+
+- `ape::rtree()`: 例示用のランダム系統樹を生成します。
+- `ggtree::ggtree()`: 系統樹を `ggplot` オブジェクトとして描画します。
+- `ggtree::geom_tiplab()`: tip ラベルを表示します。
+- `patchwork::plot_layout()`: 2つの tree を横並びで表示します。
+
+最初に `host_phylo` と `symbiont_phylo` を単体で描くと、
+「左右どちらがどの生物群か」をイメージしやすくなります。
+
+```{r}
+#| label: tree-overview
+#| fig-width: 12
+#| fig-height: 4
+set.seed(123)
+
+host_phylo <- ape::rtree(8)
+host_phylo$tip.label <- LETTERS[1:8]
+
+symbiont_phylo <- ape::rtree(5)
+symbiont_phylo$tip.label <- sprintf("otu_%d", 1:5)
+
+p_host_tree <- ggtree::ggtree(host_phylo) +
+  ggtree::geom_tiplab(size = 3) +
+  labs(title = "Host phylogeny")
+
+p_symbiont_tree <- ggtree::ggtree(symbiont_phylo) +
+  ggtree::geom_tiplab(size = 3) +
+  labs(title = "Symbiont phylogeny")
+
+if (requireNamespace("patchwork", quietly = TRUE)) {
+  p_host_tree +
+    p_symbiont_tree +
+    patchwork::plot_layout(nrow = 1)
+} else {
+  p_host_tree
+  p_symbiont_tree
+}
+```
+
+## 相互作用行列を作り、系統樹の順序に合わせる
+
+この章で使う主な関数:
+
+- `ggbipartite::get_tip_order()`: tree 上の y 順に tip ラベル順を取得します。
+- `base::factor(levels = ...)`: host / symbiont の表示順を固定します。
+- `dplyr::arrange()` と `dplyr::relocate()`: 行列化前の表を順序どおりに並べます。
+- `tibble::column_to_rownames()`: host 列を行名へ変換して行列化します。
+
+`ggbipartite` では、行列の行順・列順がレイアウトに直接影響します。  
+そのため、系統樹と対応させる場合は以下の 2 点が重要です。
+
+1. `factor(levels = ...)` で表示順を明示する
+1. 行列をその順序でソートしてから可視化に使う
+
+```{r}
+#| label: matrix-alignment
+host_order <- get_tip_order(host_phylo) |> rev()
+symbiont_order <- get_tip_order(symbiont_phylo) |> rev()
+
+interaction_tbl <- tibble::tibble(
+  host = LETTERS[1:8],
+  otu_1 = c(40, 0, 20, 0, 5, 0, 8, 1),
+  otu_2 = c(0, 9, 1, 4, 0, 2, 0, 0),
+  otu_3 = c(10, 0, 0, 3, 4, 0, 1, 7),
+  otu_4 = c(1, 0, 12, 0, 0, 6, 0, 0),
+  otu_5 = c(0, 2, 0, 1, 8, 0, 0, 3)
+)
+
+interaction_matrix <- interaction_tbl |>
+  dplyr::arrange(factor(host, levels = host_order)) |>
+  dplyr::relocate(host, dplyr::all_of(symbiont_order)) |>
+  tibble::column_to_rownames(var = "host") |>
+  as.matrix()
+
+metadata_row <- tibble::tibble(
+  host = rownames(interaction_matrix),
+  family = c(
+    "Fagaceae", "Fagaceae", "Rosaceae", "Rosaceae",
+    "Fabaceae", "Fabaceae", "Betulaceae", "Betulaceae"
+  )
+)
+
+metadata_column <- tibble::tibble(
+  symbiont = colnames(interaction_matrix),
+  guild = c("AMF", "AMF", "ECM", "ECM", "Unknown")
+)
+
+interaction_matrix
+```
+
+## long 形式へ変換し `row`, `column`, `count` を理解する
+
+この章で使う主な関数:
+
+- `ggbipartite::to_longer()`: 行列を long 形式へ変換します（0 は除外）。
+- `dplyr::rename()` と `dplyr::mutate()`: `count` 列名と因子順を整えます。
+- `ggbipartite` の主要 geoms は `row`, `column`, `count` を必須入力として使います。
+
+`ggplot()` に渡すときは、最低限 `row`, `column`, `count` を使います。
+
+1. `row`: 左側ノードID（この vignette では host）
+1. `column`: 右側ノードID（この vignette では symbiont/otu）
+1. `count`: 相互作用の強さ（カウント、重み）
+
+```{r}
+#| label: to-long
+interaction_df <- to_longer(interaction_matrix, .rowname = "row") |>
+  dplyr::rename(count = interaction) |>
+  dplyr::mutate(
+    row = factor(row, levels = rownames(interaction_matrix)),
+    column = factor(column, levels = colnames(interaction_matrix))
+  )
+
+dplyr::glimpse(interaction_df)
+```
+
+原理的には、行列と系統樹の左右対応が保たれていれば
+`row` / `column` を逆に定義しても描画は可能です。  
+ただし実務では混乱を避けるため、最初に
+「row をどちら側とみなすか」を固定することを推奨します。
+
+## abundance の基本可視化
+
+この章で使う主な関数:
+
+- `ggbipartite::geom_bipnet_box()`: row / column 側のボックスを描きます。
+- `ggbipartite::geom_bipnet_interaction()`: 相互作用ポリゴンを描きます。
+- `ggbipartite::stat_bipnet()`:
+`geom_bipnet_*()` から内部的に呼ばれ、座標計算を行います。
+
+```{r}
+#| label: abundance-basic
+#| fig-width: 9
+#| fig-height: 5
+gap_value <- sum(interaction_matrix) / 12
+
+p_abundance <- ggplot(
+  interaction_df,
+  aes(row = row, column = column, count = count)
+) +
+  geom_bipnet_box(
+    type = "row",
+    gap = gap_value,
+    fill = "grey85",
+    colour = "grey30",
+    linewidth = 0.2
+  ) +
+  geom_bipnet_box(
+    type = "column",
+    gap = gap_value,
+    fill = "#2C3E50",
+    colour = "grey10",
+    linewidth = 0.2
+  ) +
+  geom_bipnet_interaction(
+    gap = gap_value,
+    alpha = 0.55,
+    linewidth = 0.15,
+    show.legend = FALSE
+  ) +
+  theme_void()
+
+p_abundance
+```
+
+`gap` を未指定にすると `stat_bipnet()` が自動で値を選びます
+（`sum(count) / 10`、非正の場合は `1`）。  
+再現性の観点では、`gap` は明示指定するのが安全です。
+
+補足: `geom_bipnet_interaction()` では `type = "interaction"` が既定なので、
+通常は省略できます（上のコードも省略形です）。
+
+## メタデータで色分けする
+
+この章で使う主な関数:
+
+- `ggbipartite::geom_bipnet_box()`: row / column のメタデータ色分けに使います。
+- `ggbipartite::geom_bipnet_interaction()`: 連結部もメタデータで色分けできます。
+- `ggbipartite::geom_bipnet_point()`: binary 表示時のノード色分けに使えます。
+- `ggplot2::after_stat()`: `stat_bipnet()` が後段で付与する列を参照します。
+
+`row` 側だけでなく `column` 側でも同様に色分けできます。  
+さらに同じ考え方で `geom_bipnet_point()` と
+`geom_bipnet_interaction()` でも色分け可能です。
+
+`after_stat()` を使う理由は、`metadata_row` / `metadata_column` の列が
+`stat_bipnet()` の計算後にデータへ結合されるためです。
+つまり元データ `interaction_df` には存在しない列を
+審美属性に使うには `after_stat()` が必要になります。
+
+```{r}
+#| label: metadata-coloring
+#| fig-width: 10
+#| fig-height: 5
+p_metadata <- ggplot(
+  interaction_df,
+  aes(row = row, column = column, count = count)
+) +
+  geom_bipnet_box(
+    aes(fill = after_stat(family)),
+    type = "row",
+    row_nm = "host",
+    metadata_row = metadata_row,
+    gap = gap_value,
+    linewidth = 0.2
+  ) +
+  geom_bipnet_box(
+    aes(fill = after_stat(guild)),
+    type = "column",
+    column_nm = "symbiont",
+    metadata_column = metadata_column,
+    gap = gap_value,
+    linewidth = 0.2
+  ) +
+  geom_bipnet_interaction(
+    aes(fill = after_stat(guild)),
+    column_nm = "symbiont",
+    metadata_column = metadata_column,
+    gap = gap_value,
+    alpha = 0.35,
+    linewidth = 0.1,
+    colour = NA,
+    show.legend = FALSE
+  ) +
+  theme_void() +
+  labs(fill = "Row/Column metadata")
+
+p_metadata
+```
+
+`geom_bipnet_point()` でも同じ発想で色付けできます。
+
+```{r}
+#| label: metadata-coloring-point
+#| eval: false
+binary_matrix <- (interaction_matrix > 0) * 1L
+
+binary_df <- to_longer(binary_matrix, .rowname = "row") |>
+  dplyr::rename(count = interaction) |>
+  dplyr::mutate(
+    row = factor(row, levels = rownames(binary_matrix)),
+    column = factor(column, levels = colnames(binary_matrix))
+  )
+
+ggplot(binary_df, aes(row = row, column = column, count = count)) +
+  geom_bipnet_point(
+    aes(fill = after_stat(family)),
+    type = "row",
+    row_nm = "host",
+    metadata_row = metadata_row
+  ) +
+  geom_bipnet_point(
+    aes(fill = after_stat(guild)),
+    type = "column",
+    column_nm = "symbiont",
+    metadata_column = metadata_column
+  )
+```
+
+## レイアウトパラメータを調整する
+
+この章で使う主な関数:
+
+- `ggbipartite::geom_bipnet_box()`:
+`gap`, `box_ratio`, `ratio`, `adjust_box_height` を渡せます。
+- `ggbipartite::geom_bipnet_interaction()`:
+同じレイアウト引数を共有し、各レイヤーの整合を保ちます。
+- `ggbipartite::stat_bipnet()`: 指定パラメータに基づいて座標を再計算します。
+
+`box_ratio`, `ratio`, `adjust_box_height` は次を調整します。
+
+1. `box_ratio`:
+`sum(count) / box_ratio` でボックス幅を決める。値を大きくするとボックスは細くなる。
+1. `ratio`:
+全体の横方向スケールに影響する。値を小さくすると左右の間隔は広がる傾向がある。
+1. `adjust_box_height`:
+`TRUE` で row 側と column 側の総高さを揃えるよう gap を再調整する。
+
+```{r}
+#| label: abundance-layout-tuning
+#| fig-width: 9
+#| fig-height: 5
+p_abundance_tuned <- ggplot(
+  interaction_df,
+  aes(row = row, column = column, count = count)
+) +
+  geom_bipnet_box(
+    type = "row",
+    gap = sum(interaction_matrix) / 10,
+    box_ratio = 6,
+    ratio = 0.75,
+    adjust_box_height = TRUE,
+    fill = "grey85",
+    linewidth = 0.2
+  ) +
+  geom_bipnet_box(
+    type = "column",
+    gap = sum(interaction_matrix) / 10,
+    box_ratio = 6,
+    ratio = 0.75,
+    adjust_box_height = TRUE,
+    fill = "#2C3E50",
+    linewidth = 0.2
+  ) +
+  geom_bipnet_interaction(
+    gap = sum(interaction_matrix) / 10,
+    box_ratio = 6,
+    ratio = 0.75,
+    adjust_box_height = TRUE,
+    alpha = 0.5,
+    linewidth = 0.15,
+    show.legend = FALSE
+  ) +
+  coord_equal() +
+  theme_void()
+
+p_abundance_tuned
+```
+
+## binary（有無）表示に切り替える
+
+この章で使う主な関数:
+
+- `ggbipartite::to_longer()`: binary 行列を long 形式へ変換します。
+- `ggbipartite::geom_bipnet_interaction(interaction_type = "binary")`:
+相互作用を線分として描きます。
+- `ggbipartite::geom_bipnet_point()`: row / column ノードを点として描きます。
+
+接続の「強さ」ではなく「存在/非存在」を見たい場合は
+`interaction_type = "binary"` を使います。
+
+```{r}
+#| label: binary-plot
+#| fig-width: 9
+#| fig-height: 5
+binary_matrix <- (interaction_matrix > 0) * 1L
+
+binary_df <- to_longer(binary_matrix, .rowname = "row") |>
+  dplyr::rename(count = interaction) |>
+  dplyr::mutate(
+    row = factor(row, levels = rownames(binary_matrix)),
+    column = factor(column, levels = colnames(binary_matrix))
+  )
+
+binary_gap <- sum(binary_matrix) / 10
+
+p_binary <- ggplot(
+  binary_df,
+  aes(row = row, column = column, count = count)
+) +
+  geom_bipnet_interaction(
+    interaction_type = "binary",
+    gap = binary_gap,
+    linewidth = 0.45,
+    alpha = 0.7,
+    show.legend = FALSE
+  ) +
+  geom_bipnet_point(
+    type = "row",
+    gap = binary_gap,
+    fill = "steelblue",
+    size = 2.4
+  ) +
+  geom_bipnet_point(
+    type = "column",
+    gap = binary_gap,
+    fill = "navy",
+    size = 2.4
+  ) +
+  coord_equal() +
+  theme_void()
+
+p_binary
+```
+
+## `construct_bn_coordination()` でラベル注釈する
+
+この章で使う主な関数:
+
+- `ggbipartite::construct_bn_coordination()`:
+row_box / column_box / interaction 座標を明示的に作成します。
+- `ggbipartite::compute_box_label_coords()`:
+ボックス外側ラベルの代表座標を算出します。
+- `ggplot2::annotate()`: 算出座標を使ってテキスト注釈を描きます。
+
+`construct_bn_coordination()` は通常、
+`geom_bipnet_*()` が内部で呼び出している座標計算関数です。  
+ふだんは直接呼ぶ必要はありませんが、
+ラベル座標や外部図形（リンク線など）を自作するときには有用です。
+
+```{r}
+#| label: label-annotation
+#| fig-width: 10
+#| fig-height: 5
+bn_coords <- construct_bn_coordination(
+  .mat = interaction_matrix,
+  .row = "host",
+  .column = "symbiont",
+  .metadata_row = metadata_row,
+  .metadata_column = metadata_column,
+  .gap = gap_value
+)
+
+label_row <- compute_box_label_coords(
+  .box = bn_coords$row_box,
+  .by = "row",
+  .side = "row"
+)
+
+label_column <- compute_box_label_coords(
+  .box = bn_coords$column_box,
+  .by = "column",
+  .side = "column"
+)
+
+x_span <- diff(range(c(label_row$x, label_column$x)))
+label_offset <- x_span * 0.03
+
+ggplot(
+  interaction_df,
+  aes(row = row, column = column, count = count)
+) +
+  geom_bipnet_box(type = "row", gap = gap_value, fill = "grey85", linewidth = 0.2) +
+  geom_bipnet_box(type = "column", gap = gap_value, fill = "#2C3E50", linewidth = 0.2) +
+  geom_bipnet_interaction(
+    gap = gap_value,
+    alpha = 0.5,
+    linewidth = 0.15,
+    show.legend = FALSE
+  ) +
+  annotate(
+    geom = "text",
+    x = label_row$x - label_offset,
+    y = label_row$y,
+    label = label_row$row,
+    hjust = 1,
+    size = 3
+  ) +
+  annotate(
+    geom = "text",
+    x = label_column$x + label_offset,
+    y = label_column$y,
+    label = label_column$column,
+    hjust = 0,
+    size = 3
+  ) +
+  coord_equal(clip = "off") +
+  theme_void()
+```
+
+## 系統樹とネットワークを対応づける
+
+この章で使う主な関数:
+
+- `ggbipartite::adjust_tree()`: tree の y スケールをボックスに合わせます。
+- `ggbipartite::create_link()`: ボックス中心と tip を結ぶリンク座標を作ります。
+- `ggbipartite::get_yrange()`: 複数パネルの y 範囲を共通化します。
+- `ggtree::geom_tiplab()`: tip ラベル（通常版と `align = TRUE` 版）を描きます。
+
+ここでは次の 3 関数を連携させます。
+
+1. `adjust_tree()`: 系統樹の y スケールをボックスに合わせる
+1. `create_link()`: ボックス中心と tip を結ぶリンク座標を作る
+1. `get_yrange()`: 複数パネルの y 範囲を揃える
+
+```{r}
+#| label: tree-link-setup
+t_row <- adjust_tree(
+  .phylo = host_phylo,
+  .box = bn_coords$row_box,
+  .tree_position = "left",
+  .adjust = 1
+) +
+  ggtree::geom_tiplab(size = 3)
+
+t_column <- adjust_tree(
+  .phylo = symbiont_phylo,
+  .box = bn_coords$column_box,
+  .tree_position = "right",
+  .adjust = 1
+) +
+  ggtree::geom_tiplab(hjust = 1, size = 3)
+
+link_row <- create_link(
+  box = bn_coords$row_box,
+  ggtree = t_row,
+  side = "row",
+  x = 1,
+  xend = 0
+)
+
+link_column <- create_link(
+  box = bn_coords$column_box,
+  ggtree = t_column,
+  side = "column",
+  x = 0,
+  xend = 1
+)
+
+p_link_row <- ggplot(link_row) +
+  geom_segment(
+    aes(x = x, y = y1, xend = xend, yend = y2, group = row),
+    linetype = "dotted",
+    linewidth = 0.4
+  ) +
+  theme_void()
+
+p_link_column <- ggplot(link_column) +
+  geom_segment(
+    aes(x = x, y = y1, xend = xend, yend = y2, group = column),
+    linetype = "dotted",
+    linewidth = 0.4
+  ) +
+  theme_void()
+
+ylim_common <- range(
+  c(get_yrange(t_row), get_yrange(t_column), get_yrange(p_abundance)),
+  na.rm = TRUE
+)
+
+scale_y_common <- scale_y_continuous(
+  limits = ylim_common,
+  expand = expansion(mult = 0)
+)
+
+t_row <- t_row + scale_y_common
+t_column <- t_column + scale_y_common
+p_link_row <- p_link_row + scale_y_common
+p_link_column <- p_link_column + scale_y_common
+p_abundance_aligned <- p_abundance + scale_y_common
+```
+
+```{r}
+#| label: tree-link-display
+#| fig-width: 14
+#| fig-height: 5
+if (requireNamespace("patchwork", quietly = TRUE)) {
+  t_row +
+    p_link_row +
+    p_abundance_aligned +
+    p_link_column +
+    t_column +
+    patchwork::plot_layout(nrow = 1, widths = c(1, 0.25, 1, 0.25, 1))
+} else {
+  t_row
+  p_link_row
+  p_abundance_aligned
+  p_link_column
+  t_column
+}
+```
+
+上記のバリエーションとして、tip ラベルを `align = TRUE` で描く版も
+用意できます。tip ラベルの x 位置が揃うため、ラベル列の視認性が上がります。
+
+```{r}
+#| label: tree-link-align-setup
+t_row_align <- adjust_tree(
+  .phylo = host_phylo,
+  .box = bn_coords$row_box,
+  .tree_position = "left",
+  .adjust = 1
+) +
+  ggtree::geom_tiplab(
+    align = TRUE,
+    linetype = "dotted",
+    size = 3
+  )
+
+t_column_align <- adjust_tree(
+  .phylo = symbiont_phylo,
+  .box = bn_coords$column_box,
+  .tree_position = "right",
+  .adjust = 1
+) +
+  ggtree::geom_tiplab(
+    align = TRUE,
+    linetype = "dotted",
+    hjust = 1,
+    size = 3
+  )
+
+link_row_align <- create_link(
+  box = bn_coords$row_box,
+  ggtree = t_row_align,
+  side = "row",
+  x = 1,
+  xend = 0
+)
+
+link_column_align <- create_link(
+  box = bn_coords$column_box,
+  ggtree = t_column_align,
+  side = "column",
+  x = 0,
+  xend = 1
+)
+
+p_link_row_align <- ggplot(link_row_align) +
+  geom_segment(
+    aes(x = x, y = y1, xend = xend, yend = y2, group = row),
+    linetype = "dotted",
+    linewidth = 0.4
+  ) +
+  theme_void()
+
+p_link_column_align <- ggplot(link_column_align) +
+  geom_segment(
+    aes(x = x, y = y1, xend = xend, yend = y2, group = column),
+    linetype = "dotted",
+    linewidth = 0.4
+  ) +
+  theme_void()
+
+ylim_common_align <- range(
+  c(
+    get_yrange(t_row_align),
+    get_yrange(t_column_align),
+    get_yrange(p_abundance)
+  ),
+  na.rm = TRUE
+)
+
+scale_y_common_align <- scale_y_continuous(
+  limits = ylim_common_align,
+  expand = expansion(mult = 0)
+)
+
+t_row_align <- t_row_align + scale_y_common_align
+t_column_align <- t_column_align + scale_y_common_align
+p_link_row_align <- p_link_row_align + scale_y_common_align
+p_link_column_align <- p_link_column_align + scale_y_common_align
+p_abundance_align <- p_abundance + scale_y_common_align
+```
+
+```{r}
+#| label: tree-link-align-display
+#| fig-width: 14
+#| fig-height: 5
+if (requireNamespace("patchwork", quietly = TRUE)) {
+  t_row_align +
+    p_link_row_align +
+    p_abundance_align +
+    p_link_column_align +
+    t_column_align +
+    patchwork::plot_layout(nrow = 1, widths = c(1, 0.25, 1, 0.25, 1))
+} else {
+  t_row_align
+  p_link_row_align
+  p_abundance_align
+  p_link_column_align
+  t_column_align
+}
+```
+
+## 応用編: 系統樹スケールを維持した可視化
+
+この章で使う主な関数:
+
+- `ggbipartite::geom_bipnet_interaction()`:
+`tip_positions_row/column` で tree 由来 y 座標に合わせます。
+- `ggbipartite::geom_bipnet_point()`:
+binary ノード位置を同じ tip 座標へ固定します。
+- `ggbipartite::get_yrange()`: tree と network の y 範囲を共通化します。
+- `ggtree::ggtree()`: tip 座標テーブル（`label`, `y`）抽出に使います。
+
+前節では `adjust_tree()` で系統樹をネットワーク側のスケールに合わせました。  
+ここでは逆に、系統樹の tip の y 座標を基準にして
+ネットワーク側を合わせる方法を示します。この場合は link が不要です。
+また、abundance の場合は現実的な調整が難しいため、binary で使う前提です。
+
+```{r}
+#| label: tree-scale-preserve-setup
+host_tip_positions <- ggtree::ggtree(host_phylo)$data |>
+  dplyr::filter(!is.na(isTip) & isTip) |>
+  dplyr::transmute(
+    label = as.character(label),
+    y = as.numeric(y)
+  ) |>
+  dplyr::group_by(label) |>
+  dplyr::summarise(y = mean(y), .groups = "drop")
+
+symbiont_tip_positions <- ggtree::ggtree(symbiont_phylo)$data |>
+  dplyr::filter(!is.na(isTip) & isTip) |>
+  dplyr::transmute(
+    label = as.character(label),
+    y = as.numeric(y)
+  ) |>
+  dplyr::group_by(label) |>
+  dplyr::summarise(y = mean(y), .groups = "drop")
+
+p_binary_tree_scale <- ggplot(
+  binary_df,
+  aes(row = row, column = column, count = count)
+) +
+  geom_bipnet_interaction(
+    interaction_type = "binary",
+    tip_positions_row = host_tip_positions,
+    tip_positions_column = symbiont_tip_positions,
+    linewidth = 0.45,
+    alpha = 0.7,
+    show.legend = FALSE
+  ) +
+  geom_bipnet_point(
+    type = "row",
+    tip_positions_row = host_tip_positions,
+    tip_positions_column = symbiont_tip_positions,
+    fill = "steelblue",
+    size = 2.4
+  ) +
+  geom_bipnet_point(
+    type = "column",
+    tip_positions_row = host_tip_positions,
+    tip_positions_column = symbiont_tip_positions,
+    fill = "navy",
+    size = 2.4
+  ) +
+  theme_void()
+
+t_row_tree_scale <- ggtree::ggtree(host_phylo) +
+  ggtree::geom_tiplab(
+    align = TRUE,
+    linetype = "dotted",
+    size = 3
+  )
+
+t_column_tree_scale <- ggtree::ggtree(symbiont_phylo) +
+  ggtree::geom_tiplab(
+    align = TRUE,
+    linetype = "dotted",
+    hjust = 1,
+    size = 3
+  ) +
+  scale_x_reverse()
+
+ylim_tree_scale <- range(
+  c(
+    get_yrange(t_row_tree_scale),
+    get_yrange(t_column_tree_scale),
+    get_yrange(p_binary_tree_scale)
+  ),
+  na.rm = TRUE
+)
+
+scale_y_tree_scale <- scale_y_continuous(
+  limits = ylim_tree_scale,
+  expand = expansion(mult = 0)
+)
+
+t_row_tree_scale <- t_row_tree_scale + scale_y_tree_scale
+t_column_tree_scale <- t_column_tree_scale + scale_y_tree_scale
+p_binary_tree_scale <- p_binary_tree_scale + scale_y_tree_scale
+```
+
+```{r}
+#| label: tree-scale-preserve-display
+#| fig-width: 12
+#| fig-height: 5
+if (requireNamespace("patchwork", quietly = TRUE)) {
+  t_row_tree_scale +
+    p_binary_tree_scale +
+    t_column_tree_scale +
+    patchwork::plot_layout(nrow = 1, widths = c(1, 1, 1))
+} else {
+  t_row_tree_scale
+  p_binary_tree_scale
+  t_column_tree_scale
+}
+```
+
+## 自分のデータに置き換えるときの最短手順
+
+この章で使う主な関数:
+
+- `readr::read_csv()`: 相互作用データを読み込みます。
+- `tibble::column_to_rownames()`: 行列入力形式へ変換します。
+- `ggbipartite::to_longer()`: `row`, `column`, `count` 形式へ変換します。
+- `ggbipartite::geom_bipnet_box()` / `ggbipartite::geom_bipnet_interaction()`:
+最小構成の可視化を実行します。
+
+以下の 3 点を満たせば、ほぼそのまま流用できます。
+
+1. 行列化できる（行名・列名がある）
+1. 値が非負の数値である
+1. `row`, `column`, `count` に変換できる
+
+```{r}
+#| label: own-data-template
+#| eval: false
+raw_df <- readr::read_csv("data/interaction_matrix.csv")
+
+interaction_matrix <- raw_df |>
+  tibble::column_to_rownames(var = "host") |>
+  as.matrix()
+
+interaction_df <- to_longer(interaction_matrix, .rowname = "row") |>
+  dplyr::rename(count = interaction) |>
+  dplyr::mutate(
+    row = factor(row, levels = rownames(interaction_matrix)),
+    column = factor(column, levels = colnames(interaction_matrix))
+  )
+
+ggplot(interaction_df, aes(row = row, column = column, count = count)) +
+  geom_bipnet_box(type = "row") +
+  geom_bipnet_box(type = "column") +
+  geom_bipnet_interaction() +
+  theme_void()
+```
+
+## よくあるつまずき
+
+この章で参照する主な関数:
+
+- `ggbipartite::get_tip_order()`: tree と行列の順序不一致を確認します。
+- `ggplot2::after_stat()`: metadata 列参照に必要な点を再確認します。
+- `ggbipartite::geom_bipnet_*()`:
+`gap`, `row_nm`, `column_nm` の指定ミスを切り分けます。
+
+1. 系統樹の tip ラベルと行列の行名・列名が一致していない  
+`get_tip_order()` の返り値と `rownames()` / `colnames()` を照合する。
+1. `factor(levels = ...)` と行列ソートを行っていない  
+順序がズレて tree と network の対応が崩れる。
+1. レイヤーごとに `gap` が違う  
+ボックスと相互作用の位置がズレるため、同じ値を使う。
+1. metadata のキー名が `row_nm` / `column_nm` と一致していない  
+`after_stat()` で参照する列が生成されない。
+
+## まとめ
+
+この章で再確認する主要関数:
+
+- `ggbipartite::to_longer()`
+- `ggbipartite::geom_bipnet_box()`
+- `ggbipartite::geom_bipnet_interaction()`
+- `ggbipartite::geom_bipnet_point()`
+- `ggbipartite::adjust_tree()` / `ggbipartite::create_link()`
+
+`ggbipartite` は、次の順番で使うと安定します。
+
+1. 先に系統樹を描いて左右の意味を固定する
+1. `factor` と行列ソートで順序を揃える
+1. `row` / `column` / `count` を明示して基本図を作る
+1. 必要に応じて metadata・binary・系統樹連携へ拡張する
+
+この vignette をテンプレートにすれば、実データにもそのまま移植できます。

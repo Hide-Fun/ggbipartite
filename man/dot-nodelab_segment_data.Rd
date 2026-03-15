@@ -10,7 +10,7 @@
   nudge_x = 0,
   nudge_y = 0,
   node = "internal",
-  align = TRUE
+  align = FALSE
 )
 }
 \arguments{

@@ -1,7 +1,7 @@
 Package: ggbipartite
 Type: Package
 Title: Visualize Bipartite Networks with ggplot2
-Version: 0.9.5
+Version: 0.9.6
 Authors@R: c(
     person("Hidehito", "Okada", , "hidefungi@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3210-2736"))

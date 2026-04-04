@@ -51,4 +51,10 @@ x <- c("66.6/59", "90/94", "70/96", "85/97", "55", "90", NA, "")
 format_node_support(x)
 
 format_node_support("95", boot_cutoff = 90)
+
+format_node_support(
+  "85",
+  sh_alrt_cutoff = 80,
+  single_value = "sh_alrt"
+)
 }

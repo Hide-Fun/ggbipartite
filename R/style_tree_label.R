@@ -460,6 +460,12 @@ style_tree_label <- function(x, last_taxon_rank = NA_character_) {
 #' format_node_support(x)
 #'
 #' format_node_support("95", boot_cutoff = 90)
+#'
+#' format_node_support(
+#'   "85",
+#'   sh_alrt_cutoff = 80,
+#'   single_value = "sh_alrt"
+#' )
 #' @export
 format_node_support <- function(
   x,

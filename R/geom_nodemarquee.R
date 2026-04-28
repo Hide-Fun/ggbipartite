@@ -11,7 +11,7 @@
 #' @param nudge_x Numeric scalar added to the aligned x-position.
 #'
 #' @return A numeric scalar x-position for left-aligned node labels.
-#' @export
+#' @noRd
 .nodelab_align_x_left <- function(df, offset = 0, nudge_x = 0) {
   if (!is.data.frame(df) || !("x" %in% names(df))) {
     stop("`df` must be a data frame containing column `x`.")
@@ -109,7 +109,7 @@
 #'   left x-position.
 #'
 #' @return A filtered data frame with added `xend` and `yend` columns.
-#' @export
+#' @noRd
 .nodelab_segment_data <- function(
   df,
   offset = 0,
@@ -151,7 +151,7 @@
 #' @param node Character scalar, one of `"internal"`, `"external"`, or `"all"`.
 #'
 #' @return A filtered data frame with added `x_lab` and `y_lab` columns.
-#' @export
+#' @noRd
 .nodelab_marquee_data <- function(
   df,
   offset = 0,
@@ -188,7 +188,7 @@
 #' @param node Character scalar, one of `"internal"`, `"external"`, or `"all"`.
 #'
 #' @return A filtered data frame with added `x_lab` and `y_lab` columns.
-#' @export
+#' @noRd
 .nodelab_marquee_data_unaligned <- function(
   df,
   offset = 0,

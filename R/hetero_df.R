@@ -152,22 +152,6 @@ combine_hetero_df <- function(x, prefixes = NULL, separator = "__") {
   dplyr::bind_cols(x_padded)
 }
 
-
-x <- list(
-  a = tibble::tibble(id = 1:2, v = c(10, 20)),
-  b = tibble::tibble(z = c("x", "y", "z"))
-)
-combine_hetero_df(x)
-#> a__id a__v b__z
-#> ...
-
-# 2) 無名 + prefixes を位置で指定
-x2 <- list(tibble::tibble(id = 1:2), tibble::tibble(z = 1:3))
-combine_hetero_df(x2, prefixes = c("left", "right"))
-
-# 3) 区切り文字を変更
-combine_hetero_df(x, separator = "::")
-
 #' Reconstruct a named list of tibbles from a combined tibble
 #'
 #' @description

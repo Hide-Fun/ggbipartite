@@ -11,5 +11,10 @@ Provides tools to visualize bipartite interaction matrices on of ggplot2. It inc
 \author{
 \strong{Maintainer}: Hidehito Okada \email{hidefungi@gmail.com} (\href{https://orcid.org/0000-0002-3210-2736}{ORCID})
 
+Authors:
+\itemize{
+  \item Hidehito Okada \email{hidefungi@gmail.com} (\href{https://orcid.org/0000-0002-3210-2736}{ORCID})
+}
+
 }
 \keyword{internal}

@@ -378,7 +378,12 @@ geom_nodemarquee <- function(
       list(
         ggtree::geom_segment2(
           data = seg_df,
-          mapping = ggplot2::aes(x = x, xend = xend, y = y, yend = yend),
+          mapping = ggplot2::aes(
+            x = .data$x,
+            xend = .data$xend,
+            y = .data$y,
+            yend = .data$yend
+          ),
           inherit.aes = FALSE,
           linetype = segment_linetype,
           linewidth = segment_linewidth
@@ -393,7 +398,7 @@ geom_nodemarquee <- function(
 
   # utils::modifyList is exported; ggplot2::modifyList is not.
   marquee_mapping <- utils::modifyList(
-    ggplot2::aes(x = x_lab, y = y_lab),
+    ggplot2::aes(x = .data$x_lab, y = .data$y_lab),
     mapping
   )
 

@@ -20,7 +20,7 @@
 #'
 #' Scientific-name parts are converted to Markdown italics and normalized for
 #' common qualifiers (`cf.`, `aff.`, `nr.`), infraspecific rank markers
-#' (`subsp.`, `var.`, `f.`), and hybrid notation (`×`).
+#' (`subsp.`, `var.`, `f.`), and hybrid notation (`\u00d7`).
 #'
 #' Numeric-like labels (for example, node support values) are returned
 #' unchanged.
@@ -35,11 +35,11 @@
 #'   "Cremastra aphylla",
 #'   "Cremastra appendiculata var. variabilis",
 #'   "Cremastra cf. appendiculata",
-#'   "×Cremastra appendiculata var. variabilis f. alba",
+#'   "\u00d7Cremastra appendiculata var. variabilis f. alba",
 #'   "Cremastra sp.",
 #'   "Odontochilus yakushimensis x Odontochilus nakaianus",
 #'   "Odontochilus yakushimensis x O. nakaianus",
-#'   "Odontochilus yakushimensis × nakaianus"
+#'   "Odontochilus yakushimensis \u00d7 nakaianus"
 #' )
 #'
 #' style_sciname(x)
@@ -67,7 +67,7 @@ style_sciname <- function(x) {
     "s.l."
   )
   sp_tokens <- c("sp.", "spp.")
-  hybrid_tokens <- c("×", "x", "X")
+  hybrid_tokens <- c("\u00d7", "x", "X")
 
   italic_md <- function(s) {
     paste0("*", s, "*")
@@ -161,15 +161,15 @@ style_sciname <- function(x) {
     marker_attached <- FALSE
 
     if (toks[1] %in% hybrid_tokens) {
-      hybrid_marker <- "×"
+      hybrid_marker <- "\u00d7"
       marker_attached <- FALSE
       toks <- toks[-1]
-    } else if (stringr::str_detect(toks[1], "^×")) {
-      hybrid_marker <- "×"
+    } else if (stringr::str_detect(toks[1], "^\u00d7")) {
+      hybrid_marker <- "\u00d7"
       marker_attached <- TRUE
-      toks[1] <- stringr::str_remove(toks[1], "^×")
+      toks[1] <- stringr::str_remove(toks[1], "^\u00d7")
     } else if (stringr::str_detect(toks[1], "^[xX][A-Z]")) {
-      hybrid_marker <- "×"
+      hybrid_marker <- "\u00d7"
       marker_attached <- TRUE
       toks[1] <- stringr::str_remove(toks[1], "^[xX]")
     }
@@ -268,7 +268,7 @@ style_sciname <- function(x) {
       return("")
     }
 
-    sep_re <- "\\s+(×|x|X)\\s+"
+    sep_re <- "\\s+(\u00d7|x|X)\\s+"
     matched <- stringr::str_match(s_norm, paste0("^(.*)", sep_re, "(.*)$"))
     if (!all(is.na(matched))) {
       left_raw <- stringr::str_squish(matched[1, 2])
@@ -276,7 +276,7 @@ style_sciname <- function(x) {
 
       left_md <- style_one_simple(left_raw)
       right_md <- style_one_simple(right_raw)
-      return(paste(left_md, "×", right_md))
+      return(paste(left_md, "\u00d7", right_md))
     }
 
     style_one_simple(s_norm)
@@ -472,7 +472,7 @@ format_node_support <- function(
   sh_alrt_cutoff = 80,
   boot_cutoff = 95,
   sep = "/",
-  missing_mark = "—",
+  missing_mark = "\u2014",
   single_value = c("ufboot", "sh_alrt"),
   sig_digits = 3,
   keep_na = TRUE

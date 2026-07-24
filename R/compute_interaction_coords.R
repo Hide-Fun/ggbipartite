@@ -87,9 +87,25 @@
 #' @examples
 #' \dontrun{
 #' # Minimal example (requires user-defined split_y_by_interaction()):
-#' row_box <- tibble::tibble(row = 1:2, x = 0.0, xmin = 0.0, xmax = 0.4, interaction_size = c(NA, NA))
-#' column_box <- tibble::tibble(column = 1:2, x = 1.0, xmin = 0.6, xmax = 1.0, interaction_size = c(NA, NA))
-#' cells <- tibble::tibble(row = c(1,1,2,2), column = c(1,2,1,2), interaction_size = c(2,1,1,3))
+#' row_box <- tibble::tibble(
+#'   row = 1:2,
+#'   x = 0.0,
+#'   xmin = 0.0,
+#'   xmax = 0.4,
+#'   interaction_size = c(NA, NA)
+#' )
+#' column_box <- tibble::tibble(
+#'   column = 1:2,
+#'   x = 1.0,
+#'   xmin = 0.6,
+#'   xmax = 1.0,
+#'   interaction_size = c(NA, NA)
+#' )
+#' cells <- tibble::tibble(
+#'   row = c(1, 1, 2, 2),
+#'   column = c(1, 2, 1, 2),
+#'   interaction_size = c(2, 1, 1, 3)
+#' )
 #' coords <- compute_interaction_coords(row_box, column_box, cells)
 #' }
 #'

@@ -135,38 +135,32 @@ extract_tip_positions <- function(x, arg_name) {
     stop("Extracted tip data must be a data frame.")
   }
 
-  if (all(c("label", "y") %in% names(tip_df))) {
-    out <- tip_df %>%
-      dplyr::mutate(
-        label = as.character(.data$label),
-        y = as.numeric(.data$y)
-      ) %>%
-      dplyr::filter(!is.na(.data$label), is.finite(.data$y)) %>%
-      dplyr::group_by(.data$label) %>%
-      dplyr::summarise(y = mean(.data$y), .groups = "drop")
-  } else {
-    required_cols <- c("isTip", "label", "y")
-    missing_cols <- setdiff(required_cols, names(tip_df))
-    if (length(missing_cols) > 0) {
-      stop(
-        paste0(
-          "Extracted tip data is missing columns: ",
-          paste(missing_cols, collapse = ", "),
-          "."
-        )
+  required_cols <- c("label", "y")
+  missing_cols <- setdiff(required_cols, names(tip_df))
+  if (length(missing_cols) > 0) {
+    stop(
+      paste0(
+        "Extracted tip data is missing columns: ",
+        paste(missing_cols, collapse = ", "),
+        "."
       )
-    }
-
-    out <- tip_df %>%
-      dplyr::filter(!is.na(.data$isTip) & .data$isTip) %>%
-      dplyr::mutate(
-        label = as.character(.data$label),
-        y = as.numeric(.data$y)
-      ) %>%
-      dplyr::filter(!is.na(.data$label), is.finite(.data$y)) %>%
-      dplyr::group_by(.data$label) %>%
-      dplyr::summarise(y = mean(.data$y), .groups = "drop")
+    )
   }
+
+  # Tree data can contain internal nodes that share labels with tips.
+  if ("isTip" %in% names(tip_df)) {
+    tip_df <- tip_df %>%
+      dplyr::filter(!is.na(.data$isTip) & .data$isTip)
+  }
+
+  out <- tip_df %>%
+    dplyr::mutate(
+      label = as.character(.data$label),
+      y = as.numeric(.data$y)
+    ) %>%
+    dplyr::filter(!is.na(.data$label), is.finite(.data$y)) %>%
+    dplyr::group_by(.data$label) %>%
+    dplyr::summarise(y = mean(.data$y), .groups = "drop")
 
   if (nrow(out) == 0) {
     stop(paste0("`", arg_name, "` does not contain usable tip positions."))
@@ -198,6 +192,99 @@ prepare_interaction_cells <- function(data) {
       .groups = "drop"
     ) %>%
     dplyr::filter(is.finite(.data$interaction), .data$interaction > 0)
+}
+
+#' Validate uniqueness of long-format interaction cells
+#'
+#' @param data A data frame containing `row` and `column` identifiers.
+#'
+#' @return `data`, invisibly.
+#' @keywords internal
+#' @noRd
+validate_unique_interaction_cells <- function(data) {
+  cell_ids <- data.frame(
+    row = as.character(data$row),
+    column = as.character(data$column),
+    stringsAsFactors = FALSE
+  )
+  is_duplicate <- duplicated(cell_ids) |
+    duplicated(cell_ids, fromLast = TRUE)
+
+  if (!any(is_duplicate)) {
+    return(invisible(data))
+  }
+
+  duplicate_cells <- unique(cell_ids[is_duplicate, , drop = FALSE])
+  duplicate_labels <- paste0(
+    "(`",
+    duplicate_cells$row,
+    "`, `",
+    duplicate_cells$column,
+    "`)"
+  )
+
+  stop(
+    paste0(
+      "`data` contains duplicate row-column cells: ",
+      paste(duplicate_labels, collapse = ", "),
+      ". Aggregate duplicate cells explicitly before plotting."
+    ),
+    call. = FALSE
+  )
+}
+
+#' Validate long-format interaction values and identifiers
+#'
+#' @param data A data frame containing `row`, `column`, and `count`.
+#'
+#' @return `data`, invisibly.
+#' @keywords internal
+#' @noRd
+validate_interaction_data <- function(data) {
+  row_ids <- as.character(data$row)
+  column_ids <- as.character(data$column)
+  if (anyNA(row_ids) || any(row_ids == "")) {
+    stop("`row` must not contain missing or empty IDs.", call. = FALSE)
+  }
+  if (anyNA(column_ids) || any(column_ids == "")) {
+    stop("`column` must not contain missing or empty IDs.", call. = FALSE)
+  }
+  if (!typeof(data$count) %in% c("integer", "double")) {
+    stop("`count` must be numeric.", call. = FALSE)
+  }
+  if (any(!is.finite(data$count))) {
+    stop("`count` must contain only finite values.", call. = FALSE)
+  }
+  if (any(data$count < 0)) {
+    stop("`count` must not contain negative values.", call. = FALSE)
+  }
+
+  row_totals <- rowsum(data$count, row_ids, reorder = FALSE)
+  column_totals <- rowsum(data$count, column_ids, reorder = FALSE)
+  zero_rows <- rownames(row_totals)[row_totals[, 1] == 0]
+  zero_columns <- rownames(column_totals)[column_totals[, 1] == 0]
+  problems <- character()
+  if (length(zero_rows) > 0L) {
+    problems <- c(
+      problems,
+      paste0("zero-sum row IDs: ", paste(zero_rows, collapse = ", "))
+    )
+  }
+  if (length(zero_columns) > 0L) {
+    problems <- c(
+      problems,
+      paste0("zero-sum column IDs: ", paste(zero_columns, collapse = ", "))
+    )
+  }
+  if (length(problems) > 0L) {
+    stop(
+      "Every node must have positive total interaction; ",
+      paste(problems, collapse = "; "),
+      ".",
+      call. = FALSE
+    )
+  }
+  invisible(data)
 }
 
 #' Normalize bipartite side type values
@@ -572,10 +659,13 @@ StatBipnet <- ggplot2::ggproto(
       choices = c("abundance", "binary")
     )
 
+    validate_interaction_data(data)
+    validate_unique_interaction_cells(data)
+
     # Convert to matrix.
     mat <- data.frame(
-      row = data$row,
-      column = data$column,
+      row = as.character(data$row),
+      column = as.character(data$column),
       count = data$count
     ) %>%
       tidyr::pivot_wider(
@@ -638,7 +728,9 @@ StatBipnet <- ggplot2::ggproto(
       } else {
         out <- bn_coords$interaction_coords
       }
-      out$group <- as.factor(paste0(out$row, out$column))
+      out$group <- as.factor(
+        vctrs::vec_group_id(out[c("row", "column")])
+      )
     } else {
       rlang::abort("`type` must be one of 'row', 'column', or 'interaction'.")
     }

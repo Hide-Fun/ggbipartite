@@ -52,9 +52,9 @@
 #' }
 #'
 #' @note
-#' Row/column identifiers are coerced to character before joining metadata.
-#' Ensure that key values in the columns specified by `.row` and `.column`
-#' match those character identifiers.
+#' Row/column identifiers and metadata keys are coerced to character before
+#' joining. Metadata keys must be non-missing, non-empty, and unique within
+#' each side.
 #'
 #' The helper \code{compute_box_coords()} is expected to accept arguments
 #' \code{(.df, .var, .size, .x0, .width, .gap)} and return a data frame with
@@ -115,6 +115,24 @@ construct_bn_coordination <- function(
   .ratio = 1 / 1.618,
   .adjust_box_height = FALSE
 ) {
+  if (!is.null(.metadata_row)) {
+    .metadata_row <- normalize_metadata_key(
+      metadata = .metadata_row,
+      key = .row,
+      metadata_arg = ".metadata_row",
+      key_arg = ".row"
+    )
+  }
+
+  if (!is.null(.metadata_column)) {
+    .metadata_column <- normalize_metadata_key(
+      metadata = .metadata_column,
+      key = .column,
+      metadata_arg = ".metadata_column",
+      key_arg = ".column"
+    )
+  }
+
   dfs <- bipartite_network(.mat = .mat)
 
   params <- calc_global_params(
@@ -132,6 +150,7 @@ construct_bn_coordination <- function(
     .var = "row",
     .size = "interaction_size",
     .x0 = params$row_box[[1]],
+    .y0 = params$row_box[[2]],
     .width = params$box_width,
     .gap = params$gap_row
   )
@@ -141,6 +160,7 @@ construct_bn_coordination <- function(
     .var = "column",
     .size = "interaction_size",
     .x0 = params$column_box[[1]],
+    .y0 = params$column_box[[2]],
     .width = params$box_width,
     .gap = params$gap_column
   )
@@ -151,43 +171,27 @@ construct_bn_coordination <- function(
     .interation_cell = dfs$ilf
   )
 
-  if (!is.null(.metadata_row) && !is.null(.metadata_column)) {
-    row_box <- row_box %>%
-      dplyr::mutate(row = as.character(row)) %>%
-      dplyr::left_join(.metadata_row, by = c("row" = .row))
+  row_box <- row_box %>%
+    dplyr::mutate(row = as.character(.data$row))
+  column_box <- column_box %>%
+    dplyr::mutate(column = as.character(.data$column))
+  interaction_coords <- interaction_coords %>%
+    dplyr::mutate(
+      row = as.character(.data$row),
+      column = as.character(.data$column)
+    )
 
+  if (!is.null(.metadata_column)) {
     column_box <- column_box %>%
-      dplyr::mutate(column = as.character(column)) %>%
       dplyr::left_join(.metadata_column, by = c("column" = .column))
-
     interaction_coords <- interaction_coords %>%
-      dplyr::mutate(
-        row = as.character(row),
-        column = as.character(column)
-      ) %>%
-      dplyr::left_join(.metadata_column, by = c("column" = .column)) %>%
-      dplyr::left_join(.metadata_row, by = c("row" = .row))
-  } else if (!is.null(.metadata_column)) {
-    column_box <- column_box %>%
-      dplyr::mutate(column = as.character(column)) %>%
       dplyr::left_join(.metadata_column, by = c("column" = .column))
+  }
 
-    interaction_coords <- interaction_coords %>%
-      dplyr::mutate(
-        row = as.character(row),
-        column = as.character(column)
-      ) %>%
-      dplyr::left_join(.metadata_column, by = c("column" = .column))
-  } else if (!is.null(.metadata_row)) {
+  if (!is.null(.metadata_row)) {
     row_box <- row_box %>%
-      dplyr::mutate(row = as.character(row)) %>%
       dplyr::left_join(.metadata_row, by = c("row" = .row))
-
     interaction_coords <- interaction_coords %>%
-      dplyr::mutate(
-        row = as.character(row),
-        column = as.character(column)
-      ) %>%
       dplyr::left_join(.metadata_row, by = c("row" = .row))
   }
 
@@ -198,6 +202,51 @@ construct_bn_coordination <- function(
     box1 = row_box,
     box2 = column_box
   ))
+}
+
+normalize_metadata_key <- function(metadata, key, metadata_arg, key_arg) {
+  if (!is.data.frame(metadata)) {
+    stop("`", metadata_arg, "` must be a data frame.", call. = FALSE)
+  }
+  if (
+    !is.character(key) ||
+      length(key) != 1L ||
+      is.na(key) ||
+      key == ""
+  ) {
+    stop(
+      "`", key_arg, "` must be a single non-empty column name.",
+      call. = FALSE
+    )
+  }
+  if (!key %in% names(metadata)) {
+    stop(
+      "`", metadata_arg, "` must contain the key column `", key, "`.",
+      call. = FALSE
+    )
+  }
+
+  key_values <- as.character(metadata[[key]])
+  if (anyNA(key_values) || any(key_values == "")) {
+    stop(
+      "`", metadata_arg, "$", key,
+      "` must not contain missing or empty IDs.",
+      call. = FALSE
+    )
+  }
+
+  duplicated_ids <- unique(key_values[duplicated(key_values)])
+  if (length(duplicated_ids) > 0L) {
+    stop(
+      "`", metadata_arg, "$", key, "` must be unique; duplicated IDs: ",
+      paste(duplicated_ids, collapse = ", "),
+      ".",
+      call. = FALSE
+    )
+  }
+
+  metadata[[key]] <- key_values
+  metadata
 }
 
 #' Summarize a bipartite interaction matrix
@@ -240,6 +289,7 @@ construct_bn_coordination <- function(
 #' @examples
 #' m <- matrix(c(1, 0, 2,
 #'               3, 1, 1), nrow = 2, byrow = TRUE)
+#' dimnames(m) <- list(c("row_1", "row_2"), c("col_1", "col_2", "col_3"))
 #'
 #' # Example stub for `to_longer()` if not available:
 #' to_longer <- function(.mat) {
@@ -255,6 +305,22 @@ construct_bn_coordination <- function(
 #' @importFrom tibble enframe
 #' @export
 bipartite_network <- function(.mat) {
+  row_ids <- validate_bipartite_dimnames(
+    ids = rownames(.mat),
+    size = nrow(.mat),
+    side = "row"
+  )
+  column_ids <- validate_bipartite_dimnames(
+    ids = colnames(.mat),
+    size = ncol(.mat),
+    side = "column"
+  )
+  .mat <- validate_bipartite_matrix_values(
+    .mat,
+    row_ids = row_ids,
+    column_ids = column_ids
+  )
+
   # Calculate row/column sums.
   rsf <- rowSums(.mat) %>%
     tibble::enframe(name = "row", value = "interaction_size")

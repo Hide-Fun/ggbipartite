@@ -140,19 +140,19 @@ compute_interaction_coords <- function(
   }
 
   row_side <- .row_box %>%
-    dplyr::select(!interaction_size) %>%
+    dplyr::select(-tidyselect::any_of("interaction_size")) %>%
     dplyr::right_join(
       .interation_cell,
-      by = dplyr::intersect(names(.row_box), names(.interation_cell))
+      by = "row"
     ) %>%
     split_y_by_interaction(x_side = "xmax", var = "row") %>%
     dplyr::select(row, column, y1 = y_start, y2 = y_end, x1 = x, x2 = x)
 
   column_side <- .column_box %>%
-    dplyr::select(!interaction_size) %>%
+    dplyr::select(-tidyselect::any_of("interaction_size")) %>%
     dplyr::right_join(
       .interation_cell,
-      by = dplyr::intersect(names(.column_box), names(.interation_cell))
+      by = "column"
     ) %>%
     split_y_by_interaction(x_side = "xmin", var = "column") %>%
     dplyr::select(row, column, y3 = y_start, y4 = y_end, x3 = x, x4 = x)

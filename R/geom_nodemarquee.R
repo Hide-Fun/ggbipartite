@@ -398,7 +398,11 @@ geom_nodemarquee <- function(
 
   # utils::modifyList is exported; ggplot2::modifyList is not.
   marquee_mapping <- utils::modifyList(
-    ggplot2::aes(x = .data$x_lab, y = .data$y_lab),
+    ggplot2::aes(
+      x = .data$x_lab,
+      y = .data$y_lab,
+      label = .data$label
+    ),
     mapping
   )
 

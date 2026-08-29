@@ -41,10 +41,9 @@
 #' \deqn{\text{height}_\mathrm{column} = \sum(\mathtt{.mat}) + (\mathtt{.ncol}-1)\times \mathtt{gap\_column}}
 #'
 #' @note
-#' This function relies on [adjust_box_height()]. As currently written,
-#' if the two computed heights are already equal, that helper emits a message
-#' and does not return a list of gaps (i.e., returns `NULL`). Callers expecting
-#' `gap_row`/`gap_column` should handle that case accordingly.
+#' This function relies on [adjust_box_height()]. Equal-height and singleton
+#' layouts retain finite gaps so callers always receive `gap_row` and
+#' `gap_column`.
 #'
 #' @seealso [adjust_box_height()]
 #'
@@ -60,7 +59,7 @@
 #'   .adjust_box_height = FALSE
 #' )
 #'
-#' # With adjustment (be aware of the equal-height note)
+#' # With automatic gap adjustment
 #' calc_global_params(
 #'   .mat = m,
 #'   .gap = 0.1,
@@ -90,7 +89,7 @@ calc_global_params <- function(
 
   # box origins
   row_box <- c(.x0, .y0)
-  column_box <- c(w - w1, .y0)
+  column_box <- c(.x0 + w - w1, .y0)
 
   if (.adjust_box_height) {
     .gaps <- adjust_box_height(
@@ -134,8 +133,9 @@ calc_global_params <- function(
 #'
 #' Given the total mass (`.interaction`), matrix dimensions, and a baseline gap,
 #' compute per-side gaps (`.gap_row`, `.gap_column`) so that the total heights
-#' for the two boxes are equal. If the heights are already equal, a message is
-#' emitted and no value is returned.
+#' for the two boxes are equal. Equal-height inputs preserve the baseline gap.
+#' When only one side is a singleton, the non-singleton side uses a zero gap
+#' because a singleton has no inter-item gap that can be expanded.
 #'
 #' @param .interaction Numeric scalar; the total mass (typically `sum(.mat)`).
 #' @param .nrow,.ncol Positive integers; number of rows/columns in `.mat`.
@@ -147,8 +147,8 @@ calc_global_params <- function(
 #'   \item `.gap_column`: gap for the column-side box.
 #'   \item `.gap1` and `.gap2`: backward-compatible aliases.
 #' }
-#' If the two heights are already equal, the function only emits a message and
-#' returns `NULL`.
+#' The returned gaps are always finite for positive dimensions and a finite
+#' baseline gap.
 #'
 #' @examples
 #' adjust_box_height(.interaction = 10, .nrow = 4, .ncol = 3, .gap = 0.2)
@@ -159,8 +159,39 @@ adjust_box_height <- function(.interaction, .nrow, .ncol, .gap) {
   column_box_height <- .interaction + (.ncol - 1) * .gap
 
   if (row_box_height == column_box_height) {
-    message("Row and column box heights are already equal.")
-  } else if (row_box_height > column_box_height) {
+    return(
+      list(
+        .gap_row = .gap,
+        .gap_column = .gap,
+        .gap1 = .gap,
+        .gap2 = .gap
+      )
+    )
+  }
+
+  if (.nrow == 1L) {
+    return(
+      list(
+        .gap_row = .gap,
+        .gap_column = 0,
+        .gap1 = .gap,
+        .gap2 = 0
+      )
+    )
+  }
+
+  if (.ncol == 1L) {
+    return(
+      list(
+        .gap_row = 0,
+        .gap_column = .gap,
+        .gap1 = 0,
+        .gap2 = .gap
+      )
+    )
+  }
+
+  if (row_box_height > column_box_height) {
     height <- row_box_height
     gap_column <- (height - .interaction) / (.ncol - 1)
     return(
@@ -171,16 +202,14 @@ adjust_box_height <- function(.interaction, .nrow, .ncol, .gap) {
         .gap2 = gap_column
       )
     )
-  } else {
-    height <- column_box_height
-    gap_row <- (height - .interaction) / (.nrow - 1)
-    return(
-      list(
-        .gap_row = gap_row,
-        .gap_column = .gap,
-        .gap1 = gap_row,
-        .gap2 = .gap
-      )
-    )
   }
+
+  height <- column_box_height
+  gap_row <- (height - .interaction) / (.nrow - 1)
+  list(
+    .gap_row = gap_row,
+    .gap_column = .gap,
+    .gap1 = gap_row,
+    .gap2 = .gap
+  )
 }

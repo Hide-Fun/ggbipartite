@@ -1,2 +1,8 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.RDataTmp.*$
+^AGENTS\.md$
+^LICENSE\.md$
+^README\.qmd$
+^README_files$
+^vignettes$

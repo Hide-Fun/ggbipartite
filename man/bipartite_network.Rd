@@ -29,7 +29,7 @@ the bipartite interaction matrix.
 \details{
 This function is a light-weight helper that:
 \enumerate{
-\item Computes row totals via \code{\link[base:colSums]{base::rowSums()}} and wraps them with
+\item Computes row totals via \code{\link[base:rowSums]{base::rowSums()}} and wraps them with
 \code{\link[tibble:enframe]{tibble::enframe()}}.
 \item Computes column totals via \code{\link[base:colSums]{base::colSums()}} and wraps them with
 \code{\link[tibble:enframe]{tibble::enframe()}}.

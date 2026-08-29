@@ -15,7 +15,7 @@ Character vector of Markdown-styled labels.
 \description{
 Scientific-name parts are converted to Markdown italics and normalized for
 common qualifiers (\code{cf.}, \code{aff.}, \code{nr.}), infraspecific rank markers
-(\code{subsp.}, \code{var.}, \code{f.}), and hybrid notation (\verb{×}).
+(\code{subsp.}, \code{var.}, \code{f.}), and hybrid notation (\verb{\\u00d7}).
 }
 \details{
 Numeric-like labels (for example, node support values) are returned
@@ -27,11 +27,11 @@ x <- c(
   "Cremastra aphylla",
   "Cremastra appendiculata var. variabilis",
   "Cremastra cf. appendiculata",
-  "×Cremastra appendiculata var. variabilis f. alba",
+  "\u00d7Cremastra appendiculata var. variabilis f. alba",
   "Cremastra sp.",
   "Odontochilus yakushimensis x Odontochilus nakaianus",
   "Odontochilus yakushimensis x O. nakaianus",
-  "Odontochilus yakushimensis × nakaianus"
+  "Odontochilus yakushimensis \u00d7 nakaianus"
 )
 
 style_sciname(x)

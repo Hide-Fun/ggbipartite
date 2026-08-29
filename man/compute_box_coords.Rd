@@ -86,5 +86,5 @@ ggplot(coords1) +
   coord_fixed() + theme_minimal()
 }
 \seealso{
-\code{\link[ggplot2:geom_tile]{ggplot2::geom_rect()}}, \code{\link[rlang:enquo]{rlang::enquo()}}
+\code{\link[ggplot2:geom_rect]{ggplot2::geom_rect()}}, \code{\link[rlang:enquo]{rlang::enquo()}}
 }

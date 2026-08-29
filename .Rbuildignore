@@ -1,8 +1,15 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.RDataTmp.*$
+^\.collective$
+^\.github$
+^\.DS_Store$
 ^AGENTS\.md$
 ^LICENSE\.md$
 ^README\.qmd$
 ^README_files$
-^vignettes$
+^docs/roadmap-v0\.9\.7-v0\.10\.0\.md$
+^vignettes/\.DS_Store$
+^vignettes/.*-ja\.qmd$
+^vignettes/.*\.html$
+^vignettes/.*_files$

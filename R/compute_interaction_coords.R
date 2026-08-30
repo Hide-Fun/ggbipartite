@@ -1,5 +1,7 @@
 #' Compute interaction polygon coordinates for a bipartite layout
 #'
+#' `r lifecycle::badge("superseded")`
+#'
 #' Given per-row and per-column box layouts and an interaction-cell table, this
 #' function constructs 4-vertex polygons (one per nonzero interaction cell)
 #' describing the ribbon/rectangle that connects the corresponding row box to
@@ -24,13 +26,15 @@
 #'   \item{`.row_box`}{A tibble/data frame describing the \emph{row-side} boxes.
 #'     Must contain at least:
 #'     \itemize{
-#'       \item \code{row}: row identifier (key used to join with `.interation_cell`).
+#'       \item \code{row}: row identifier used to join with
+#'             `.interation_cell`.
 #'       \item \code{x}: the x coordinate of the row-side vertical edge.
-#'       \item \code{xmin}/\code{xmax} (if present): \code{split_y_by_interaction()}
-#'             may use these; this function passes \code{x_side = "xmax"} when
-#'             splitting the row side.
-#'       \item \code{y} or precomputed vertical extents per row are not required;
-#'             they are produced by \code{split_y_by_interaction()}.
+#'       \item \code{xmin}/\code{xmax} (if present):
+#'             \code{split_y_by_interaction()} may use these; this function
+#'             passes \code{x_side = "xmax"} when splitting the row side.
+#'       \item \code{y} or precomputed vertical extents per row are not
+#'             required; they are produced by
+#'             \code{split_y_by_interaction()}.
 #'       \item \code{interaction_size}: will be dropped if present.
 #'     }}
 #'   \item{`.column_box`}{A tibble/data frame describing the \emph{column-side}
@@ -39,14 +43,15 @@
 #'     \itemize{
 #'       \item \code{column}: column identifier (key used to join).
 #'       \item \code{x}: the x coordinate of the column-side vertical edge.
-#'       \item \code{xmin}/\code{xmax} (if present): \code{split_y_by_interaction()}
-#'             may use these; this function passes \code{x_side = "xmin"} when
-#'             splitting the column side.
+#'       \item \code{xmin}/\code{xmax} (if present):
+#'             \code{split_y_by_interaction()} may use these; this function
+#'             passes \code{x_side = "xmin"} when splitting the column side.
 #'       \item \code{interaction_size}: will be dropped if present.
 #'     }}
-#'   \item{`.interation_cell`}{(sic) A tibble/data frame of interaction cells with
-#'     at least \code{row}, \code{column}, and the per-cell "interaction size"
-#'     that \code{split_y_by_interaction()} uses to subdivide vertical spans.
+#'   \item{`.interation_cell`}{(sic) A tibble/data frame of interaction cells
+#'     with at least \code{row}, \code{column}, and the per-cell "interaction
+#'     size" that \code{split_y_by_interaction()} uses to subdivide vertical
+#'     spans.
 #'     (The original spelling \code{.interation_cell} is retained to match the
 #'     calling code.)}
 #'   \item{`.box1`, `.box2`}{Backward-compatible argument aliases. Prefer
@@ -58,14 +63,16 @@
 #' \enumerate{
 #'   \item Join `.row_box` and `.interation_cell`, then call
 #'         \code{split_y_by_interaction(x_side = "xmax", var = "row")} to obtain
-#'         \code{y_start}/\code{y_end} for each \code{row}–\code{column} cell on
-#'         the row side and duplicate the x coordinate into \code{x1}/\code{x2}.
+#'         \code{y_start}/\code{y_end} for each row-column cell on the row side
+#'         and duplicate the x coordinate into \code{x1}/\code{x2}.
 #'   \item Join `.column_box` and `.interation_cell`, then call
-#'         \code{split_y_by_interaction(x_side = "xmin", var = "column")} to obtain
-#'         the analogous \code{y3}/\code{y4} and \code{x3}/\code{x4} for the column side.
+#'         \code{split_y_by_interaction(x_side = "xmin", var = "column")} to
+#'         obtain the analogous \code{y3}/\code{y4} and \code{x3}/\code{x4} for
+#'         the column side.
 #'   \item Merge both sides, pivot the four vertex columns to long format, and
 #'         reconstruct (x, y) pairs for the 4 vertices.
-#'   \item Order each 4-point set counter-clockwise (\code{\link{order_ccw_df}}),
+#'   \item Order each 4-point set counter-clockwise
+#'         (\code{\link{order_ccw_df}}),
 #'         compute its area via the shoelace formula
 #'         (\code{\link{polygon_area_xy}}), then unnest.
 #' }
@@ -74,19 +81,20 @@
 #' \describe{
 #'   \item{\code{row}}{Row identifier.}
 #'   \item{\code{column}}{Column identifier.}
-#'   \item{\code{x}, \code{y}}{Polygon vertex coordinates in CCW order (four rows
-#'                              per \code{row}–\code{column} cell).}
-#'   \item{\code{area}}{Polygon area (repeated across the four vertices of a cell).}
+#'   \item{\code{x}, \code{y}}{Polygon vertex coordinates in CCW order (four
+#'                              rows per \code{row}–\code{column} cell).}
+#'   \item{\code{area}}{Polygon area repeated across the four vertices of a
+#'                       cell.}
 #' }
 #'
 #' @note
-#' This function relies on an external helper \code{split_y_by_interaction()}
-#' that must exist in scope and return \code{y_start}, \code{y_end}, and \code{x}.
+#' This function uses \code{split_y_by_interaction()}, which returns
+#' \code{y_start}, \code{y_end}, and \code{x}.
 #' No NA values are permitted in the polygon vertex coordinates.
 #'
 #' @examples
 #' \dontrun{
-#' # Minimal example (requires user-defined split_y_by_interaction()):
+#' # Minimal example
 #' row_box <- tibble::tibble(
 #'   row = 1:2,
 #'   x = 0.0,
@@ -176,7 +184,7 @@ compute_interaction_coords <- function(
     dplyr::arrange(dplyr::desc(.data$area)) %>%
     tidyr::unnest(c(data))
 
-  return(interaction_coords)
+  interaction_coords
 }
 
 #' Order a set of 2D points counter-clockwise (CCW)
@@ -224,7 +232,7 @@ order_ccw_df <- function(df) {
 #'
 #' @keywords internal
 polygon_area_xy <- function(df) {
-  # inputs: df with columns x, y; vertices must be in a non-self-intersecting ring order
+  # A traversal order is required because the shoelace formula follows edges.
   stopifnot(all(c("x", "y") %in% names(df)))
   stopifnot(nrow(df) >= 3)
   stopifnot(!anyNA(df$x), !anyNA(df$y))
@@ -240,24 +248,27 @@ polygon_area_xy <- function(df) {
 }
 
 
-#' Split y-direction range by strictly positive interaction values (grouped by a single key) and add drawing coordinates
+#' Split vertical ranges among positive interactions
 #'
 #' @description
-#' Splits the y-range `[ymin, ymax]` within groups defined by a single key column
-#' (`var`), proportionally to strictly positive `interaction` values. Computes
-#' `y_start`/`y_end` and adds `x`/`xend` for vertical segment drawing.
+#' Splits the y-range `[ymin, ymax]` within groups defined by one key column
+#' (`var`), proportionally to strictly positive `interaction` values. It
+#' computes `y_start`/`y_end` and adds `x`/`xend` for vertical segments.
 #'
 #' @details
-#' - **Required columns**: the grouping key `var`, `xmin`, `xmax`, `ymin`, `ymax`, `interaction`.
+#' - **Required columns**: the grouping key `var`, `xmin`, `xmax`, `ymin`,
+#'   `ymax`, and `interaction`.
 #'   An error is raised if any are missing.
-#' - **Validation**: `interaction` must be strictly positive (`> 0`) and non-missing for all rows.
-#' - **Grouping**: by the single provided key `var` only. Bounds (`xmin/xmax/ymin/ymax`)
-#'   are assumed to be fixed upstream and therefore excluded from grouping.
-#' - **Coordinates**: if `x_side == "xmin"`, set `x = xmin`; if `"xmax"`, set `x = xmax`;
-#'   in both cases `xend = x` (vertical segments).
+#' - **Validation**: `interaction` must be strictly positive (`> 0`) and
+#'   non-missing for all rows.
+#' - **Grouping**: by the single provided key `var` only. Bounds (`xmin`,
+#'   `xmax`, `ymin`, and `ymax`) are fixed upstream and excluded from grouping.
+#' - **Coordinates**: if `x_side == "xmin"`, set `x = xmin`; if `"xmax"`, set
+#'   `x = xmax`; in both cases `xend = x` (vertical segments).
 #'
 #' @param df A `data.frame`/`tibble` containing the required columns.
-#' @param x_side One of `c("xmin","xmax")`. Chooses which side provides the x coordinate.
+#' @param x_side One of `c("xmin", "xmax")`. Chooses the side that provides
+#'   the x coordinate.
 #' @param var Character scalar giving the column name to group by.
 #'
 #' @return

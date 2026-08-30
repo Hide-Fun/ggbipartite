@@ -59,9 +59,11 @@ compatible aliases \code{"box1"} and \code{"box2"} are also accepted.}
 
 \item{metadata_row}{Optional data frame with row metadata used by the stat.}
 
-\item{metadata_column}{Optional data frame with column metadata used by the stat.}
+\item{metadata_column}{Optional data frame with column metadata used by the
+stat.}
 
-\item{gap}{Spacing between the two partitions (see Details of \code{StatBipnet}).}
+\item{gap}{Vertical spacing between adjacent nodes within each partition
+(see Details of \code{StatBipnet}).}
 
 \item{box_ratio}{Width of boxes relative to the interaction band.}
 
@@ -98,7 +100,8 @@ to use \code{position_jitter()}, give the position as \code{"jitter"}.
 
 \item{show.legend}{Passed to \code{\link[ggplot2:layer]{ggplot2::layer()}}.}
 
-\item{inherit.aes}{Should default aesthetics be inherited.}
+\item{inherit.aes}{Should plot-level aesthetics be inherited. Defaults to
+\code{FALSE} for \code{stat_bipnet()}.}
 
 \item{...}{Additional parameters passed to the stat/geom.}
 }

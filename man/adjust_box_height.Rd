@@ -20,14 +20,15 @@ A named list with elements:
 \item \code{.gap_column}: gap for the column-side box.
 \item \code{.gap1} and \code{.gap2}: backward-compatible aliases.
 }
-If the two heights are already equal, the function only emits a message and
-returns \code{NULL}.
+The returned gaps are always finite for positive dimensions and a finite
+baseline gap.
 }
 \description{
 Given the total mass (\code{.interaction}), matrix dimensions, and a baseline gap,
 compute per-side gaps (\code{.gap_row}, \code{.gap_column}) so that the total heights
-for the two boxes are equal. If the heights are already equal, a message is
-emitted and no value is returned.
+for the two boxes are equal. Equal-height inputs preserve the baseline gap.
+When only one side is a singleton, the non-singleton side uses a zero gap
+because a singleton has no inter-item gap that can be expanded.
 }
 \examples{
 adjust_box_height(.interaction = 10, .nrow = 4, .ncol = 3, .gap = 0.2)

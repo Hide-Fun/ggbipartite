@@ -32,15 +32,16 @@ used to join row metadata to row identifiers.}
 to the \strong{row-side} box table (\code{row_box}). Must contain the column
 specified by \code{.row}.}
 
-\item{.metadata_column}{Optional tibble/data frame of column-level metadata to
-join to the \strong{column-side} box table (\code{column_box}) and to
+\item{.metadata_column}{Optional tibble/data frame of column-level metadata
+to join to the \strong{column-side} box table (\code{column_box}) and to
 \code{interaction_coords}. Must contain the column specified by \code{.column}.}
 
 \item{.x0, .y0}{Numeric scalars; global origin for the left/bottom corner of
 the first box.}
 
 \item{.gap}{Non-negative numeric scalar; baseline vertical gap between
-adjacent items on each side (subject to adjustment; see \code{.adjust_box_height}).}
+adjacent items on each side (subject to adjustment; see
+\code{.adjust_box_height}).}
 
 \item{.box_ratio}{Positive numeric scalar; divisor to derive per-box width as
 \code{sum(.mat) / .box_ratio}.}
@@ -65,12 +66,14 @@ interaction, including an \code{area} column.}
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+}
+\details{
 Given a bipartite interaction matrix, compute:
 (1) global layout parameters, (2) per-side box coordinates for rows and
 columns, and (3) per-cell interaction polygons connecting the two sides.
 Optionally, row/column metadata can be joined onto the resulting frames.
-}
-\details{
+
 Pipeline:
 \enumerate{
 \item \code{\link{bipartite_network}()} produces row/column summaries and a
@@ -93,9 +96,9 @@ table; \code{interaction_coords} is left unchanged.
 }
 }
 \note{
-Row/column identifiers are coerced to character before joining metadata.
-Ensure that key values in the columns specified by \code{.row} and \code{.column}
-match those character identifiers.
+Row/column identifiers and metadata keys are coerced to character before
+joining. Metadata keys must be non-missing, non-empty, and unique within
+each side.
 
 The helper \code{compute_box_coords()} is expected to accept arguments
 \code{(.df, .var, .size, .x0, .width, .gap)} and return a data frame with
@@ -130,5 +133,6 @@ str(res$row_box); str(res$column_box); str(res$interaction_coords)
 }
 \seealso{
 \code{\link{bipartite_network}}, \code{\link{calc_global_params}},
-\code{\link{compute_box_coords}}, \code{\link{compute_interaction_coords}}
+\code{\link{compute_box_coords}}, \code{\link{compute_interaction_coords}},
+and \code{\link[=layout_bipartite]{layout_bipartite()}} for the recommended shared-layout workflow.
 }

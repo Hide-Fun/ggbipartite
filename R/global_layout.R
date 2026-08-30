@@ -1,5 +1,7 @@
 #' Calculate global layout parameters for paired boxes
 #'
+#' `r lifecycle::badge("superseded")`
+#'
 #' Compute overall layout parameters (widths, origins, and vertical gaps) for a
 #' two-box layout derived from a matrix input. The total "size" used for layout
 #' is the sum of all entries in `.mat`. When `.adjust_box_height` is `TRUE`,
@@ -37,15 +39,16 @@
 #' Internally, the variable `.interaction` is used for `sum(.mat)` (total mass).
 #' If `.adjust_box_height` is `TRUE`, gaps are computed by
 #' [adjust_box_height()] to equalize the total height:
-#' \deqn{\text{height}_\mathrm{row} = \sum(\mathtt{.mat}) + (\mathtt{.nrow}-1)\times \mathtt{gap\_row}}
-#' \deqn{\text{height}_\mathrm{column} = \sum(\mathtt{.mat}) + (\mathtt{.ncol}-1)\times \mathtt{gap\_column}}
+#' \deqn{h_\mathrm{row} = S + (n_\mathrm{row} - 1) g_\mathrm{row}}
+#' \deqn{h_\mathrm{column} = S + (n_\mathrm{column} - 1) g_\mathrm{column}}
 #'
 #' @note
 #' This function relies on [adjust_box_height()]. Equal-height and singleton
 #' layouts retain finite gaps so callers always receive `gap_row` and
 #' `gap_column`.
 #'
-#' @seealso [adjust_box_height()]
+#' @seealso [adjust_box_height()] and [layout_bipartite()] for the recommended
+#'   shared-layout workflow.
 #'
 #' @examples
 #' m <- matrix(c(1, 2, 1,

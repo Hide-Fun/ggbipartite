@@ -1,9 +1,11 @@
 #' Compute stacked rectangle coordinates for 1D partitions
 #'
+#' `r lifecycle::badge("superseded")`
+#'
 #' Given a data frame with a numeric `.size` column and a categorical variable,
 #' compute rectangle coordinates (`xmin`, `xmax`, `ymin`, `ymax`) for a vertical
-#' stack of boxes whose heights equal `.size`. This is useful for drawing stacked
-#' bars or custom block diagrams with `ggplot2::geom_rect()`.
+#' stack of boxes whose heights equal `.size`. This is useful for drawing
+#' stacked bars or custom block diagrams with `ggplot2::geom_rect()`.
 #'
 #' Boxes are stacked along the y-axis starting at `.y0`. If `.var` is a factor,
 #' its level order governs the stacking order. If `.var` is not a factor, the
@@ -12,7 +14,8 @@
 #' factor handling only affects how the cumulative offsets are computed.
 #'
 #' @param .df A data frame or tibble containing at least:
-#'   - a numeric, non-negative column for heights referenced by `.size` with no `NA`s;
+#'   - a numeric, non-negative column for heights referenced by `.size` with no
+#'     `NA`s;
 #'   - a column referenced by `.var`.
 #' @param .var Bare column name in `.df` giving the grouping/category whose
 #'   values define the stacked boxes. Captured with tidy evaluation.
@@ -56,20 +59,32 @@
 #' library(tibble)
 #' library(ggplot2)
 #'
-#' # Non-factor: levels become reverse of input order (A,B,C -> C,B,A) for stacking,
+#' # Non-factor levels reverse input order for stacking,
 #' # but output order stays as A,B,C
 #' df1 <- tibble(var = c("A","B","C"), interaction_size = c(3,1,2))
-#' coords1 <- compute_box_coords(df1, .var = var, .size = interaction_size, .gap = 0.2)
+#' coords1 <- compute_box_coords(
+#'   df1,
+#'   .var = var,
+#'   .size = interaction_size,
+#'   .gap = 0.2
+#' )
 #'
 #' # Factor: existing levels are preserved for stacking
 #' df2 <- tibble(
 #'   var  = factor(c("low","mid","high"), levels = c("high","mid","low")),
 #'   interaction_size = c(1,2,3)
 #' )
-#' coords2 <- compute_box_coords(df2, .var = var, .size = interaction_size, .gap = 0.1)
+#' coords2 <- compute_box_coords(
+#'   df2,
+#'   .var = var,
+#'   .size = interaction_size,
+#'   .gap = 0.1
+#' )
 #'
 #' ggplot(coords1) +
-#'   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = var)) +
+#'   geom_rect(
+#'     aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = var)
+#'   ) +
 #'   coord_fixed() + theme_minimal()
 compute_box_coords <- function(
   .df,
@@ -143,5 +158,5 @@ compute_box_coords <- function(
     dplyr::select(-.row_id) %>%
     dplyr::rename({{ var_quo }} := var, {{ size_quo }} := height)
 
-  return(coords)
+  coords
 }

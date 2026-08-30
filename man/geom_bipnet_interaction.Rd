@@ -15,7 +15,9 @@ geom_bipnet_interaction(
   ...,
   na.rm = FALSE,
   show.legend = NA,
-  inherit.aes = TRUE
+  inherit.aes = TRUE,
+  layout = NULL,
+  type = NULL
 )
 }
 \arguments{
@@ -79,6 +81,15 @@ but unobserved levels are omitted.}
 rather than combining with them. This is most useful for helper functions
 that define both data and aesthetics and shouldn't inherit behaviour from
 the default plot specification, e.g. \code{\link[ggplot2:annotation_borders]{annotation_borders()}}.}
+
+\item{layout}{An optional \code{bipartite_layout} created by
+\code{\link[=layout_bipartite]{layout_bipartite()}}. When supplied, precomputed interaction coordinates
+are drawn with the identity stat, \code{data} must be \code{NULL}, and plot-level
+aesthetics are not inherited. If \code{interaction_type} is omitted, the mode
+is taken from \code{layout}.}
+
+\item{type}{Use \code{NULL} (the default) or \code{"interaction"}. With \code{layout}, no
+row, column, or compatibility alias is accepted.}
 }
 \value{
 A ggplot2 layer using \code{GeomBipnetInteraction} or

@@ -33,28 +33,22 @@ This function is a light-weight helper that:
 \code{\link[tibble:enframe]{tibble::enframe()}}.
 \item Computes column totals via \code{\link[base:colSums]{base::colSums()}} and wraps them with
 \code{\link[tibble:enframe]{tibble::enframe()}}.
-\item Delegates reshaping to a user- or package-provided \code{\link[=to_longer]{to_longer()}}
-helper that converts the matrix to a long tibble.
+\item Delegates reshaping to the package's \code{\link[=to_longer]{to_longer()}} helper, which
+applies the same strict matrix contract and returns a long tibble.
 }
-
-The function assumes that \code{\link[=to_longer]{to_longer()}} is available in scope; if not,
-provide your own implementation that accepts \code{.mat} and returns a tibble.
 }
 \section{Input validation}{
 
-Minimal checks are performed. For robust workflows, validate that \code{.mat} is a
-numeric matrix (or coercible) and contains non-missing values as needed.
+\code{.mat} must be a numeric matrix with finite, non-negative values and
+non-empty, unique row and column names. Every row and column must have a
+positive total interaction weight. Invalid IDs and zero-total nodes are
+reported before coordinates are computed.
 }
 
 \examples{
 m <- matrix(c(1, 0, 2,
               3, 1, 1), nrow = 2, byrow = TRUE)
-
-# Example stub for `to_longer()` if not available:
-to_longer <- function(.mat) {
-  tibble::as_tibble(as.data.frame(as.table(.mat))) \%>\%
-    dplyr::rename(row = Var1, column = Var2, interaction_size = Freq)
-}
+dimnames(m) <- list(c("row_1", "row_2"), c("col_1", "col_2", "col_3"))
 
 bip <- bipartite_network(m)
 bip$rsf

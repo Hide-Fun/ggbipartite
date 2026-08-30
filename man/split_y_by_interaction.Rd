@@ -2,14 +2,15 @@
 % Please edit documentation in R/compute_interaction_coords.R
 \name{split_y_by_interaction}
 \alias{split_y_by_interaction}
-\title{Split y-direction range by strictly positive interaction values (grouped by a single key) and add drawing coordinates}
+\title{Split vertical ranges among positive interactions}
 \usage{
 split_y_by_interaction(df, x_side = c("xmin", "xmax"), var)
 }
 \arguments{
 \item{df}{A \code{data.frame}/\code{tibble} containing the required columns.}
 
-\item{x_side}{One of \code{c("xmin","xmax")}. Chooses which side provides the x coordinate.}
+\item{x_side}{One of \code{c("xmin", "xmax")}. Chooses the side that provides
+the x coordinate.}
 
 \item{var}{Character scalar giving the column name to group by.}
 }
@@ -22,19 +23,21 @@ A \code{tibble} with all original columns plus:
 }
 }
 \description{
-Splits the y-range \verb{[ymin, ymax]} within groups defined by a single key column
-(\code{var}), proportionally to strictly positive \code{interaction} values. Computes
-\code{y_start}/\code{y_end} and adds \code{x}/\code{xend} for vertical segment drawing.
+Splits the y-range \verb{[ymin, ymax]} within groups defined by one key column
+(\code{var}), proportionally to strictly positive \code{interaction} values. It
+computes \code{y_start}/\code{y_end} and adds \code{x}/\code{xend} for vertical segments.
 }
 \details{
 \itemize{
-\item \strong{Required columns}: the grouping key \code{var}, \code{xmin}, \code{xmax}, \code{ymin}, \code{ymax}, \code{interaction}.
+\item \strong{Required columns}: the grouping key \code{var}, \code{xmin}, \code{xmax}, \code{ymin},
+\code{ymax}, and \code{interaction}.
 An error is raised if any are missing.
-\item \strong{Validation}: \code{interaction} must be strictly positive (\verb{> 0}) and non-missing for all rows.
-\item \strong{Grouping}: by the single provided key \code{var} only. Bounds (\code{xmin/xmax/ymin/ymax})
-are assumed to be fixed upstream and therefore excluded from grouping.
-\item \strong{Coordinates}: if \code{x_side == "xmin"}, set \code{x = xmin}; if \code{"xmax"}, set \code{x = xmax};
-in both cases \code{xend = x} (vertical segments).
+\item \strong{Validation}: \code{interaction} must be strictly positive (\verb{> 0}) and
+non-missing for all rows.
+\item \strong{Grouping}: by the single provided key \code{var} only. Bounds (\code{xmin},
+\code{xmax}, \code{ymin}, and \code{ymax}) are fixed upstream and excluded from grouping.
+\item \strong{Coordinates}: if \code{x_side == "xmin"}, set \code{x = xmin}; if \code{"xmax"}, set
+\code{x = xmax}; in both cases \code{xend = x} (vertical segments).
 }
 }
 \examples{

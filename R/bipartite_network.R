@@ -1,5 +1,7 @@
 #' Construct box and interaction coordinates for a bipartite network
 #'
+#' `r lifecycle::badge("superseded")`
+#'
 #' Given a bipartite interaction matrix, compute:
 #' (1) global layout parameters, (2) per-side box coordinates for rows and
 #' columns, and (3) per-cell interaction polygons connecting the two sides.
@@ -14,13 +16,14 @@
 #' @param .metadata_row Optional tibble/data frame of row-level metadata to join
 #'   to the **row-side** box table (`row_box`). Must contain the column
 #'   specified by `.row`.
-#' @param .metadata_column Optional tibble/data frame of column-level metadata to
-#'   join to the **column-side** box table (`column_box`) and to
+#' @param .metadata_column Optional tibble/data frame of column-level metadata
+#'   to join to the **column-side** box table (`column_box`) and to
 #'   `interaction_coords`. Must contain the column specified by `.column`.
 #' @param .x0,.y0 Numeric scalars; global origin for the left/bottom corner of
 #'   the first box.
 #' @param .gap Non-negative numeric scalar; baseline vertical gap between
-#'   adjacent items on each side (subject to adjustment; see \code{.adjust_box_height}).
+#'   adjacent items on each side (subject to adjustment; see
+#'   \code{.adjust_box_height}).
 #' @param .box_ratio Positive numeric scalar; divisor to derive per-box width as
 #'   \code{sum(.mat) / .box_ratio}.
 #' @param .ratio Positive numeric scalar; divisor to derive overall width as
@@ -73,7 +76,8 @@
 #' }
 #'
 #' @seealso \code{\link{bipartite_network}}, \code{\link{calc_global_params}},
-#'   \code{\link{compute_box_coords}}, \code{\link{compute_interaction_coords}}
+#'   \code{\link{compute_box_coords}}, \code{\link{compute_interaction_coords}},
+#'   and [layout_bipartite()] for the recommended shared-layout workflow.
 #'
 #' @examples
 #' \dontrun{
@@ -195,18 +199,27 @@ construct_bn_coordination <- function(
       dplyr::left_join(.metadata_row, by = c("row" = .row))
   }
 
-  return(list(
+  list(
     row_box = row_box,
     column_box = column_box,
     interaction_coords = interaction_coords,
     box1 = row_box,
     box2 = column_box
-  ))
+  )
 }
 
 normalize_metadata_key <- function(metadata, key, metadata_arg, key_arg) {
   if (!is.data.frame(metadata)) {
     stop("`", metadata_arg, "` must be a data frame.", call. = FALSE)
+  }
+  duplicated_names <- unique(names(metadata)[duplicated(names(metadata))])
+  if (length(duplicated_names) > 0L) {
+    stop(
+      "`", metadata_arg, "` must have unique column names; duplicated names: ",
+      paste(duplicated_names, collapse = ", "),
+      ".",
+      call. = FALSE
+    )
   }
   if (
     !is.character(key) ||
@@ -275,27 +288,20 @@ normalize_metadata_key <- function(metadata, key, metadata_arg, key_arg) {
 #'     [tibble::enframe()].
 #'   \item Computes column totals via [base::colSums()] and wraps them with
 #'     [tibble::enframe()].
-#'   \item Delegates reshaping to a user- or package-provided [to_longer()]
-#'     helper that converts the matrix to a long tibble.
+#'   \item Delegates reshaping to the package's [to_longer()] helper, which
+#'     applies the same strict matrix contract and returns a long tibble.
 #' }
 #'
-#' The function assumes that [to_longer()] is available in scope; if not,
-#' provide your own implementation that accepts `.mat` and returns a tibble.
-#'
 #' @section Input validation:
-#' Minimal checks are performed. For robust workflows, validate that `.mat` is a
-#' numeric matrix (or coercible) and contains non-missing values as needed.
+#' `.mat` must be a numeric matrix with finite, non-negative values and
+#' non-empty, unique row and column names. Every row and column must have a
+#' positive total interaction weight. Invalid IDs and zero-total nodes are
+#' reported before coordinates are computed.
 #'
 #' @examples
 #' m <- matrix(c(1, 0, 2,
 #'               3, 1, 1), nrow = 2, byrow = TRUE)
 #' dimnames(m) <- list(c("row_1", "row_2"), c("col_1", "col_2", "col_3"))
-#'
-#' # Example stub for `to_longer()` if not available:
-#' to_longer <- function(.mat) {
-#'   tibble::as_tibble(as.data.frame(as.table(.mat))) %>%
-#'     dplyr::rename(row = Var1, column = Var2, interaction_size = Freq)
-#' }
 #'
 #' bip <- bipartite_network(m)
 #' bip$rsf
@@ -328,14 +334,12 @@ bipartite_network <- function(.mat) {
   csf <- colSums(.mat) %>%
     tibble::enframe(name = "column", value = "interaction_size")
 
-  # Convert to longer tibble (expects a `to_longer()` helper to exist).
+  # Use the package validator again so the public long form has one contract.
   ilf <- to_longer(.mat = .mat)
 
-  return(
-    list(
-      rsf = rsf,
-      csf = csf,
-      ilf = ilf
-    )
+  list(
+    rsf = rsf,
+    csf = csf,
+    ilf = ilf
   )
 }

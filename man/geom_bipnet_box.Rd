@@ -14,7 +14,9 @@ geom_bipnet_box(
   ...,
   na.rm = FALSE,
   show.legend = NA,
-  inherit.aes = TRUE
+  inherit.aes = TRUE,
+  layout = NULL,
+  type = NULL
 )
 }
 \arguments{
@@ -76,6 +78,15 @@ but unobserved levels are omitted.}
 rather than combining with them. This is most useful for helper functions
 that define both data and aesthetics and shouldn't inherit behaviour from
 the default plot specification, e.g. \code{\link[ggplot2:annotation_borders]{annotation_borders()}}.}
+
+\item{layout}{An optional \code{bipartite_layout} created by
+\code{\link[=layout_bipartite]{layout_bipartite()}}. When supplied, the precomputed node coordinates are
+drawn with the identity stat, \code{data} must be \code{NULL}, and plot-level
+aesthetics are not inherited.}
+
+\item{type}{Required node side: \code{"row"} or \code{"column"}. The raw-data path
+also accepts the compatibility aliases \code{"box1"} and \code{"box2"}; the layout
+path accepts only the canonical names.}
 }
 \value{
 A ggplot2 layer using \code{GeomBipnetBox}.

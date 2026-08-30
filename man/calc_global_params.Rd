@@ -49,24 +49,25 @@ box origin, where \code{x = width - box_width} and \code{y = y0}.
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+}
+\details{
 Compute overall layout parameters (widths, origins, and vertical gaps) for a
 two-box layout derived from a matrix input. The total "size" used for layout
 is the sum of all entries in \code{.mat}. When \code{.adjust_box_height} is \code{TRUE},
 vertical gaps for each box are adjusted so that the total heights of the two
 boxes match (based on the matrix's row/column counts).
-}
-\details{
+
 Internally, the variable \code{.interaction} is used for \code{sum(.mat)} (total mass).
 If \code{.adjust_box_height} is \code{TRUE}, gaps are computed by
 \code{\link[=adjust_box_height]{adjust_box_height()}} to equalize the total height:
-\deqn{\text{height}_\mathrm{row} = \sum(\mathtt{.mat}) + (\mathtt{.nrow}-1)\times \mathtt{gap\_row}}
-\deqn{\text{height}_\mathrm{column} = \sum(\mathtt{.mat}) + (\mathtt{.ncol}-1)\times \mathtt{gap\_column}}
+\deqn{h_\mathrm{row} = S + (n_\mathrm{row} - 1) g_\mathrm{row}}
+\deqn{h_\mathrm{column} = S + (n_\mathrm{column} - 1) g_\mathrm{column}}
 }
 \note{
-This function relies on \code{\link[=adjust_box_height]{adjust_box_height()}}. As currently written,
-if the two computed heights are already equal, that helper emits a message
-and does not return a list of gaps (i.e., returns \code{NULL}). Callers expecting
-\code{gap_row}/\code{gap_column} should handle that case accordingly.
+This function relies on \code{\link[=adjust_box_height]{adjust_box_height()}}. Equal-height and singleton
+layouts retain finite gaps so callers always receive \code{gap_row} and
+\code{gap_column}.
 }
 \examples{
 m <- matrix(c(1, 2, 1,
@@ -80,7 +81,7 @@ calc_global_params(
   .adjust_box_height = FALSE
 )
 
-# With adjustment (be aware of the equal-height note)
+# With automatic gap adjustment
 calc_global_params(
   .mat = m,
   .gap = 0.1,
@@ -89,5 +90,6 @@ calc_global_params(
 
 }
 \seealso{
-\code{\link[=adjust_box_height]{adjust_box_height()}}
+\code{\link[=adjust_box_height]{adjust_box_height()}} and \code{\link[=layout_bipartite]{layout_bipartite()}} for the recommended
+shared-layout workflow.
 }

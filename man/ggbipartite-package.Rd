@@ -6,7 +6,15 @@
 \alias{ggbipartite-package}
 \title{ggbipartite: Visualize Bipartite Networks with ggplot2}
 \description{
-Provides tools to visualize bipartite interaction matrices on of ggplot2. It includes stat/geom layers to draw row and column boxes and interaction polygons, coordinate constructors for custom workflows, and helpers to align bipartite layouts with phylogenetic trees.
+Provides tools to visualize bipartite interaction matrices with 'ggplot2'. It computes reusable layouts for abundance ribbons or binary links, offers layers and a high-level plot composer, and aligns either network partition with a phylogenetic tree.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/Hide-Fun/ggbipartite}
+  \item Report bugs at \url{https://github.com/Hide-Fun/ggbipartite/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Hidehito Okada \email{hidefungi@gmail.com} (\href{https://orcid.org/0000-0002-3210-2736}{ORCID})

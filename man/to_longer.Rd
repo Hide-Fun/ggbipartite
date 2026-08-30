@@ -9,26 +9,27 @@ to_longer(.mat, .rowname = "row")
 \arguments{
 \item{.mat}{A matrix or data-frame-like object to be reshaped.}
 
-\item{.rowname}{A single string giving the column name to store row names.
-If \code{NULL}, row names are not added. Defaults to \code{"row"}.}
+\item{.rowname}{A single non-empty string giving the column name to store
+row identifiers. \code{NULL} is not supported because row identifiers are
+required. Defaults to \code{"row"}.}
 }
 \value{
 A tibble with columns:
 \itemize{
-\item \code{.rowname} (if provided): original row identifiers
+\item The column named by \code{.rowname}: original row identifiers
 \item \code{column}: original column names
 \item \code{interaction}: cell values (filtered to nonzero)
 }
 }
 \description{
 Transforms a numeric matrix or data frame into a long-format tibble with
-one row per nonzero cell. Optionally preserves original row names in a
-dedicated column.
+one row per nonzero cell. The input must have non-empty, unique row and
+column names.
 }
 \details{
-The input is first converted to a tibble (optionally adding a row-name
-column), then pivoted to long format and filtered to keep only rows where
-\code{interaction != 0}.
+The input is first validated for complete and unique dimension names. It is
+then converted to a tibble, pivoted to long format, and filtered to keep only
+rows where \code{interaction != 0}.
 }
 \examples{
 m <- matrix(c(1, 0, 2, 3), nrow = 2,

@@ -1,19 +1,19 @@
 Package: ggbipartite
 Type: Package
 Title: Visualize Bipartite Networks with ggplot2
-Version: 0.9.7
+Version: 0.10.0
 Authors@R: c(
     person("Hidehito", "Okada", , "hidefungi@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3210-2736"))
   )
-Description: Provides tools to visualize bipartite interaction matrices on
-    of ggplot2. It includes stat/geom layers to draw row and column
-    boxes and interaction polygons, coordinate constructors for custom
-    workflows, and helpers to align bipartite layouts with phylogenetic
-    trees.
+Description: Provides tools to visualize bipartite interaction matrices with
+    'ggplot2'. It computes reusable layouts for abundance ribbons or binary
+    links, offers layers and a high-level plot composer, and aligns either
+    network partition with a phylogenetic tree.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
+URL: https://github.com/Hide-Fun/ggbipartite
+BugReports: https://github.com/Hide-Fun/ggbipartite/issues
 Depends:
     R (>= 4.1.0),
     ggplot2 (>= 3.4.0)
@@ -34,11 +34,12 @@ Suggests:
     ape,
     covr,
     cowplot,
+    lintr,
     marquee,
     patchwork,
     quarto,
     RPANDA,
-    testthat (>= 3.0.0),
+    testthat (>= 3.1.7),
     vdiffr
 VignetteBuilder: quarto
 Roxygen: list(markdown = TRUE)

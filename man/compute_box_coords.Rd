@@ -9,7 +9,8 @@ compute_box_coords(.df, .var, .size, .width = 1, .x0 = 0, .y0 = 0, .gap = 0)
 \arguments{
 \item{.df}{A data frame or tibble containing at least:
 \itemize{
-\item a numeric, non-negative column for heights referenced by \code{.size} with no \code{NA}s;
+\item a numeric, non-negative column for heights referenced by \code{.size} with no
+\code{NA}s;
 \item a column referenced by \code{.var}.
 }}
 
@@ -40,12 +41,14 @@ boundaries suitable for \code{ggplot2::geom_rect()}.
 }
 }
 \description{
-Given a data frame with a numeric \code{.size} column and a categorical variable,
-compute rectangle coordinates (\code{xmin}, \code{xmax}, \code{ymin}, \code{ymax}) for a vertical
-stack of boxes whose heights equal \code{.size}. This is useful for drawing stacked
-bars or custom block diagrams with \code{ggplot2::geom_rect()}.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
 }
 \details{
+Given a data frame with a numeric \code{.size} column and a categorical variable,
+compute rectangle coordinates (\code{xmin}, \code{xmax}, \code{ymin}, \code{ymax}) for a vertical
+stack of boxes whose heights equal \code{.size}. This is useful for drawing
+stacked bars or custom block diagrams with \code{ggplot2::geom_rect()}.
+
 Boxes are stacked along the y-axis starting at \code{.y0}. If \code{.var} is a factor,
 its level order governs the stacking order. If \code{.var} is not a factor, the
 stacking order is the reverse of the first-appearance order of the values.
@@ -69,20 +72,32 @@ first-appearance order);
 library(tibble)
 library(ggplot2)
 
-# Non-factor: levels become reverse of input order (A,B,C -> C,B,A) for stacking,
+# Non-factor levels reverse input order for stacking,
 # but output order stays as A,B,C
 df1 <- tibble(var = c("A","B","C"), interaction_size = c(3,1,2))
-coords1 <- compute_box_coords(df1, .var = var, .size = interaction_size, .gap = 0.2)
+coords1 <- compute_box_coords(
+  df1,
+  .var = var,
+  .size = interaction_size,
+  .gap = 0.2
+)
 
 # Factor: existing levels are preserved for stacking
 df2 <- tibble(
   var  = factor(c("low","mid","high"), levels = c("high","mid","low")),
   interaction_size = c(1,2,3)
 )
-coords2 <- compute_box_coords(df2, .var = var, .size = interaction_size, .gap = 0.1)
+coords2 <- compute_box_coords(
+  df2,
+  .var = var,
+  .size = interaction_size,
+  .gap = 0.1
+)
 
 ggplot(coords1) +
-  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = var)) +
+  geom_rect(
+    aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = var)
+  ) +
   coord_fixed() + theme_minimal()
 }
 \seealso{

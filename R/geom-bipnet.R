@@ -16,7 +16,6 @@
 GeomBipnetBox <- ggproto(
   "GeomBipnetBox",
   GeomRect,
-  # required_aes = c("x", "y", "xmin", "xmax", "ymin", "ymax"),
   required_aes = c("xmin", "xmax", "ymin", "ymax"),
   default_aes = aes(
     fill = "grey",
@@ -27,6 +26,77 @@ GeomBipnetBox <- ggproto(
   )
 )
 
+merge_bipnet_layout_mapping <- function(default_mapping, mapping) {
+  if (is.null(mapping)) {
+    return(default_mapping)
+  }
+  if (!inherits(mapping, "uneval")) {
+    rlang::abort("`mapping` must be created by `ggplot2::aes()`.")
+  }
+
+  default_mapping[names(mapping)] <- mapping
+  default_mapping
+}
+
+validate_bipnet_layout_layer <- function(
+  layout,
+  data,
+  stat,
+  stat_is_missing,
+  tip_positions_row,
+  tip_positions_column
+) {
+  validate_bipartite_layout(layout)
+
+  if (!is.null(data)) {
+    rlang::abort("`data` must be `NULL` when `layout` is supplied.")
+  }
+  if (!stat_is_missing && !identical(stat, "identity")) {
+    rlang::abort(
+      "`stat` must be `\"identity\"` when `layout` is supplied."
+    )
+  }
+  if (!is.null(tip_positions_row) || !is.null(tip_positions_column)) {
+    rlang::abort(
+      paste0(
+        "Tip positions are already included in `layout`; ",
+        "do not supply them again."
+      )
+    )
+  }
+
+  invisible(layout)
+}
+
+validate_bipnet_layout_node_type <- function(type) {
+  if (
+    !is.character(type) ||
+      length(type) != 1L ||
+      is.na(type) ||
+      !type %in% c("row", "column")
+  ) {
+    rlang::abort(
+      "`type` must be either `\"row\"` or `\"column\"` with `layout`."
+    )
+  }
+  type
+}
+
+validate_bipnet_layout_interaction_type <- function(type) {
+  if (is.null(type)) {
+    return(invisible(type))
+  }
+  if (
+    !is.character(type) ||
+      length(type) != 1L ||
+      is.na(type) ||
+      type != "interaction"
+  ) {
+    rlang::abort("`type` must be `\"interaction\"` with `layout`.")
+  }
+  invisible(type)
+}
+
 #' Draw bipartite boxes
 #'
 #' Convenience layer to draw row (`type = "row"`) or column
@@ -35,6 +105,13 @@ GeomBipnetBox <- ggproto(
 #' @inheritParams ggplot2::layer
 #' @inheritParams stat_bipnet
 #' @param stat The stat to use. Defaults to `"bipnet"` (i.e., `StatBipnet`).
+#' @param layout An optional `bipartite_layout` created by
+#'   [layout_bipartite()]. When supplied, the precomputed node coordinates are
+#'   drawn with the identity stat, `data` must be `NULL`, and plot-level
+#'   aesthetics are not inherited.
+#' @param type Required node side: `"row"` or `"column"`. The raw-data path
+#'   also accepts the compatibility aliases `"box1"` and `"box2"`; the layout
+#'   path accepts only the canonical names.
 #' @param ... Additional aesthetics passed to the geom/stat.
 #'
 #' @return A ggplot2 layer using `GeomBipnetBox`.
@@ -72,8 +149,48 @@ geom_bipnet_box <- function(
   ...,
   na.rm = FALSE,
   show.legend = NA,
-  inherit.aes = TRUE
+  inherit.aes = TRUE,
+  layout = NULL,
+  type = NULL
 ) {
+  stat_is_missing <- missing(stat)
+
+  if (!is.null(layout)) {
+    validate_bipnet_layout_layer(
+      layout = layout,
+      data = data,
+      stat = stat,
+      stat_is_missing = stat_is_missing,
+      tip_positions_row = tip_positions_row,
+      tip_positions_column = tip_positions_column
+    )
+    type <- validate_bipnet_layout_node_type(type)
+    node_data <- dplyr::filter(layout$nodes, .data$side == type)
+    layout_mapping <- merge_bipnet_layout_mapping(
+      ggplot2::aes(
+        xmin = xmin,
+        xmax = xmax,
+        ymin = ymin,
+        ymax = ymax
+      ),
+      mapping
+    )
+
+    return(ggplot2::layer(
+      data = node_data,
+      mapping = layout_mapping,
+      stat = "identity",
+      geom = GeomBipnetBox,
+      position = position,
+      show.legend = show.legend,
+      inherit.aes = FALSE,
+      params = list(
+        na.rm = na.rm,
+        ...
+      )
+    ))
+  }
+
   ggplot2::layer(
     data = data,
     mapping = mapping,
@@ -83,6 +200,7 @@ geom_bipnet_box <- function(
     show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
+      type = type,
       tip_positions_row = tip_positions_row,
       tip_positions_column = tip_positions_column,
       na.rm = na.rm,
@@ -134,6 +252,13 @@ GeomBipnetPoint <- ggproto(
 #' @inheritParams ggplot2::layer
 #' @inheritParams stat_bipnet
 #' @param stat The stat to use. Defaults to `"bipnet"` (i.e., `StatBipnet`).
+#' @param layout An optional `bipartite_layout` created by
+#'   [layout_bipartite()]. When supplied, the precomputed node coordinates are
+#'   drawn with the identity stat, `data` must be `NULL`, and plot-level
+#'   aesthetics are not inherited.
+#' @param type Required node side: `"row"` or `"column"`. The raw-data path
+#'   also accepts the compatibility aliases `"box1"` and `"box2"`; the layout
+#'   path accepts only the canonical names.
 #' @param ... Additional aesthetics passed to the geom/stat.
 #'
 #' @return A ggplot2 layer using `GeomBipnetPoint`.
@@ -167,8 +292,48 @@ geom_bipnet_point <- function(
   ...,
   na.rm = FALSE,
   show.legend = NA,
-  inherit.aes = TRUE
+  inherit.aes = TRUE,
+  layout = NULL,
+  type = NULL
 ) {
+  stat_is_missing <- missing(stat)
+
+  if (!is.null(layout)) {
+    validate_bipnet_layout_layer(
+      layout = layout,
+      data = data,
+      stat = stat,
+      stat_is_missing = stat_is_missing,
+      tip_positions_row = tip_positions_row,
+      tip_positions_column = tip_positions_column
+    )
+    type <- validate_bipnet_layout_node_type(type)
+    node_data <- dplyr::filter(layout$nodes, .data$side == type)
+    layout_mapping <- merge_bipnet_layout_mapping(
+      ggplot2::aes(
+        xmin = xmin,
+        xmax = xmax,
+        ymin = ymin,
+        ymax = ymax
+      ),
+      mapping
+    )
+
+    return(ggplot2::layer(
+      data = node_data,
+      mapping = layout_mapping,
+      stat = "identity",
+      geom = GeomBipnetPoint,
+      position = position,
+      show.legend = show.legend,
+      inherit.aes = FALSE,
+      params = list(
+        na.rm = na.rm,
+        ...
+      )
+    ))
+  }
+
   ggplot2::layer(
     data = data,
     mapping = mapping,
@@ -178,6 +343,7 @@ geom_bipnet_point <- function(
     show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
+      type = type,
       tip_positions_row = tip_positions_row,
       tip_positions_column = tip_positions_column,
       na.rm = na.rm,
@@ -203,7 +369,6 @@ geom_bipnet_point <- function(
 GeomBipnetInteraction <- ggproto(
   "GeomBipnetInteraction",
   GeomPolygon,
-  # required_aes = c("x", "y", "xmin", "xmax", "ymin", "ymax"),
   required_aes = c("x", "y", "group"),
   default_aes = aes(
     fill = "grey",
@@ -213,11 +378,10 @@ GeomBipnetInteraction <- ggproto(
     alpha = 1
   ),
   setup_data = function(data, params) {
-    transform(
-      data,
-      row = as.character(row),
-      column = as.character(column)
-    )
+    for (id_column in intersect(c("row", "column"), names(data))) {
+      data[[id_column]] <- as.character(data[[id_column]])
+    }
+    data
   }
 )
 
@@ -262,6 +426,13 @@ GeomBipnetInteractionBinary <- ggproto(
 #' @inheritParams ggplot2::layer
 #' @inheritParams stat_bipnet
 #' @param stat The stat to use. Defaults to `"bipnet"` (i.e., `StatBipnet`).
+#' @param layout An optional `bipartite_layout` created by
+#'   [layout_bipartite()]. When supplied, precomputed interaction coordinates
+#'   are drawn with the identity stat, `data` must be `NULL`, and plot-level
+#'   aesthetics are not inherited. If `interaction_type` is omitted, the mode
+#'   is taken from `layout`.
+#' @param type Use `NULL` (the default) or `"interaction"`. With `layout`, no
+#'   row, column, or compatibility alias is accepted.
 #' @param interaction_type One of `"abundance"` or `"binary"`.
 #' @param ... Additional aesthetics passed to the geom/stat.
 #'
@@ -315,8 +486,75 @@ geom_bipnet_interaction <- function(
   ...,
   na.rm = FALSE,
   show.legend = NA,
-  inherit.aes = TRUE
+  inherit.aes = TRUE,
+  layout = NULL,
+  type = NULL
 ) {
+  stat_is_missing <- missing(stat)
+  interaction_type_is_missing <- missing(interaction_type)
+
+  if (!is.null(layout)) {
+    validate_bipnet_layout_layer(
+      layout = layout,
+      data = data,
+      stat = stat,
+      stat_is_missing = stat_is_missing,
+      tip_positions_row = tip_positions_row,
+      tip_positions_column = tip_positions_column
+    )
+    validate_bipnet_layout_interaction_type(type)
+
+    layout_mode <- layout$params$interaction
+    interaction_type <- if (interaction_type_is_missing) {
+      layout_mode
+    } else {
+      match.arg(interaction_type)
+    }
+    if (!identical(interaction_type, layout_mode)) {
+      rlang::abort(
+        paste0(
+          "`interaction_type` must match `layout$params$interaction` ",
+          "(`\"", layout_mode, "\"`)."
+        )
+      )
+    }
+
+    if (interaction_type == "binary") {
+      geom <- GeomBipnetInteractionBinary
+      default_mapping <- ggplot2::aes(
+        x = x,
+        y = y,
+        xend = xend,
+        yend = yend
+      )
+    } else {
+      geom <- GeomBipnetInteraction
+      default_mapping <- ggplot2::aes(
+        x = x,
+        y = y,
+        group = edge_id
+      )
+    }
+    layout_mapping <- merge_bipnet_layout_mapping(
+      default_mapping,
+      mapping
+    )
+
+    return(ggplot2::layer(
+      data = layout$interactions,
+      mapping = layout_mapping,
+      stat = "identity",
+      geom = geom,
+      position = position,
+      show.legend = show.legend,
+      inherit.aes = FALSE,
+      params = list(
+        na.rm = na.rm,
+        ...
+      )
+    ))
+  }
+
   interaction_type <- match.arg(interaction_type)
   geom <- if (interaction_type == "binary") {
     GeomBipnetInteractionBinary
@@ -333,6 +571,7 @@ geom_bipnet_interaction <- function(
     show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
+      type = type,
       interaction_type = interaction_type,
       tip_positions_row = tip_positions_row,
       tip_positions_column = tip_positions_column,

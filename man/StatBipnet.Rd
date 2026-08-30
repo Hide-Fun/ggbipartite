@@ -44,7 +44,8 @@ expected to return a list with elements \code{row_box}, \code{column_box}, and
 \code{xmin}, \code{xmax}, \code{ymin}, \code{ymax}, plus \code{column}.}
 \item{\code{"interaction"}}{Polygons spanning the two boxes with columns
 \code{x}, \code{y}, \code{row}, \code{column}, and a \code{group} id per interaction.}
-\item{\code{"box1"}/\code{"box2"}}{Backward-compatible aliases for \code{"row"}/\code{"column"}.}
+\item{\code{"box1"}/\code{"box2"}}{Backward-compatible aliases for
+\code{"row"}/\code{"column"}.}
 }
 }
 

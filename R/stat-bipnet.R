@@ -359,7 +359,12 @@ extract_side_boxes <- function(.bn_coords) {
 #'   provided; otherwise the unchanged input.
 #' @keywords internal
 #' @noRd
-align_box_to_tip_positions <- function(box_df, id_col, tip_positions, side_name) {
+align_box_to_tip_positions <- function(
+  box_df,
+  id_col,
+  tip_positions,
+  side_name
+) {
   if (is.null(tip_positions)) {
     return(box_df)
   }
@@ -588,7 +593,8 @@ compute_binary_interaction_coords <- function(.bn_coords) {
 #'     `xmin`, `xmax`, `ymin`, `ymax`, plus `column`.}
 #'   \item{`"interaction"`}{Polygons spanning the two boxes with columns
 #'     `x`, `y`, `row`, `column`, and a `group` id per interaction.}
-#'   \item{`"box1"`/`"box2"`}{Backward-compatible aliases for `"row"`/`"column"`.}
+#'   \item{`"box1"`/`"box2"`}{Backward-compatible aliases for
+#'     `"row"`/`"column"`.}
 #' }
 #'
 #' @details
@@ -753,8 +759,10 @@ StatBipnet <- ggplot2::ggproto(
 #' @param column_nm A single string giving the key column name in
 #'   `metadata_column` used to join column metadata.
 #' @param metadata_row Optional data frame with row metadata used by the stat.
-#' @param metadata_column Optional data frame with column metadata used by the stat.
-#' @param gap Spacing between the two partitions (see Details of `StatBipnet`).
+#' @param metadata_column Optional data frame with column metadata used by the
+#'   stat.
+#' @param gap Vertical spacing between adjacent nodes within each partition
+#'   (see Details of `StatBipnet`).
 #' @param box_ratio Width of boxes relative to the interaction band.
 #' @param ratio Overall aspect ratio of the layout.
 #' @param interaction_type One of `"abundance"` or `"binary"` for interaction
@@ -768,7 +776,8 @@ StatBipnet <- ggplot2::ggproto(
 #' @param geom Geom to use. Defaults to `"polygon"` for convenience.
 #' @param na.rm Logical indicating whether to drop `NA`s.
 #' @param show.legend Passed to [ggplot2::layer()].
-#' @param inherit.aes Should default aesthetics be inherited.
+#' @param inherit.aes Should plot-level aesthetics be inherited. Defaults to
+#'   `FALSE` for `stat_bipnet()`.
 #' @param ... Additional parameters passed to the stat/geom.
 #'
 #' @section Aesthetics:

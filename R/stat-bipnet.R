@@ -607,6 +607,13 @@ compute_binary_interaction_coords <- function(.bn_coords) {
 #' expected to return a list with elements `row_box`, `column_box`, and
 #' `interaction_coords` containing the columns described above.
 #'
+#' @section Node order:
+#' Factor levels define the row and column order of the interaction matrix;
+#' unused levels are ignored. Character IDs retain the legacy sorted order.
+#' To match coordinates from [construct_bn_coordination()], set factor levels
+#' to the corresponding matrix dimension names and use the same layout
+#' parameters. A shared [layout_bipartite()] avoids separate calculations.
+#'
 #' @section Parameters handled:
 #' `StatBipnet` honours the arguments accepted by [stat_bipnet()], including
 #' `type`, `metadata_row`, `metadata_column`, `gap`, `box_ratio`, `ratio`,
@@ -685,6 +692,23 @@ StatBipnet <- ggplot2::ggproto(
         var = "row"
       ) %>%
       as.matrix()
+
+    # Preserve explicit node order before labels and tree links reuse it.
+    row_order <- if (is.factor(data$row)) {
+      levels(data$row)
+    } else {
+      rownames(mat)
+    }
+    column_order <- if (is.factor(data$column)) {
+      levels(data$column)
+    } else {
+      colnames(mat)
+    }
+    mat <- mat[
+      intersect(row_order, rownames(mat)),
+      intersect(column_order, colnames(mat)),
+      drop = FALSE
+    ]
 
     construct_bn_coordination_fn <- resolve_internal_function(
       "construct_bn_coordination"
@@ -783,6 +807,8 @@ StatBipnet <- ggplot2::ggproto(
 #' @section Aesthetics:
 #' The stat requires mappings `row`, `column`, and `count`. Other aesthetics are
 #' handled by the chosen geom (e.g., `fill`, `colour`, `alpha`).
+#'
+#' @inheritSection StatBipnet Node order
 #'
 #' @return A ggplot2 layer using `StatBipnet`.
 #' @importFrom methods slotNames

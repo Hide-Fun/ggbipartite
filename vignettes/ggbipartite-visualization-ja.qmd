@@ -434,6 +434,13 @@ row_box / column_box / interaction 座標を明示的に作成します。
 ふだんは直接呼ぶ必要はありませんが、
 ラベル座標や外部図形（リンク線など）を自作するときには有用です。
 
+ラベルとボックスを一致させるには、`interaction_df` のfactor levelsを
+`interaction_matrix` の行名・列名と同じ順序にし、`gap` などの設定も揃えます。
+描画レイヤーはこのfactor順を保持します。文字列のまま渡したIDは辞書順で
+処理されるため、行列の順序と混在させないでください。
+v0.10.0の新しいコードでは、`layout_bipartite()` で一度計算した座標を
+描画・注釈で共有する方法も使えます。
+
 ```{r}
 #| label: label-annotation
 #| fig-width: 10
@@ -508,6 +515,10 @@ ggplot(
 1. `adjust_tree()`: 系統樹の y スケールをボックスに合わせる
 1. `create_link()`: ボックス中心と tip を結ぶリンク座標を作る
 1. `get_yrange()`: 複数パネルの y 範囲を揃える
+
+ここでも、ネットワークと同じ行列順・factor順で作った `bn_coords` を
+系統樹とリンクへ渡します。リンクのネットワーク側の端点は、対応する
+ボックスの中心と一致する必要があります。
 
 ```{r}
 #| label: tree-link-setup
@@ -709,11 +720,16 @@ if (requireNamespace("patchwork", quietly = TRUE)) {
 binary ノード位置を同じ tip 座標へ固定します。
 - `ggbipartite::get_yrange()`: tree と network の y 範囲を共通化します。
 - `ggtree::ggtree()`: tip 座標テーブル（`label`, `y`）抽出に使います。
+- `ggtree::geom_treescale()`: 左右の系統樹の下部に枝長スケールを表示します。
 
 前節では `adjust_tree()` で系統樹をネットワーク側のスケールに合わせました。  
 ここでは逆に、系統樹の tip の y 座標を基準にして
 ネットワーク側を合わせる方法を示します。この場合は link が不要です。
 また、abundance の場合は現実的な調整が難しいため、binary で使う前提です。
+
+下部のバーは、それぞれの系統樹の元の枝長単位で `0.5` を示します。
+この例はランダム系統樹なので、時間や塩基置換数などの単位は持ちません。
+左右の x 軸は独立しているため、同じ値のバーでも表示上の長さは異なります。
 
 ```{r}
 #| label: tree-scale-preserve-setup
@@ -777,7 +793,8 @@ t_column_tree_scale <- ggtree::ggtree(symbiont_phylo) +
     hjust = 1,
     size = 3
   ) +
-  scale_x_reverse()
+  scale_x_reverse() +
+  coord_cartesian(clip = "off")
 
 ylim_tree_scale <- range(
   c(
@@ -788,13 +805,43 @@ ylim_tree_scale <- range(
   na.rm = TRUE
 )
 
+tree_scale_width <- 0.5
+tree_scale_y <- min(host_tip_positions$y, symbiont_tip_positions$y) - 1
+tree_scale_offset <- -0.4
+
+# Reserve bottom space without moving the tips or changing branch lengths.
+ylim_tree_scale[1] <- min(
+  ylim_tree_scale[1],
+  tree_scale_y + tree_scale_offset - 0.3
+)
+
 scale_y_tree_scale <- scale_y_continuous(
   limits = ylim_tree_scale,
   expand = expansion(mult = 0)
 )
 
-t_row_tree_scale <- t_row_tree_scale + scale_y_tree_scale
-t_column_tree_scale <- t_column_tree_scale + scale_y_tree_scale
+t_row_tree_scale <- t_row_tree_scale +
+  ggtree::geom_treescale(
+    x = 0,
+    y = tree_scale_y,
+    width = tree_scale_width,
+    offset = tree_scale_offset,
+    fontsize = 3
+  ) +
+  scale_y_tree_scale
+
+# geom_treescale() uses transformed x coordinates after scale_x_reverse().
+# Keep the positive bar width inside the tree's existing x range.
+t_column_tree_scale <- t_column_tree_scale +
+  ggtree::geom_treescale(
+    x = -tree_scale_width,
+    y = tree_scale_y,
+    width = tree_scale_width,
+    offset = tree_scale_offset,
+    fontsize = 3
+  ) +
+  scale_y_tree_scale
+
 p_binary_tree_scale <- p_binary_tree_scale + scale_y_tree_scale
 ```
 

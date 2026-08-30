@@ -120,6 +120,15 @@ The stat requires mappings \code{row}, \code{column}, and \code{count}. Other ae
 handled by the chosen geom (e.g., \code{fill}, \code{colour}, \code{alpha}).
 }
 
+\section{Node order}{
+
+Factor levels define the row and column order of the interaction matrix;
+unused levels are ignored. Character IDs retain the legacy sorted order.
+To match coordinates from \code{\link[=construct_bn_coordination]{construct_bn_coordination()}}, set factor levels
+to the corresponding matrix dimension names and use the same layout
+parameters. A shared \code{\link[=layout_bipartite]{layout_bipartite()}} avoids separate calculations.
+}
+
 \examples{
 # Minimal example
 library(ggplot2)

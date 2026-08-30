@@ -28,6 +28,7 @@ lint_targets <- list(
   "tests/testthat/test-geom-layout.R" = core_linters,
   "tests/testthat/test-plot-bipartite.R" = core_linters,
   "tests/testthat/test-visual-regression.R" = core_linters,
+  "tests/testthat/test-stat-bipnet-ordering.R" = core_linters,
   "tools/lint.R" = core_linters
 )
 

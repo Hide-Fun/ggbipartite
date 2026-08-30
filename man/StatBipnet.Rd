@@ -49,6 +49,15 @@ expected to return a list with elements \code{row_box}, \code{column_box}, and
 }
 }
 
+\section{Node order}{
+
+Factor levels define the row and column order of the interaction matrix;
+unused levels are ignored. Character IDs retain the legacy sorted order.
+To match coordinates from \code{\link[=construct_bn_coordination]{construct_bn_coordination()}}, set factor levels
+to the corresponding matrix dimension names and use the same layout
+parameters. A shared \code{\link[=layout_bipartite]{layout_bipartite()}} avoids separate calculations.
+}
+
 \section{Parameters handled}{
 
 \code{StatBipnet} honours the arguments accepted by \code{\link[=stat_bipnet]{stat_bipnet()}}, including

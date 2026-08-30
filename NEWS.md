@@ -14,6 +14,8 @@
 
 ## Plotting
 
+- Raw-data geoms now preserve explicit factor-level order, keeping box
+  labels and tree-link endpoints aligned with matrix-based coordinates.
 - `geom_bipnet_box()`, `geom_bipnet_point()`, and
   `geom_bipnet_interaction()` now accept `layout`. This path draws precomputed
   coordinates with the identity stat, while valid raw-data calls remain as a

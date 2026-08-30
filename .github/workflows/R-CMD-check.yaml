@@ -39,15 +39,26 @@ jobs:
       - name: Build one source tarball for the check matrix
         shell: bash
         run: |
-          mkdir -p source-package
           R CMD build . --no-manual --compact-vignettes=gs+qpdf
-          mv ggbipartite_*.tar.gz source-package/
+          tarball=$(find . -maxdepth 1 -name 'ggbipartite_*.tar.gz' -print)
+          test -n "$tarball"
+          test "$(printf '%s\n' "$tarball" | wc -l)" -eq 1
+          source_bytes=$(wc -c < "$tarball")
+          test "$source_bytes" -lt $((10 * 1024 * 1024))
+          extract_dir=$(mktemp -d)
+          tar -xzf "$tarball" -C "$extract_dir"
+          inst_doc_kib=$(du -sk "$extract_dir"/*/inst/doc | awk '{print $1}')
+          test "$inst_doc_kib" -le 5120
+          mkdir -p source-package
+          mv "$tarball" source-package/
+          cd source-package
+          sha256sum *.tar.gz > SHA256SUMS
 
       - name: Upload source tarball
         uses: actions/upload-artifact@v4
         with:
           name: source-package
-          path: source-package/*.tar.gz
+          path: source-package/
           if-no-files-found: error
           retention-days: 7
 
@@ -63,26 +74,32 @@ jobs:
             os: ubuntu-latest
             r: "4.6.0"
             bioc: "3.23"
+            minimums: false
           - id: release-windows
             os: windows-latest
             r: "4.6.0"
             bioc: "3.23"
+            minimums: false
           - id: release-macos
             os: macos-latest
             r: "4.6.0"
             bioc: "3.23"
+            minimums: false
           - id: oldrel-linux
             os: ubuntu-latest
             r: oldrel-1
             bioc: "3.22"
+            minimums: false
           - id: floor-linux
             os: ubuntu-latest
-            r: "4.1.3"
+            r: "4.1.0"
             bioc: "3.14"
+            minimums: true
           - id: bioc-devel-linux
             os: ubuntu-latest
             r: "4.6.0"
             bioc: "3.24"
+            minimums: false
     env:
       R_BIOC_VERSION: ${{ matrix.config.bioc }}
     steps:
@@ -99,6 +116,7 @@ jobs:
         with:
           extra-packages: |
             any::BiocManager
+            any::remotes
             any::rcmdcheck
           needs: check
 
@@ -108,12 +126,53 @@ jobs:
           expected <- Sys.getenv("R_BIOC_VERSION")
           actual <- as.character(BiocManager::version())
           stopifnot(identical(actual, expected))
+          validity <- BiocManager::valid()
+          if (!isTRUE(validity)) {
+            print(validity)
+            stop("The installed Bioconductor environment is not valid.")
+          }
+
+      - name: Install declared minimum dependency versions
+        if: matrix.config.minimums
+        shell: Rscript {0}
+        run: |
+          minimums <- c(
+            ggplot2 = "3.4.0",
+            dplyr = "1.1.0",
+            tidyr = "1.3.0",
+            testthat = "3.1.7"
+          )
+          for (package in names(minimums)) {
+            remotes::install_version(
+              package,
+              version = minimums[[package]],
+              dependencies = FALSE,
+              upgrade = "never"
+            )
+          }
+          installed <- vapply(
+            names(minimums),
+            function(package) as.character(packageVersion(package)),
+            character(1)
+          )
+          print(installed)
+          stopifnot(identical(installed, minimums))
 
       - name: Download source tarball
         uses: actions/download-artifact@v4
         with:
           name: source-package
           path: source-package
+
+      - name: Verify the canonical source checksum
+        shell: bash
+        run: |
+          cd source-package
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum --check SHA256SUMS
+          else
+            shasum -a 256 --check SHA256SUMS
+          fi
 
       - name: Check the shared source tarball
         shell: Rscript {0}
@@ -124,13 +183,41 @@ jobs:
             full.names = TRUE
           )
           stopifnot(length(tarballs) == 1L)
-          rcmdcheck::rcmdcheck(
+          result <- rcmdcheck::rcmdcheck(
             path = tarballs[[1]],
             args = c("--no-manual", "--as-cran"),
             build_args = character(),
             check_dir = "check",
-            error_on = "warning"
+            error_on = "never"
           )
+          print(result)
+          if (length(result$errors) > 0L || length(result$warnings) > 0L) {
+            stop("R CMD check produced an ERROR or WARNING.")
+          }
+          allowed_notes <- vapply(
+            result$notes,
+            function(note) {
+              lines <- trimws(strsplit(note, "\n", fixed = TRUE)[[1L]])
+              known_lines <- grepl(
+                "^checking CRAN incoming feasibility .*NOTE$",
+                lines
+              ) |
+                grepl("^Maintainer: ", lines) |
+                lines %in% c(
+                  "",
+                  "New submission",
+                  "Suggests or Enhances not in mainstream repositories:",
+                  "RPANDA"
+                )
+              grepl("^checking CRAN incoming feasibility", lines[[1L]]) &&
+                all(known_lines)
+            },
+            logical(1)
+          )
+          if (any(!allowed_notes)) {
+            cat(result$notes[!allowed_notes], sep = "\n\n")
+            stop("R CMD check produced an unexpected NOTE.")
+          }
 
       - name: Show testthat output
         if: always()
@@ -146,3 +233,163 @@ jobs:
           path: check
           if-no-files-found: ignore
           retention-days: 7
+
+  lint:
+    name: Lint changed v0.10 code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.6.0"
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::lintr
+
+      - name: Run blocking lint checks
+        shell: Rscript {0}
+        run: source("tools/lint.R")
+
+  coverage:
+    name: Measure test coverage
+    runs-on: ubuntu-latest
+    env:
+      R_BIOC_VERSION: "3.23"
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.6.0"
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::BiocManager
+            any::covr
+          needs: coverage
+
+      - name: Require successful coverage measurement
+        shell: Rscript {0}
+        run: |
+          coverage <- covr::package_coverage(quiet = FALSE)
+          stopifnot(inherits(coverage, "coverage"))
+          print(coverage)
+
+  visual-regression:
+    name: Visual regression (fixed Linux)
+    runs-on: ubuntu-24.04
+    env:
+      R_BIOC_VERSION: "3.23"
+      RUN_VDIFFR: "true"
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.6.0"
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::BiocManager
+            any::devtools
+            any::remotes
+            any::vdiffr
+          needs: check
+
+      - name: Pin the visual rendering toolchain
+        shell: Rscript {0}
+        run: |
+          versions <- c(
+            systemfonts = "1.3.2",
+            svglite = "2.2.2",
+            ggplot2 = "4.0.3",
+            vdiffr = "1.0.9"
+          )
+          for (package in names(versions)) {
+            remotes::install_version(
+              package,
+              version = versions[[package]],
+              dependencies = FALSE,
+              upgrade = "never"
+            )
+          }
+          installed <- vapply(
+            names(versions),
+            function(package) as.character(packageVersion(package)),
+            character(1)
+          )
+          print(installed)
+          stopifnot(identical(installed, versions))
+
+      - name: Compare approved SVG snapshots
+        shell: Rscript {0}
+        run: |
+          devtools::test(
+            filter = "visual-regression",
+            stop_on_failure = TRUE,
+            stop_on_warning = TRUE
+          )
+
+  docs:
+    name: Render README from source
+    runs-on: ubuntu-latest
+    env:
+      R_BIOC_VERSION: "3.23"
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.6.0"
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::BiocManager
+          needs: check
+
+      - name: Install the current package
+        shell: bash
+        run: R CMD INSTALL .
+
+      - name: Render README
+        shell: bash
+        run: quarto render README.qmd
+
+      - name: Require generated README to be current
+        shell: bash
+        run: |
+          git diff --exit-code -- README.md
+          git ls-files --error-unmatch man/figures/README-quick-start-1.png
+          test -s man/figures/README-quick-start-1.png
+
+  required:
+    name: Required quality gates
+    if: always()
+    needs:
+      - build-source
+      - check
+      - lint
+      - coverage
+      - visual-regression
+      - docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every release gate to pass
+        shell: bash
+        run: |
+          test "${{ needs.build-source.result }}" = "success"
+          test "${{ needs.check.result }}" = "success"
+          test "${{ needs.lint.result }}" = "success"
+          test "${{ needs.coverage.result }}" = "success"
+          test "${{ needs.visual-regression.result }}" = "success"
+          test "${{ needs.docs.result }}" = "success"

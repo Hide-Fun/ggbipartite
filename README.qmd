@@ -1,6 +1,8 @@
 ---
 title: "ggbipartite"
 format: gfm
+fig-format: retina
+fig-dpi: 350
 execute:
   echo: true
   warning: false
@@ -28,6 +30,9 @@ layout across layers.
 ```{r}
 #| label: quick-start
 #| fig-path: man/figures/README-
+#| fig-width: 7
+#| fig-height: 5
+#| out-width: 672px
 library(ggplot2)
 library(ggbipartite)
 

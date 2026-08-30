@@ -1,6 +1,8 @@
 ---
 title: "Integrating phylogenetic trees"
 format: html
+fig-format: retina
+fig-dpi: 350
 execute:
   warning: false
   message: false
@@ -46,6 +48,7 @@ Abundance layouts use connector panels between tree tips and boxes.
 ```{r}
 #| fig-width: 10
 #| fig-height: 5
+#| out-width: 960px
 abundance_layout <- layout_bipartite(
   interaction_matrix,
   row_tree = row_tree,
@@ -60,6 +63,7 @@ need connector panels.
 ```{r}
 #| fig-width: 9
 #| fig-height: 5
+#| out-width: 864px
 binary_layout <- layout_bipartite(
   interaction_matrix,
   interaction = "binary",

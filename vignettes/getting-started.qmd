@@ -1,6 +1,8 @@
 ---
 title: "Getting started with ggbipartite"
 format: html
+fig-format: retina
+fig-dpi: 350
 execute:
   warning: false
   message: false
@@ -53,6 +55,7 @@ The three layers below share those exact coordinates.
 ```{r}
 #| fig-width: 7
 #| fig-height: 5
+#| out-width: 672px
 ggplot() +
   geom_bipnet_box(
     layout = network_layout,
@@ -96,6 +99,7 @@ Set `interaction = "binary"` explicitly for presence-absence drawing. Positive
 weights become one; zeros remain absent edges.
 
 ```{r}
+#| out-width: 672px
 binary_layout <- layout_bipartite(
   interaction_matrix,
   interaction = "binary"

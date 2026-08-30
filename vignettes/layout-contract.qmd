@@ -1,6 +1,8 @@
 ---
 title: "Bipartite layout contract"
 format: html
+fig-format: retina
+fig-dpi: 350
 vignette: >
   %\VignetteIndexEntry{Bipartite layout contract}
   %\VignetteEngine{quarto::html}

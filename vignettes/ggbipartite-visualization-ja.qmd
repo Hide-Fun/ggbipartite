@@ -4,11 +4,12 @@ format:
   html:
     toc: true
     number-sections: false
+fig-format: retina
+fig-dpi: 350
 execute:
   echo: true
   warning: false
   message: false
-  fig-dpi: 350
 embed-resources: true
 vignette: >
   %\VignetteIndexEntry{ggbipartiteで始める二部ネットワーク可視化}

@@ -58,7 +58,7 @@ ggplot() +
   theme_void()
 ```
 
-![](man/figures/README-quick-start-1.png)
+<img src="man/figures/README-quick-start-1.png" width="672" />
 
 `network_layout$nodes` and `network_layout$interactions` contain the
 exact data drawn by the layers. Long data is also supported when `row`,

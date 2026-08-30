@@ -1,6 +1,8 @@
 ---
 title: "Migrating from ggbipartite 0.9.x"
 format: html
+fig-format: retina
+fig-dpi: 350
 vignette: >
   %\VignetteIndexEntry{Migrating from ggbipartite 0.9.x}
   %\VignetteEngine{quarto::html}

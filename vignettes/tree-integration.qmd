@@ -43,7 +43,32 @@ column_tree <- ape::read.tree(
 )
 ```
 
-Abundance layouts use connector panels between tree tips and boxes.
+`plot_bipartite()` returns a `ggbipartite_plot` with named, editable
+`components`. Tree tips are unlabelled by default. The helper below adds the
+identifiers in aligned columns, with dotted guides for tips that end before
+the label column. Extra horizontal space keeps the labels inside their panels;
+the tree coordinates and tip order are unchanged.
+
+```{r}
+add_tree_tip_labels <- function(tree_plot, hjust = 0) {
+  stopifnot(inherits(tree_plot, "ggplot"), hjust %in% c(0, 1))
+  tree_extent <- max(tree_plot$data$x)
+
+  tree_plot +
+    ggtree::geom_tiplab(
+      align = TRUE,
+      hjust = hjust,
+      linetype = "dotted",
+      linesize = 0.3,
+      size = 3.5
+    ) +
+    ggplot2::expand_limits(x = 1.55 * tree_extent)
+}
+```
+
+Abundance layouts use connector panels between tree tips and boxes. The
+composer gives every panel the same vertical range and expansion, so each
+connector endpoint shares the height of its corresponding tip or box centre.
 
 ```{r}
 #| fig-width: 10
@@ -54,11 +79,24 @@ abundance_layout <- layout_bipartite(
   row_tree = row_tree,
   column_tree = column_tree
 )
-plot_bipartite(abundance_layout)
+abundance_plot <- plot_bipartite(abundance_layout)
+abundance_plot$components$row_tree <- add_tree_tip_labels(
+  abundance_plot$components$row_tree
+)
+abundance_plot$components$column_tree <- add_tree_tip_labels(
+  abundance_plot$components$column_tree,
+  hjust = 1
+)
+as_patchwork(
+  abundance_plot,
+  widths = c(row_tree = 2, network = 3, column_tree = 2)
+)
 ```
 
 Binary layouts align node centres directly with tree tips and therefore do not
-need connector panels.
+need connector panels. Panel widths can be changed without breaking this
+vertical alignment. The column tree has a reversed horizontal axis, so its
+labels use `hjust = 1` to face the network.
 
 ```{r}
 #| fig-width: 9
@@ -70,7 +108,18 @@ binary_layout <- layout_bipartite(
   row_tree = row_tree,
   column_tree = column_tree
 )
-plot_bipartite(binary_layout)
+binary_plot <- plot_bipartite(binary_layout)
+binary_plot$components$row_tree <- add_tree_tip_labels(
+  binary_plot$components$row_tree
+)
+binary_plot$components$column_tree <- add_tree_tip_labels(
+  binary_plot$components$column_tree,
+  hjust = 1
+)
+as_patchwork(
+  binary_plot,
+  widths = c(row_tree = 2, network = 3.5, column_tree = 2)
+)
 ```
 
 By default, either side of an ID mismatch is an error and the message lists the
@@ -87,6 +136,6 @@ layout_bipartite(
 )
 ```
 
-The composer returns a `ggbipartite_plot`, not a bare patchwork. Its named
-`components` can be edited before `as_patchwork()` or printing. The network and
-component data remain available through `$layout`.
+Component edits are applied before `as_patchwork()` or printing. The network
+and component data remain available through `$layout`, so these presentation
+changes do not require recomputing the layout.

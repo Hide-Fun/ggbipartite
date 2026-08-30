@@ -14,6 +14,8 @@
 
 ## Plotting
 
+- Tree/network compositions now share a y scale and panel height, keeping
+  abundance connectors and binary tree tips visually aligned across sizes.
 - Raw-data geoms now preserve explicit factor-level order, keeping box
   labels and tree-link endpoints aligned with matrix-based coordinates.
 - `geom_bipnet_box()`, `geom_bipnet_point()`, and

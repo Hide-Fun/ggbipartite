@@ -10,6 +10,11 @@
 #' them. The suggested package `patchwork` is required only when two or more
 #' non-`NULL` panels must be assembled.
 #'
+#' With trees, every panel uses the same y scale and fills the same vertical
+#' space. Panel widths change horizontal spacing without moving matched tips
+#' and nodes vertically. Tree-free plots retain a fixed coordinate aspect
+#' ratio. The composer does not change the stored layout or tree coordinates.
+#'
 #' @param data A matrix or long data frame accepted by [layout_bipartite()],
 #'   or an existing `bipartite_layout` object.
 #' @param row,column,weight Columns used for long-format raw data. Supply bare
@@ -157,13 +162,40 @@ build_bipartite_components <- function(layout) {
   row_link <- build_bipartite_link_component(layout, "row")
   column_link <- build_bipartite_link_component(layout, "column")
 
-  list(
+  components <- list(
     row_tree = row_tree,
     row_link = row_link,
     network = network,
     column_link = column_link,
     column_tree = column_tree
   )
+
+  if (is.null(row_tree) && is.null(column_tree)) {
+    return(components)
+  }
+
+  if (mode == "abundance") {
+    # Connect to box edges instead of leaving a gap inside the network panel.
+    components$network <- components$network +
+      ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = 0))
+  }
+
+  # Matching data coordinates also need identical panel heights and expansion.
+  y_limits <- range(c(layout$nodes$ymin, layout$nodes$ymax))
+  lapply(components, function(component) {
+    if (is.null(component)) {
+      return(NULL)
+    }
+    suppressMessages(
+      component +
+        ggplot2::scale_y_continuous(
+          limits = y_limits,
+          expand = ggplot2::expansion(mult = 0.05)
+        ) +
+        ggplot2::coord_cartesian(clip = "off") +
+        ggplot2::theme(plot.margin = ggplot2::margin(t = 5.5, b = 5.5))
+    )
+  })
 }
 
 extract_bipartite_tree_component <- function(layout, side) {

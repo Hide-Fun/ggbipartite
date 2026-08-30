@@ -44,6 +44,11 @@ The returned object is deliberately not a patchwork object. Its named
 components can be inspected or edited before \code{\link[=as_patchwork]{as_patchwork()}} assembles
 them. The suggested package \code{patchwork} is required only when two or more
 non-\code{NULL} panels must be assembled.
+
+With trees, every panel uses the same y scale and fills the same vertical
+space. Panel widths change horizontal spacing without moving matched tips
+and nodes vertically. Tree-free plots retain a fixed coordinate aspect
+ratio. The composer does not change the stored layout or tree coordinates.
 }
 \examples{
 interaction_matrix <- matrix(

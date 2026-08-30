@@ -587,7 +587,8 @@ aggregate_layout_cells <- function(cells, duplicate) {
         cells$column == unique_cells$column[[index]]
       result <- duplicate(cells$weight[selected])
       if (
-        !typeof(result) %in% c("integer", "double") ||
+        !is.numeric(result) ||
+          !typeof(result) %in% c("integer", "double") ||
           length(result) != 1L ||
           !is.finite(result) ||
           result < 0

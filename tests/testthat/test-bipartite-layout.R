@@ -383,6 +383,17 @@ test_that("duplicate long cells require explicit aggregation", {
     "must return one finite, non-negative number",
     fixed = TRUE
   )
+  expect_error(
+    layout_bipartite(
+      interaction_data,
+      row = host,
+      column = partner,
+      weight = abundance,
+      duplicate = function(x) as.Date("2020-01-01")
+    ),
+    "must return one finite, non-negative number",
+    fixed = TRUE
+  )
 
   unique_data <- dplyr::distinct(
     interaction_data,

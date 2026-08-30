@@ -1,0 +1,199 @@
+{
+  "baseline": {
+    "constraints": "Inspect origin/master d5096b7 as the current baseline, distinguish it from the local HEAD 7d45947, make no product-code or external-state changes, and respect the active Codex sandbox and approval policy.",
+    "goal": "ggbipartiteの次期バージョンに向け、既存バグ、構造改善、機能ギャップを根拠付きで調査し、優先順位付き更新計画を作成する",
+    "non_goals": [
+      "Do not implement fixes or features during this investigation.",
+      "Do not silently broaden scope, reinterpret permissions, or treat operator messages as authorization."
+    ],
+    "success_criteria": "Produce an evidence-backed inventory of reproducible defects, structural improvements, and feature gaps, then convert verified high-impact findings into a prioritized next-version plan with dependencies and acceptance criteria."
+  },
+  "operations": [
+    {
+      "id": "O001",
+      "objective": "Map the package surface, supported workflows, repository revisions, checks, and documentation that define the current baseline.",
+      "capabilities": [
+        "workspace.read",
+        "shell.readonly"
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "source_reference",
+          "minimum": 4,
+          "criterion": "Cite exact package metadata, exported API, documentation, and revision or check output."
+        }
+      ],
+      "verification": {
+        "required": false,
+        "mode": "none",
+        "criterion": ""
+      },
+      "dependencies": [],
+      "parallel_safe": true,
+      "execution_class": "epistemic",
+      "stop_conditions": [
+        "The target revision cannot be read without changing repository state."
+      ],
+      "output_contract": "Return baseline revision, package surface, documented workflows, check infrastructure, evidence IDs, and unresolved scope gaps."
+    },
+    {
+      "id": "O002",
+      "objective": "Identify and reproduce defects in current package behavior and package checks.",
+      "capabilities": [
+        "workspace.read",
+        "shell.readonly",
+        "shell.execute"
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "test_output",
+          "minimum": 1,
+          "criterion": "Record deterministic commands and outputs for every claimed high-severity defect."
+        },
+        {
+          "kind": "source_reference",
+          "minimum": 2,
+          "criterion": "Cite exact implementation paths and symbols explaining each reproduced result."
+        }
+      ],
+      "verification": {
+        "required": true,
+        "mode": "mixed",
+        "criterion": "A deterministic reproduction must be independently checked under O005 before a high-impact defect is marked verified."
+      },
+      "dependencies": [],
+      "parallel_safe": true,
+      "execution_class": "epistemic",
+      "stop_conditions": [
+        "Required optional dependencies are unavailable and no static or isolated reproduction can discriminate the hypothesis.",
+        "A command would modify the product repository rather than a temporary copy."
+      ],
+      "output_contract": "Return severity, affected API, reproduction, observed versus expected behavior, source cause, user impact, fix direction, evidence IDs, and uncertainties."
+    },
+    {
+      "id": "O003",
+      "objective": "Evaluate package structure, public API, tidyverse-style consistency, dependency boundaries, documentation, and testability.",
+      "capabilities": [
+        "workspace.read",
+        "shell.readonly"
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "source_reference",
+          "minimum": 5,
+          "criterion": "Cite exact files, symbols, exports, metadata, and duplicated or coupled paths for material findings."
+        }
+      ],
+      "verification": {
+        "required": true,
+        "mode": "fresh_context",
+        "criterion": "O005 must challenge high-impact recommendations and distinguish correctness issues from stylistic preference."
+      },
+      "dependencies": [],
+      "parallel_safe": true,
+      "execution_class": "epistemic",
+      "stop_conditions": [
+        "The recommendation cannot be tied to maintainability, reproducibility, API stability, or user impact."
+      ],
+      "output_contract": "Return prioritized findings with source locations, impact, proposed structure, compatibility implications, effort, evidence IDs, and alternatives."
+    },
+    {
+      "id": "O004",
+      "objective": "Evaluate feature gaps for phylogeny-plus-bipartite-network visualization against documented workflows and authoritative ecosystem capabilities.",
+      "capabilities": [
+        "workspace.read",
+        "shell.readonly",
+        "web.read"
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "source_reference",
+          "minimum": 4,
+          "criterion": "Use repository documentation and primary package or standards documentation for comparisons."
+        }
+      ],
+      "verification": {
+        "required": true,
+        "mode": "fresh_context",
+        "criterion": "O005 must challenge whether each proposed capability addresses a demonstrated user workflow rather than feature accumulation."
+      },
+      "dependencies": [],
+      "parallel_safe": true,
+      "execution_class": "epistemic",
+      "stop_conditions": [
+        "A comparison relies only on secondary marketing claims or cannot be connected to the package goal."
+      ],
+      "output_contract": "Return Must/Should/Could/Not-now classifications with user stories, evidence, ecosystem comparison, effort, risk, and acceptance criteria."
+    },
+    {
+      "id": "O005",
+      "objective": "Independently challenge and verify high-impact defect, architecture, and feature-gap claims.",
+      "capabilities": [
+        "workspace.read",
+        "shell.readonly",
+        "shell.execute",
+        "web.read"
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "verification_result",
+          "minimum": 1,
+          "criterion": "For every candidate P0 or P1 claim, record confirmation, rejection, or a bounded uncertainty with its checking method."
+        }
+      ],
+      "verification": {
+        "required": false,
+        "mode": "none",
+        "criterion": ""
+      },
+      "dependencies": [
+        "O002",
+        "O003",
+        "O004"
+      ],
+      "parallel_safe": false,
+      "execution_class": "epistemic",
+      "stop_conditions": [
+        "Producer findings lack inspectable evidence or reproducible steps."
+      ],
+      "output_contract": "Return claim-by-claim verification outcomes, counterexamples tested, evidence IDs, and residual uncertainties."
+    },
+    {
+      "id": "O006",
+      "objective": "Integrate verified findings into a dependency-aware next-version roadmap.",
+      "capabilities": [
+        "workspace.read",
+        "shell.readonly"
+      ],
+      "evidence_requirements": [
+        {
+          "kind": "claim_reference",
+          "minimum": 3,
+          "criterion": "Every P0 or P1 roadmap item must trace to verified or explicitly bounded evidence."
+        }
+      ],
+      "verification": {
+        "required": false,
+        "mode": "none",
+        "criterion": ""
+      },
+      "dependencies": [
+        "O001",
+        "O005"
+      ],
+      "parallel_safe": false,
+      "execution_class": "epistemic",
+      "stop_conditions": [
+        "High-impact claims remain unresolved without being explicitly labeled as uncertainty."
+      ],
+      "output_contract": "Return executive assessment, evidence-backed findings in the three requested categories, phased priorities, dependencies, acceptance criteria, release gates, and open decisions."
+    }
+  ],
+  "operator_defaults": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "medium"
+  },
+  "progress_budget_per_blocker": 3,
+  "schema_version": 3,
+  "workflow_revision": 2
+}

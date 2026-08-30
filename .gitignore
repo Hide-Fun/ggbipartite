@@ -13,3 +13,15 @@ Rplots.pdf
 README_files/
 vignettes/*.html
 vignettes/*_files/
+
+# BEGIN collective-orchestrator managed ignores
+!.collective/
+.collective/*
+!.collective/workflow.json
+!.collective/checkpoint.json
+!.collective/evidence-index.jsonl
+!.collective/artifacts/
+.collective/artifacts/*
+!.collective/artifacts/accepted/
+!.collective/artifacts/accepted/**
+# END collective-orchestrator managed ignores

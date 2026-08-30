@@ -1,0 +1,1167 @@
+{
+  "attempts": [],
+  "checkpoint_sha256": "661b9dc05e896e6da65a47b59441171229f513253e28ec521c5de3ad0465b418",
+  "claims": [
+    {
+      "confidence": "high",
+      "dependencies": [],
+      "evidence_ids": [
+        "E001",
+        "E002"
+      ],
+      "id": "C001",
+      "notes": "Verified by local git refs and package metadata without modifying the checkout.",
+      "producer_instance_id": "I001",
+      "producer_operation_id": "O001",
+      "statement": "The appropriate current baseline for the next-version investigation is origin/master d5096b7 (package version 0.9.6), not the clean but six-commit-behind local master.",
+      "status": "VERIFIED",
+      "verification_mode": "deterministic",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [],
+      "evidence_ids": [
+        "E003",
+        "E004"
+      ],
+      "id": "C002",
+      "notes": "O005 should independently confirm the release-gate implication before roadmap promotion.",
+      "producer_instance_id": "I001",
+      "producer_operation_id": "O001",
+      "statement": "The current tarball passes its available local R package checks, but those checks do not exercise a test suite or packaged vignettes because neither is present in the built package.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [],
+      "evidence_ids": [
+        "E001",
+        "E007"
+      ],
+      "id": "C007",
+      "notes": "Verified through local refs and a remote API read.",
+      "producer_instance_id": "I001",
+      "producer_operation_id": "O001",
+      "statement": "The audited revision d5096b7 was the live GitHub master as of 2026-08-30.",
+      "status": "VERIFIED",
+      "verification_mode": "deterministic",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [],
+      "evidence_ids": [
+        "E204"
+      ],
+      "id": "C204",
+      "notes": "Candidate P0/P1 coordinate defect for O005.",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "statement": "The public global origin parameters are not applied consistently, so nonzero x0/y0 can reverse the two sides and y0 is ignored.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [],
+      "evidence_ids": [
+        "E205"
+      ],
+      "id": "C205",
+      "notes": "Candidate P1 API-default defect for O005.",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "statement": "The new geom_nodemarquee() wrapper's default invocation fails its required label aesthetic and is inconsistent with geom_tipmarquee().",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [],
+      "evidence_ids": [
+        "E206",
+        "E306"
+      ],
+      "id": "C206",
+      "notes": "Candidate P1 input-contract defect for O005.",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "statement": "Metadata key normalization is inconsistent with the package's own examples, so numeric keys can fail before geometry is returned.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "medium",
+      "dependencies": [],
+      "evidence_ids": [
+        "E207"
+      ],
+      "id": "C207",
+      "notes": "Candidate P2 API cleanup item for O005.",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "statement": "The exported stat_bipnet() defaults are internally inconsistent for common inherited mappings and non-interaction types.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "medium",
+      "dependencies": [],
+      "evidence_ids": [
+        "E208"
+      ],
+      "id": "C208",
+      "notes": "Candidate P2 low-level API correction.",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "statement": "compute_interaction_coords() enforces an optional-column assumption through strict selection, contradicting its public input contract.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [],
+      "evidence_ids": [
+        "E301"
+      ],
+      "id": "C301",
+      "notes": "Candidate P0 correctness defect for O005.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "Interaction group IDs are not injective, so distinct ribbons can be merged into one polygon group and rendered incorrectly.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [],
+      "evidence_ids": [
+        "E302"
+      ],
+      "id": "C302",
+      "notes": "Candidate P0 input defect for O005.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "The documented .rowname contract and unnamed-matrix handling in to_longer() are broken, causing errors or invalid identifiers.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [],
+      "evidence_ids": [
+        "E303"
+      ],
+      "id": "C303",
+      "notes": "Candidate P0 correctness defect for O005.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "Duplicate row-column observations are not normalized before matrix construction, so a supported-looking long input can fail before the intended aggregation step.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [],
+      "evidence_ids": [
+        "E304"
+      ],
+      "id": "C304",
+      "notes": "Candidate P0 edge-case defect for O005.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "Height-adjustment helpers do not preserve their return schema for equal or singleton partitions, exposing NULL or infinite gaps through public layout APIs.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [],
+      "evidence_ids": [
+        "E305"
+      ],
+      "id": "C305",
+      "notes": "Candidate P0 phylogeny-alignment defect for O005.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "Tip-position normalization can include internal nodes and align a network ID to the wrong y coordinate when labels collide.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [],
+      "evidence_ids": [
+        "E306"
+      ],
+      "id": "C306",
+      "notes": "Candidate P0 data-integrity defect for O005.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "Unvalidated metadata cardinality can silently multiply boxes and interaction vertices, corrupting geometry and mapped attributes.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C301",
+        "C302",
+        "C303",
+        "C304",
+        "C305",
+        "C306"
+      ],
+      "evidence_ids": [
+        "E003",
+        "E004",
+        "E307"
+      ],
+      "id": "C307",
+      "notes": "Candidate P1 release-engineering claim for O005.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "A testthat/CI/visual-regression release gate and explicit minimum dependency versions are prerequisite structural work for the next release.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "medium",
+      "dependencies": [],
+      "evidence_ids": [
+        "E308",
+        "E006"
+      ],
+      "id": "C308",
+      "notes": "O005 must distinguish necessary architecture from stylistic preference and preserve 0.x compatibility.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "After correctness is stabilized, the package should introduce a validated layout object and staged lifecycle cleanup instead of expanding the current low-level API surface.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [],
+      "evidence_ids": [
+        "E401",
+        "E302",
+        "E303",
+        "E305",
+        "E306"
+      ],
+      "id": "C401",
+      "notes": "O005 should challenge default mismatch policy and distinguish bug fixes from new API.",
+      "producer_instance_id": "I004",
+      "producer_operation_id": "O004",
+      "statement": "A pure input-normalization and tree/network ID-reconciliation layer is a Must for the next version because the current workflow delegates correctness-critical ordering and mismatch handling to users.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C401"
+      ],
+      "evidence_ids": [
+        "E401",
+        "E402",
+        "E308"
+      ],
+      "id": "C402",
+      "notes": "O005 should test whether this belongs in the immediate release after correctness gates.",
+      "producer_instance_id": "I004",
+      "producer_operation_id": "O004",
+      "statement": "A thin high-level composer backed by one shared validated layout is a Must-level usability feature, provided it returns editable components and does not become a monolith.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "medium",
+      "dependencies": [
+        "C401"
+      ],
+      "evidence_ids": [
+        "E403"
+      ],
+      "id": "C403",
+      "notes": "External size semantics require explicit relative/absolute scaling rules.",
+      "producer_instance_id": "I004",
+      "producer_operation_id": "O004",
+      "statement": "Interaction-level metadata and optional independent node sizes are Should-level extensions, while a dedicated bipartite adapter and duplicated network-analysis methods are unnecessary.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "medium",
+      "dependencies": [
+        "C401"
+      ],
+      "evidence_ids": [
+        "E404"
+      ],
+      "id": "C404",
+      "notes": "Actual adapter priority depends on whether target users are microbiome-focused or general ecological-network users.",
+      "producer_instance_id": "I004",
+      "producer_operation_id": "O004",
+      "statement": "Broader treeio-compatible input is a Should, but phyloseq and TreeSummarizedExperiment adapters are Could-level optional converters after the canonical data model stabilizes.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "medium",
+      "dependencies": [
+        "C401",
+        "C402"
+      ],
+      "evidence_ids": [
+        "E405"
+      ],
+      "id": "C405",
+      "notes": "Acceptance must preserve topology, branch lengths, labels, and return before/after crossing scores.",
+      "producer_instance_id": "I004",
+      "producer_operation_id": "O004",
+      "statement": "Crossing minimization is a valuable Should-level feature, but it should follow correctness, shared layout, and deterministic baseline ordering rather than enter the immediate stabilization release.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": []
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C301"
+      ],
+      "evidence_ids": [
+        "E201",
+        "E301",
+        "E501"
+      ],
+      "id": "C501",
+      "notes": "Use tuple-safe grouping and a regression test.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "Distinct interaction tuples can collapse to one polygon group, silently corrupting the scientific visualization; this is a P0 release blocker.",
+      "status": "VERIFIED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C306"
+      ],
+      "evidence_ids": [
+        "E306",
+        "E502"
+      ],
+      "id": "C502",
+      "notes": "Validate uniqueness and join relationship before geometry construction.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "Duplicate metadata keys silently multiply boxes and vertices, corrupting geometry and attributes; this is a P0 release blocker.",
+      "status": "VERIFIED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C302"
+      ],
+      "evidence_ids": [
+        "E302",
+        "E503"
+      ],
+      "id": "C503",
+      "notes": "Standard named-matrix default calls still work, so it is not P0.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "to_longer() rowname handling and unnamed matrices violate the public input contract; this is a verified P1 defect.",
+      "status": "VERIFIED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C303"
+      ],
+      "evidence_ids": [
+        "E203",
+        "E303",
+        "E503"
+      ],
+      "id": "C504",
+      "notes": "The new input contract must make aggregation versus rejection explicit.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "Duplicate long-form cells fail before the intended aggregation step and produce an empty layer with a warning; this is a verified P1 defect.",
+      "status": "VERIFIED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C304"
+      ],
+      "evidence_ids": [
+        "E202",
+        "E304",
+        "E504"
+      ],
+      "id": "C505",
+      "notes": "Main stat and constructor default adjustment to FALSE, limiting scope.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "Equal or singleton partition height adjustment can expose NULL or infinite gaps; this is a verified P1 opt-in layout defect.",
+      "status": "VERIFIED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C305"
+      ],
+      "evidence_ids": [
+        "E305",
+        "E505"
+      ],
+      "id": "C506",
+      "notes": "Filter isTip before label/y normalization.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "Tip normalization can include an internal node when labels collide and produce a wrong y target; this is a verified but scoped P1 defect.",
+      "status": "VERIFIED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C204"
+      ],
+      "evidence_ids": [
+        "E204",
+        "E504"
+      ],
+      "id": "C507",
+      "notes": "The main stat hardcodes zero origin, so ordinary plots are not affected.",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "statement": "Nonzero x0/y0 values are not propagated consistently through public layout coordinates; this is a verified P1 low-level API defect.",
+      "status": "VERIFIED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C205"
+      ],
+      "evidence_ids": [
+        "E205",
+        "E505"
+      ],
+      "id": "C508",
+      "notes": "Explicit aes(label = label) is a workaround.",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "statement": "geom_nodemarquee() fails its natural default invocation because label is omitted; this is a verified P1 wrapper-default defect.",
+      "status": "VERIFIED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C206"
+      ],
+      "evidence_ids": [
+        "E206",
+        "E502"
+      ],
+      "id": "C509",
+      "notes": "Normalize both sides and validate key existence and uniqueness.",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "statement": "Numeric metadata keys shown in package examples can fail type-sensitive joins; this is a verified P1 input-normalization defect.",
+      "status": "VERIFIED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C501",
+        "C502",
+        "C503",
+        "C504",
+        "C505",
+        "C506",
+        "C507",
+        "C508",
+        "C509"
+      ],
+      "evidence_ids": [
+        "E003",
+        "E004",
+        "E209",
+        "E501",
+        "E502",
+        "E503",
+        "E504",
+        "E505",
+        "E506"
+      ],
+      "id": "C510",
+      "notes": "Visual snapshots should be scoped; exact dependency floors still require version-matrix checks.",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "statement": "A testthat plus CI correctness gate covering the verified P0/P1 cases is a Must before the next release.",
+      "status": "VERIFIED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C401"
+      ],
+      "evidence_ids": [
+        "E401",
+        "E502",
+        "E503",
+        "E505",
+        "E506"
+      ],
+      "id": "C511",
+      "notes": "The exact function/class boundary and mismatch default remain design choices.",
+      "producer_instance_id": "I004",
+      "producer_operation_id": "O004",
+      "statement": "Validated canonical normalization for identifiers, types, duplicate cells, metadata cardinality, and tree-tip matching is a Must-level structural change.",
+      "status": "VERIFIED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "medium",
+      "dependencies": [
+        "C402"
+      ],
+      "evidence_ids": [
+        "E402",
+        "E506"
+      ],
+      "id": "C512",
+      "notes": "The composer return contract and optional composition dependency remain unresolved.",
+      "producer_instance_id": "I004",
+      "producer_operation_id": "O004",
+      "statement": "One shared validated layout should replace per-layer recomputation as a Must-level architectural boundary; a separate high-level composer remains a later Should.",
+      "status": "VERIFIED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "medium",
+      "dependencies": [
+        "C403",
+        "C404",
+        "C405"
+      ],
+      "evidence_ids": [
+        "E403",
+        "E404",
+        "E405",
+        "E506"
+      ],
+      "id": "C513",
+      "notes": "Reconsider when a representative workflow, dataset, and acceptance criterion exist.",
+      "producer_instance_id": "I005",
+      "producer_operation_id": "O005",
+      "statement": "Interaction metadata, external node sizes, broader adapters, and crossing optimization lack package-specific demand or benchmarks and should not enter the immediate release scope.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C501",
+        "C502",
+        "C503",
+        "C504",
+        "C505",
+        "C506",
+        "C507",
+        "C508",
+        "C509",
+        "C510"
+      ],
+      "evidence_ids": [
+        "E601",
+        "E602",
+        "E604"
+      ],
+      "id": "C601",
+      "notes": "No new visualization feature should precede the release-blocking fixes.",
+      "producer_instance_id": "I006",
+      "producer_operation_id": "O006",
+      "statement": "The next release should be a 0.9.7 stabilization release limited to regression infrastructure, the verified P0/P1 fixes, explicit input policies, and release checks.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C511",
+        "C512",
+        "C601"
+      ],
+      "evidence_ids": [
+        "E602",
+        "E603"
+      ],
+      "id": "C602",
+      "notes": "Exact class/function names and composer dependency remain design choices.",
+      "producer_instance_id": "I006",
+      "producer_operation_id": "O006",
+      "statement": "A subsequent 0.10.0 should introduce a canonical normalized input boundary and one reusable layout object, route existing layers through it with compatibility shims, and treat a high-level tree-network composer as a late Should item.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "medium",
+      "dependencies": [
+        "C513"
+      ],
+      "evidence_ids": [
+        "E603"
+      ],
+      "id": "C603",
+      "notes": "Promote only with representative workflows, datasets, benchmarks, and acceptance criteria.",
+      "producer_instance_id": "I006",
+      "producer_operation_id": "O006",
+      "statement": "Interaction metadata, independent node abundance, treeio/phyloseq/TSE adapters, crossing optimization, curved ribbons, and sparse backends should remain evidence-gated backlog rather than immediate release scope.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    },
+    {
+      "confidence": "high",
+      "dependencies": [
+        "C510",
+        "C601"
+      ],
+      "evidence_ids": [
+        "E006",
+        "E604"
+      ],
+      "id": "C604",
+      "notes": "Avoid mixing a repository-wide style rewrite into the bug-fix diff.",
+      "producer_instance_id": "I006",
+      "producer_operation_id": "O006",
+      "statement": "Tidyverse-style modernization should be staged after correctness changes: align tests with R files, adopt base pipes internally, clarify errors and documentation, then deprecate legacy exports without immediate removal.",
+      "status": "SUPPORTED",
+      "verification_mode": "fresh_context",
+      "verification_operation_ids": [
+        "O005"
+      ]
+    }
+  ],
+  "diagnoses": [],
+  "evidence": [
+    {
+      "artifact_ref": "",
+      "id": "E001",
+      "kind": "revision_reference",
+      "locator": "git:origin/master@d5096b7",
+      "producer_instance_id": "I001",
+      "producer_operation_id": "O001",
+      "summary": "git status and git log show clean local master 7d45947 is six commits behind origin/master d5096b7; the remote baseline adds marquee geoms and related package-check changes."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E002",
+      "kind": "source_reference",
+      "locator": "DESCRIPTION:1-30;NAMESPACE:1-70",
+      "producer_instance_id": "I001",
+      "producer_operation_id": "O001",
+      "summary": "The baseline declares version 0.9.6, R >= 4.1.0, ggplot2/ggtree/tidyverse-component dependencies, and 28 exports spanning layout primitives, ggplot2 layers, tree helpers, marquee layers, and deprecated heterogeneous-data helpers."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E003",
+      "kind": "source_reference",
+      "locator": ".Rbuildignore:1-10;git-tree:origin/master",
+      "producer_instance_id": "I001",
+      "producer_operation_id": "O001",
+      "summary": "origin/master contains no tests/ or .github/ paths. The vignettes directory is excluded by .Rbuildignore even though DESCRIPTION declares VignetteBuilder: quarto and Suggests: quarto."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E004",
+      "kind": "test_output",
+      "locator": "command:R CMD build --no-build-vignettes --no-manual . && R CMD check --no-manual --no-build-vignettes ggbipartite_0.9.6.tar.gz",
+      "producer_instance_id": "I001",
+      "producer_operation_id": "O001",
+      "summary": "On R 4.6.0 arm64 macOS, the archived origin/master tarball builds and checks successfully with Status: OK; check reports INFO that quarto is required without any packaged vignettes. Repository network indexes were unavailable but did not affect local examples or loading checks."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E005",
+      "kind": "source_reference",
+      "locator": "README.qmd:1-620;vignettes/ggbipartite-visualization-ja.qmd:1-880;vignettes/ggbipartite-publishable-ja.qmd:1-720",
+      "producer_instance_id": "I001",
+      "producer_operation_id": "O001",
+      "summary": "Documented workflows cover abundance and binary bipartite layouts, manual metadata joins, manual tree/link/network composition, tip alignment, scientific-name/support formatting, marquee labels, and publication export examples."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E006",
+      "kind": "standards_reference",
+      "locator": "https://style.tidyverse.org;https://zenn.dev/cp_r/articles/2747e7cb35684c",
+      "producer_instance_id": "I001",
+      "producer_operation_id": "O001",
+      "summary": "The requested standards emphasize consistent snake_case naming, verb-led functions, two-space structural indentation, clear pipes, 80-column readability, meaningful errors, automated tests, explicit documentation, and reducing cognitive load through focused functions and unambiguous names."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E007",
+      "kind": "remote_revision_reference",
+      "locator": "github:Hide-Fun/ggbipartite/master@d5096b71a80d688134cb40e2d166c40d684b3dea",
+      "producer_instance_id": "I001",
+      "producer_operation_id": "O001",
+      "summary": "A read-only GitHub API query on 2026-08-30 confirmed remote master still resolves to the locally tracked origin/master commit d5096b7."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E201",
+      "kind": "test_output",
+      "locator": "R/stat-bipnet.R:629-643;R/geom-bipnet.R:203-221",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "summary": "I002 independently reproduced that (a,bc) and (ab,c) both become group abc and are consumed as one polygon drawing group."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E202",
+      "kind": "test_output",
+      "locator": "R/global_layout.R:95-185",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "summary": "I002 reproduced blank ggplot layers for adjust_box_height TRUE on a square network and NULL public gap fields when default gap zero makes both sides equal."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E203",
+      "kind": "test_output",
+      "locator": "R/stat-bipnet.R:188-200,575-625",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "summary": "I002 independently reproduced that duplicate row-column observations fail in pivot_wider before aggregation and leave an empty layer."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E204",
+      "kind": "test_output",
+      "locator": "R/global_layout.R:85-94;R/bipartite_network.R:130-146",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "summary": "With .x0=100 and .y0=100, row xmin is 100 but column xmin is 14.18 and both sides begin at y=0 because column x omits the origin and compute_box_coords calls omit y0."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E205",
+      "kind": "test_output",
+      "locator": "R/geom_nodemarquee.R:395-419;R/geom_tipmarquee.R:136-159",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "summary": "ggtree(tree) + geom_nodemarquee() fails because label is absent from the default mapping, whereas explicitly mapping label succeeds and the analogous tip wrapper supplies label by default."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E206",
+      "kind": "test_output",
+      "locator": "R/bipartite_network.R:154-191;R/bipartite_network.R:80-103",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "summary": "The documented integer metadata keys fail dplyr joins because only coordinate IDs are coerced to character; x$row is character while y$row remains integer."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E207",
+      "kind": "test_output",
+      "locator": "R/stat-bipnet.R:649-765",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "summary": "stat_bipnet() defaults to inherit.aes FALSE and geom polygon regardless of type, so an ordinary inherited-aesthetic call lacks required aesthetics and type row lacks polygon x/y output."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E208",
+      "kind": "source_reference",
+      "locator": "R/compute_interaction_coords.R:22-53,142-156",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "summary": "The documentation treats interaction_size in box tables as optional, but strict negative selection errors when the column is absent."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E209",
+      "kind": "test_output",
+      "locator": "command:R CMD build and R CMD check origin/master tarball;command:quarto render README.qmd",
+      "producer_instance_id": "I002",
+      "producer_operation_id": "O002",
+      "summary": "I002 independently confirmed tarball check and all Rd examples succeed, and the repository README renders; formal package checks still exclude all three vignettes and no tests exist."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E301",
+      "kind": "test_output",
+      "locator": "R/stat-bipnet.R:629-643;command:Rscript /private/tmp/ggbipartite-audit-repro.R",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "summary": "Two distinct interactions (a,bc) and (ab,c) produce eight vertices but only one ggplot group because paste0(row, column) maps both to abc."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E302",
+      "kind": "test_output",
+      "locator": "R/to_longer.R:32-47;R/bipartite_network.R:257-274",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "summary": "to_longer() hard-codes row after accepting a configurable .rowname; custom or NULL .rowname errors, while missing matrix dimnames can yield unusable factor IDs."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E303",
+      "kind": "test_output",
+      "locator": "R/stat-bipnet.R:188-200,575-625",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "summary": "Duplicate long-form row-column observations reach pivot_wider before the package's aggregation helper, producing a list-column conversion failure and an empty ggplot layer with a computation warning."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E304",
+      "kind": "test_output",
+      "locator": "R/global_layout.R:71-185",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "summary": "calc_global_params() defaults to height adjustment, but equal row/column counts make adjust_box_height() return NULL gaps; singleton sides can also divide by n - 1 and return Inf."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E305",
+      "kind": "source_reference",
+      "locator": "R/stat-bipnet.R:97-175;R/extract_tree_data.R:1-27",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "summary": "extract_tip_positions() takes the generic label/y branch before inspecting isTip, so labeled internal nodes can be treated as tip targets; tree extraction logic is also duplicated."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E306",
+      "kind": "test_output",
+      "locator": "R/bipartite_network.R:154-191;R/compute_interaction_coords.R:142-156",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "summary": "Metadata keys are joined without uniqueness or relationship validation; a duplicate row key expands two row boxes to three and sixteen polygon vertices to twenty-four."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E307",
+      "kind": "source_reference",
+      "locator": "DESCRIPTION:17-38;git-tree:origin/master;R/compute_box_label_coords.R:90-93;R/geom-bipnet.R:21-26",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "summary": "No tests or CI exist, and dependency floors are unspecified despite use of dplyr .by and ggplot2 linewidth APIs introduced in later releases."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E308",
+      "kind": "source_reference",
+      "locator": "NAMESPACE:1-70;R/stat-bipnet.R:1-766;R/hetero_df.R:1-335;R/to_longer.R:1-82;.Rbuildignore:1-10",
+      "producer_instance_id": "I003",
+      "producer_operation_id": "O003",
+      "summary": "The public surface mixes high- and low-level helpers, dot-prefixed helpers, a re-exported pipe, deprecated data-frame utilities, legacy aliases, and a misspelled public argument; one large stat file also duplicates tree/ggplot compatibility helpers and repeatedly recomputes layout."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E401",
+      "kind": "source_reference",
+      "locator": "NAMESPACE:1-32;README.qmd:159-332;vignettes/ggbipartite-visualization-ja.qmd:497-872",
+      "producer_instance_id": "I004",
+      "producer_operation_id": "O004",
+      "summary": "The package exports layout and layer primitives but no single entry point for two trees plus a network; documented workflows manually build and align five panels and warn users about ID/order preparation."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E402",
+      "kind": "ecosystem_reference",
+      "locator": "https://yulab-smu.top/treedata-book/chapter4.html;https://yulab-smu.top/aplot/align-associated-subplots.html;R/stat-bipnet.R:527-645",
+      "producer_instance_id": "I004",
+      "producer_operation_id": "O004",
+      "summary": "ggtree/aplot document aligned tree-associated panels, while ggbipartite recalculates layout per layer and requires callers to compose tree/link/network components manually."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E403",
+      "kind": "ecosystem_reference",
+      "locator": "https://cran.r-project.org/web/packages/bipartite/bipartite.pdf;R/bipartite_network.R:1-275;R/stat-bipnet.R:649-765",
+      "producer_instance_id": "I004",
+      "producer_operation_id": "O004",
+      "summary": "bipartite analysis and plotweb workflows accept ordinary matrices, while ggbipartite already accepts matrices and side metadata but has no interaction-metadata contract or independent node-size input."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E404",
+      "kind": "ecosystem_reference",
+      "locator": "https://bioconductor.org/packages/release/bioc/manuals/phyloseq/man/phyloseq.pdf;https://www.bioconductor.org/packages/release/bioc/manuals/TreeSummarizedExperiment/man/TreeSummarizedExperiment.pdf;R/adjust_tree.R:27-64;R/extract_tree_data.R:1-27",
+      "producer_instance_id": "I004",
+      "producer_operation_id": "O004",
+      "summary": "ggbipartite tree support is inconsistent across helpers; treeio-compatible objects and TreeSummarizedExperiment rowTree/colTree match later interoperability needs better than making phyloseq a core dependency."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E405",
+      "kind": "ecosystem_reference",
+      "locator": "https://cran.r-project.org/web/packages/phytools/phytools.pdf;https://cran.r-project.org/web/packages/ape/ape.pdf;https://cran.r-project.org/web/packages/bipartite/bipartite.pdf",
+      "producer_instance_id": "I004",
+      "producer_operation_id": "O004",
+      "summary": "phytools cophylo, ape cophyloplot, and bipartite sorting establish topology-preserving rotation or ordering as standard methods for reducing link crossings."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E501",
+      "kind": "verification_result",
+      "locator": "O005:R/stat-bipnet.R:629-643;R/geom-bipnet.R:203-221",
+      "producer_instance_id": "I005",
+      "producer_operation_id": "O005",
+      "summary": "Fresh-context reproduction found eight vertices but one group for two distinct tuple keys, confirming silent interaction-polygon grouping corruption."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E502",
+      "kind": "verification_result",
+      "locator": "O005:R/bipartite_network.R:154-191",
+      "producer_instance_id": "I005",
+      "producer_operation_id": "O005",
+      "summary": "Fresh-context reproduction confirmed duplicate metadata keys silently expand two boxes to three and sixteen vertices to twenty-four, while integer metadata keys fail character-integer joins."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E503",
+      "kind": "verification_result",
+      "locator": "O005:R/to_longer.R:32-47;R/stat-bipnet.R:575-625",
+      "producer_instance_id": "I005",
+      "producer_operation_id": "O005",
+      "summary": "Fresh-context reproduction confirmed custom or NULL rowname errors, NA identifiers for unnamed matrices, and an empty layer for duplicate cells because widening precedes aggregation."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E504",
+      "kind": "verification_result",
+      "locator": "O005:R/global_layout.R:85-185;R/bipartite_network.R:120-146",
+      "producer_instance_id": "I005",
+      "producer_operation_id": "O005",
+      "summary": "Fresh-context reproduction confirmed nonzero origins are inconsistently applied, equal partitions return NULL gaps, and singleton adjustment can return infinite gaps."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E505",
+      "kind": "verification_result",
+      "locator": "O005:R/stat-bipnet.R:97-169;R/geom_nodemarquee.R:395-419;R/geom_tipmarquee.R:136-159",
+      "producer_instance_id": "I005",
+      "producer_operation_id": "O005",
+      "summary": "Fresh-context reproduction confirmed internal-node labels can enter tip normalization and that geom_nodemarquee() fails without an explicit label mapping while the tip wrapper supplies one."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E506",
+      "kind": "verification_result",
+      "locator": "O005:DESCRIPTION:17-38;git-tree:origin/master;README.qmd:159-271;R/geom-bipnet.R:65-342;R/stat-bipnet.R:575-625",
+      "producer_instance_id": "I005",
+      "producer_operation_id": "O005",
+      "summary": "Fresh-context review confirmed no tests or CI, per-layer layout recomputation, manual five-panel composition, and user-managed ID ordering; it supported tests/CI, validated normalization, and one shared layout, but found insufficient evidence to make a high-level composer or speculative ecosystem features immediate Must items."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E601",
+      "kind": "claim_reference",
+      "locator": "claims:C501,C502,C510",
+      "producer_instance_id": "I006",
+      "producer_operation_id": "O006",
+      "summary": "Two independently verified silent geometry-corruption defects and the absence of regression gates require a correctness-focused stabilization release before new features."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E602",
+      "kind": "claim_reference",
+      "locator": "claims:C503,C504,C505,C506,C507,C508,C509,C511",
+      "producer_instance_id": "I006",
+      "producer_operation_id": "O006",
+      "summary": "Verified public and opt-in input/layout defects converge on one canonical validation contract for identifiers, types, duplicates, metadata, tips, and finite layout parameters."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E603",
+      "kind": "claim_reference",
+      "locator": "claims:C308,C512,C513",
+      "producer_instance_id": "I006",
+      "producer_operation_id": "O006",
+      "summary": "A shared validated layout and staged API cleanup are supported, while the composer is a post-stabilization Should and broader ecosystem or optimization features lack immediate demand evidence."
+    },
+    {
+      "artifact_ref": "",
+      "id": "E604",
+      "kind": "claim_reference",
+      "locator": "claims:C002,C307,C308;standards:E006",
+      "producer_instance_id": "I006",
+      "producer_operation_id": "O006",
+      "summary": "The current tarball smoke checks pass but omit tests and packaged vignettes; tidyverse guidance supports file-aligned tests, base pipes, concise documentation, and explicit internal/public boundaries."
+    }
+  ],
+  "goal_changes": [],
+  "instances": [
+    {
+      "agent_profile": "collective_readonly",
+      "id": "I001",
+      "operation_id": "O001",
+      "result_ref": "claim:C001",
+      "status": "DONE"
+    },
+    {
+      "agent_profile": "collective_readonly",
+      "id": "I002",
+      "operation_id": "O002",
+      "result_ref": "claim:C204",
+      "status": "DONE"
+    },
+    {
+      "agent_profile": "collective_readonly",
+      "id": "I003",
+      "operation_id": "O003",
+      "result_ref": "claim:C301",
+      "status": "DONE"
+    },
+    {
+      "agent_profile": "collective_readonly",
+      "id": "I004",
+      "operation_id": "O004",
+      "result_ref": "claim:C401",
+      "status": "DONE"
+    },
+    {
+      "agent_profile": "collective_readonly",
+      "id": "I005",
+      "operation_id": "O005",
+      "result_ref": "claim:C510",
+      "status": "DONE"
+    },
+    {
+      "agent_profile": "collective_readonly",
+      "id": "I006",
+      "operation_id": "O006",
+      "result_ref": "claim:C601",
+      "status": "DONE"
+    }
+  ],
+  "operation_state": [
+    {
+      "last_instance_id": "I001",
+      "operation_id": "O001",
+      "result_ref": "claim:C001",
+      "status": "DONE"
+    },
+    {
+      "last_instance_id": "I002",
+      "operation_id": "O002",
+      "result_ref": "claim:C204",
+      "status": "DONE"
+    },
+    {
+      "last_instance_id": "I003",
+      "operation_id": "O003",
+      "result_ref": "claim:C301",
+      "status": "DONE"
+    },
+    {
+      "last_instance_id": "I004",
+      "operation_id": "O004",
+      "result_ref": "claim:C401",
+      "status": "DONE"
+    },
+    {
+      "last_instance_id": "I005",
+      "operation_id": "O005",
+      "result_ref": "claim:C510",
+      "status": "DONE"
+    },
+    {
+      "last_instance_id": "I006",
+      "operation_id": "O006",
+      "result_ref": "claim:C601",
+      "status": "DONE"
+    }
+  ],
+  "schema_version": 3,
+  "workflow_revision": 2,
+  "workflow_sha256": "826af6bfbf5d15277abc1b7dc8f01d84c8a7c7f68a808ebb68e9772f82f03295"
+}

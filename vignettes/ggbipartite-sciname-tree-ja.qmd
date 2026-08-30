@@ -4,7 +4,6 @@ format:
   html:
     toc: true
     number-sections: false
-    theme: Darkly
 execute:
   echo: true
   warning: false
@@ -33,7 +32,7 @@ vignette: >
 
 ```{r}
 #| label: setup
-library(tidyverse)
+library(ggplot2)
 library(ape)
 library(ggtree)
 library(marquee)

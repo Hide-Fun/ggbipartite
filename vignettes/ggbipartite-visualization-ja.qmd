@@ -4,7 +4,6 @@ format:
   html:
     toc: true
     number-sections: false
-    theme: Darkly
 execute:
   echo: true
   warning: false

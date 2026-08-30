@@ -8,6 +8,11 @@
 ^LICENSE\.md$
 ^README\.qmd$
 ^README_files$
+^Rplots\.pdf$
+^tools$
+^.*[.]Rcheck$
+^ggbipartite_.*[.]tar[.]gz$
+^source-package$
 ^docs/roadmap-v0\.9\.7-v0\.10\.0\.md$
 ^vignettes/\.DS_Store$
 ^vignettes/.*-ja\.qmd$

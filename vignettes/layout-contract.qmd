@@ -1,0 +1,60 @@
+---
+title: "Bipartite layout contract"
+format: html
+vignette: >
+  %\VignetteIndexEntry{Bipartite layout contract}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+`layout_bipartite()` is the stable computation boundary introduced in
+ggbipartite 0.10.0. It validates and normalizes an input once. Layers and the
+high-level plot composer then consume the same coordinates.
+
+## Input dispatch
+
+Matrix input is selected only by `is.matrix(data)`. It must be numeric and
+have non-empty, unique row and column names. The `row`, `column`, and `weight`
+arguments must remain `NULL`.
+
+Data-frame input is interpreted as long data. `row`, `column`, and `weight`
+must name three distinct columns; ggbipartite does not guess them. Repeated
+row-column cells are errors unless an aggregation function is supplied through
+`duplicate`.
+
+Both forms use the same rules:
+
+- IDs are converted to character and then compared exactly. Case and
+  whitespace are not changed.
+- Weights must be finite and non-negative.
+- A zero cell means that no edge exists.
+- A row or column whose total is zero is an error.
+- Input order is preserved when no tree is supplied. A tree establishes tip
+  order when it is supplied.
+- Tree and data ID sets must agree by default. `unmatched_data = "drop"` and
+  `unmatched_tree = "prune"` are explicit opt-ins.
+
+`interaction = "abundance"` is the default. With
+`interaction = "binary"`, each positive weight is treated as presence. The
+mode is never inferred from the observed values.
+
+## Stable object schema
+
+A `bipartite_layout` is a named list with five stable components:
+
+| Component | Stable content |
+|---|---|
+| `nodes` | `side`, `id`, `order`, size, box bounds, and centre coordinates |
+| `interactions` | `edge_id`, row and column IDs, weight, and drawing coordinates |
+| `tree_links` | side, ID, and connector endpoints |
+| `params` | resolved mode, origins, gaps, scale, and side orders |
+| `trees` | original tree, reconciled tree, and validated plotting geometry |
+
+Abundance interactions contain four polygon vertices per edge. Binary
+interactions contain one segment per edge, including `xend` and `yend`.
+Metadata columns are prefixed with `row_` or `column_` before they are attached
+to nodes and interactions, preventing them from replacing coordinate fields.
+
+Fields used only while calculating the layout are not part of this contract.
+Consumers should depend on the documented columns above rather than on list
+printing or incidental column order.

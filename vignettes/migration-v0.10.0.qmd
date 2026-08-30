@@ -1,0 +1,97 @@
+---
+title: "Migrating from ggbipartite 0.9.x"
+format: html
+vignette: >
+  %\VignetteIndexEntry{Migrating from ggbipartite 0.9.x}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+Version 0.10.0 adds a shared-layout path while retaining the 0.9.x raw-data
+layers. Existing valid calls continue to work, but the legacy path may still
+compute a layout independently for each layer.
+
+## Recommended replacement
+
+Instead of passing the same long data and aesthetics to every layer, create one
+layout and pass it to each geom:
+
+```r
+layout <- layout_bipartite(
+  interaction_data,
+  row = host,
+  column = otu,
+  weight = abundance
+)
+
+ggplot2::ggplot() +
+  geom_bipnet_box(layout = layout, type = "row") +
+  geom_bipnet_box(layout = layout, type = "column") +
+  geom_bipnet_interaction(layout = layout)
+```
+
+Use `plot_bipartite(layout)` when the standard tree-link-network composition is
+appropriate. Use the identity geoms when you need detailed ggplot2 control.
+
+## Stricter inputs
+
+The following inputs now fail rather than producing ambiguous or incorrect
+coordinates:
+
+- unnamed, empty, or duplicate matrix dimension names;
+- `NA`, infinite, or negative weights;
+- rows or columns whose total interaction is zero;
+- duplicate long-format row-column cells without an explicit `duplicate`
+  function;
+- duplicate or missing metadata keys;
+- tree and data identifier mismatches unless drop or prune is requested.
+
+Identifiers are compared as character values without changing case or
+whitespace. Correct upstream identifiers instead of relying on automatic
+cleanup.
+
+## Low-level helpers
+
+The following helpers remain available for specialized coordinate workflows,
+but `layout_bipartite()` is the supported replacement for ordinary plots.
+
+### `construct_bn_coordination()`
+
+- Replacement: `layout_bipartite()`.
+- Arguments: pass `data`, `x0`, `y0`, `gap`, `box_ratio`, and `ratio` without
+  leading dots. Metadata keys are explicit through `metadata_row_key` and
+  `metadata_column_key`.
+- Return value: use `layout$nodes` instead of `row_box`/`column_box`, and
+  `layout$interactions` instead of `interaction_coords`. The layout also keeps
+  validated parameters and tree geometry.
+
+### `calc_global_params()`
+
+- Replacement: `layout_bipartite(...)$params`.
+- Arguments: the new call validates the interaction input before computing
+  `x0`, `y0`, `gap`, `box_ratio`, and `ratio` derived values.
+- Return value: origins, side-specific gaps, box width, total width, ordering,
+  and matching policies are stored in `layout$params`; legacy `box1`, `box2`,
+  `gap1`, and `gap2` aliases are not part of the stable layout schema.
+
+### `compute_box_coords()`
+
+- Replacement: filter `layout$nodes` by `side == "row"` or
+  `side == "column"`.
+- Arguments: callers no longer pass summary columns with tidy-evaluated
+  `.var` and `.size`; node sizes and ordering come from validated input.
+- Return value: `layout$nodes` has stable IDs, side labels, bounds, centres,
+  sizes, and prefixed metadata columns.
+
+### `compute_interaction_coords()`
+
+- Replacement: `layout$interactions`.
+- Arguments: callers no longer assemble row boxes, column boxes, and an
+  interaction-cell table. Choose `interaction = "abundance"` or `"binary"`
+  when creating the layout.
+- Return value: abundance mode returns polygon vertices with collision-free
+  `edge_id` values; binary mode returns direct segment endpoints.
+
+These helpers are not scheduled for removal before 0.12.0. Raw-data
+`stat_bipnet()` and geom calls remain supported compatibility paths through the
+0.11.x series.

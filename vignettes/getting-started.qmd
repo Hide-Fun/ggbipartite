@@ -1,0 +1,113 @@
+---
+title: "Getting started with ggbipartite"
+format: html
+execute:
+  warning: false
+  message: false
+vignette: >
+  %\VignetteIndexEntry{Getting started with ggbipartite}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+ggbipartite separates layout computation from drawing. Compute one reusable
+layout, inspect its data, and pass it to any combination of layers.
+
+```{r}
+library(ggplot2)
+library(ggbipartite)
+```
+
+## Matrix input
+
+A matrix must have explicit row and column names.
+
+```{r}
+interaction_matrix <- matrix(
+  c(
+    4, 0, 1,
+    1, 3, 0,
+    0, 2, 5
+  ),
+  nrow = 3,
+  byrow = TRUE,
+  dimnames = list(
+    c("host_a", "host_b", "host_c"),
+    c("otu_a", "otu_b", "otu_c")
+  )
+)
+
+network_layout <- layout_bipartite(interaction_matrix)
+network_layout
+```
+
+The stable node and interaction tables can be inspected before plotting.
+
+```{r}
+network_layout$nodes
+network_layout$interactions
+```
+
+The three layers below share those exact coordinates.
+
+```{r}
+#| fig-width: 7
+#| fig-height: 5
+ggplot() +
+  geom_bipnet_box(
+    layout = network_layout,
+    type = "row",
+    fill = "#4477AA"
+  ) +
+  geom_bipnet_box(
+    layout = network_layout,
+    type = "column",
+    fill = "#EE6677"
+  ) +
+  geom_bipnet_interaction(
+    layout = network_layout,
+    alpha = 0.45
+  ) +
+  coord_fixed() +
+  theme_void()
+```
+
+## Long input
+
+Long data requires three explicit columns. Duplicate cells are rejected unless
+you deliberately supply an aggregation function.
+
+```{r}
+interaction_data <- data.frame(
+  host = c("host_a", "host_a", "host_b", "host_c", "host_c"),
+  otu = c("otu_a", "otu_c", "otu_b", "otu_b", "otu_c"),
+  abundance = c(4, 1, 3, 2, 5)
+)
+
+long_layout <- layout_bipartite(
+  interaction_data,
+  row = host,
+  column = otu,
+  weight = abundance
+)
+```
+
+Set `interaction = "binary"` explicitly for presence-absence drawing. Positive
+weights become one; zeros remain absent edges.
+
+```{r}
+binary_layout <- layout_bipartite(
+  interaction_matrix,
+  interaction = "binary"
+)
+
+ggplot() +
+  geom_bipnet_point(layout = binary_layout, type = "row") +
+  geom_bipnet_point(layout = binary_layout, type = "column") +
+  geom_bipnet_interaction(layout = binary_layout) +
+  coord_fixed() +
+  theme_void()
+```
+
+See `vignette("tree-integration", package = "ggbipartite")` for tree matching
+and the high-level composer.

@@ -4,7 +4,6 @@ format:
   html:
     toc: true
     number-sections: false
-    theme: Superhero
 execute:
   echo: true
   warning: false
@@ -38,7 +37,10 @@ vignette: >
 
 ```{r}
 #| label: setup
-library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(tibble)
 library(cowplot)
 library(ape)
 library(ggtree)

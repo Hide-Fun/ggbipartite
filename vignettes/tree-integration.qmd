@@ -1,0 +1,88 @@
+---
+title: "Integrating phylogenetic trees"
+format: html
+execute:
+  warning: false
+  message: false
+vignette: >
+  %\VignetteIndexEntry{Integrating phylogenetic trees}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+Tree labels and data identifiers are compared exactly. A supplied tree also
+defines the order of its network partition. The input trees are not rotated or
+otherwise optimized, so topology and branch lengths remain under user control.
+
+```{r}
+library(ggbipartite)
+```
+
+```{r}
+interaction_matrix <- matrix(
+  c(
+    3, 0, 1,
+    1, 4, 0,
+    0, 2, 5
+  ),
+  nrow = 3,
+  byrow = TRUE,
+  dimnames = list(
+    c("host_a", "host_b", "host_c"),
+    c("otu_a", "otu_b", "otu_c")
+  )
+)
+
+row_tree <- ape::read.tree(
+  text = "((host_a:1,host_b:1):1,host_c:2);"
+)
+column_tree <- ape::read.tree(
+  text = "(otu_a:1,(otu_b:1,otu_c:1):1);"
+)
+```
+
+Abundance layouts use connector panels between tree tips and boxes.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+abundance_layout <- layout_bipartite(
+  interaction_matrix,
+  row_tree = row_tree,
+  column_tree = column_tree
+)
+plot_bipartite(abundance_layout)
+```
+
+Binary layouts align node centres directly with tree tips and therefore do not
+need connector panels.
+
+```{r}
+#| fig-width: 9
+#| fig-height: 5
+binary_layout <- layout_bipartite(
+  interaction_matrix,
+  interaction = "binary",
+  row_tree = row_tree,
+  column_tree = column_tree
+)
+plot_bipartite(binary_layout)
+```
+
+By default, either side of an ID mismatch is an error and the message lists the
+set differences. If discarding unmatched objects is scientifically justified,
+opt in explicitly:
+
+```{r}
+#| eval: false
+layout_bipartite(
+  interaction_matrix,
+  row_tree = row_tree,
+  unmatched_data = "drop",
+  unmatched_tree = "prune"
+)
+```
+
+The composer returns a `ggbipartite_plot`, not a bare patchwork. Its named
+`components` can be edited before `as_patchwork()` or printing. The network and
+component data remain available through `$layout`.

@@ -7,4 +7,9 @@ docs/roadmap-v0.9.7-v0.10.0.md
 AGENTS.md
 .RDataTmp
 ..Rcheck
-vignettes
+*.Rcheck/
+*.tar.gz
+Rplots.pdf
+README_files/
+vignettes/*.html
+vignettes/*_files/

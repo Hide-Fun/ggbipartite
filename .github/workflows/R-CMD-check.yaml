@@ -102,6 +102,8 @@ jobs:
             minimums: false
     env:
       R_BIOC_VERSION: ${{ matrix.config.bioc }}
+      # The Posit mirror does not retain the Bioconductor 3.14 repositories.
+      R_BIOC_MIRROR: ${{ matrix.config.minimums && 'https://bioconductor.org' || 'https://bioconductor.posit.co' }}
     steps:
       - uses: actions/checkout@v6
 
@@ -334,6 +336,15 @@ jobs:
             stop_on_failure = TRUE,
             stop_on_warning = TRUE
           )
+
+      - name: Upload visual snapshot differences
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-regression-results
+          path: tests/testthat/_snaps/visual-regression
+          if-no-files-found: error
+          retention-days: 7
 
   docs:
     name: Render README from source

@@ -92,21 +92,15 @@ jobs:
             minimums: false
           - id: floor-linux
             os: ubuntu-latest
-            r: "4.2.0"
-            bioc: "3.16"
+            r: "4.5.0"
+            bioc: "3.22"
             minimums: true
             # Resolve one compatible graph instead of downgrading after install.
             packages: |
-              ggplot2@3.4.0
+              ggplot2@4.0.0
               dplyr@1.1.0
               tidyr@1.3.0
               testthat@3.1.7
-              ggfun@0.1.5
-              yulab.utils@0.1.5
-              aplot@0.2.3
-              ggnewscale@0.4.8
-              cowplot@1.1.1
-              patchwork@1.1.3
           - id: bioc-devel-linux
             os: ubuntu-latest
             r: "4.6.0"
@@ -184,8 +178,8 @@ jobs:
         shell: Rscript {0}
         run: |
           minimums <- c(
-            ggplot2 = "3.4.0",
-            ggtree = "3.6.2",
+            ggplot2 = "4.0.0",
+            ggtree = "4.0.5",
             dplyr = "1.1.0",
             tidyr = "1.3.0",
             testthat = "3.1.7"

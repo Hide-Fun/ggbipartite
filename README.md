@@ -8,8 +8,9 @@ input contract.
 
 ## Installation
 
-Requires R 4.2.0 or later, ggplot2 3.4.0 or later, and ggtree 3.6.2 or
-later. For R 4.2, use Bioconductor 3.16. R 4.1 is no longer supported.
+Requires R 4.5.0 or later, ggplot2 4.0.0 or later, and ggtree 4.0.5 or
+later. For R 4.5, use Bioconductor 3.22. R 4.4 and earlier are no longer
+supported.
 
 Install the development version from GitHub:
 

@@ -2,10 +2,11 @@
 
 ## Dependency requirements
 
-- R 4.2.0 and ggtree 3.6.2 are now the minimum supported versions. R 4.1
-  support has been dropped because its Bioconductor 3.14 release of ggtree
-  cannot load with the required ggplot2 3.4.0. The minimum-version CI job now
-  uses R 4.2.0 with Bioconductor 3.16.
+- R 4.5.0, ggplot2 4.0.0, and ggtree 4.0.5 are now the minimum supported
+  versions. R 4.4 and earlier are no longer supported. This aligns the
+  supported environment with the Bioconductor 3.22 ggtree release and its
+  ggplot2 4.0 requirement, rather than maintaining incompatible older tree
+  packages. The minimum-version CI job uses R 4.5.0 with Bioconductor 3.22.
 
 ## Shared layout API
 

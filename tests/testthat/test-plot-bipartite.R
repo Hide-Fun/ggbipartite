@@ -233,21 +233,25 @@ measure_composer_panels <- function(composed, width, height) {
   )
   # Fixed-aspect panels can be nested; include their inner panel viewport.
   panels <- viewports$name[grepl("^panel(-[0-9]+)?[.]", viewports$name)]
-  bounds <- vapply(panels, function(panel) {
-    grid::seekViewport(panel)
-    lower <- grid::deviceLoc(
-      grid::unit(0, "npc"),
-      grid::unit(0, "npc"),
-      valueOnly = TRUE
-    )
-    upper <- grid::deviceLoc(
-      grid::unit(1, "npc"),
-      grid::unit(1, "npc"),
-      valueOnly = TRUE
-    )
-    grid::upViewport(0)
-    c(left = lower$x, right = upper$x, bottom = lower$y, top = upper$y)
-  }, numeric(4))
+  bounds <- vapply(
+    panels,
+    function(panel) {
+      grid::seekViewport(panel)
+      lower <- grid::deviceLoc(
+        grid::unit(0, "npc"),
+        grid::unit(0, "npc"),
+        valueOnly = TRUE
+      )
+      upper <- grid::deviceLoc(
+        grid::unit(1, "npc"),
+        grid::unit(1, "npc"),
+        valueOnly = TRUE
+      )
+      grid::upViewport(0)
+      c(left = lower$x, right = upper$x, bottom = lower$y, top = upper$y)
+    },
+    numeric(4)
+  )
   bounds <- t(bounds)
   bounds[order(bounds[, "left"]), , drop = FALSE]
 }
@@ -270,8 +274,9 @@ test_that("tree endpoints stay aligned at wide and tall device sizes", {
     panel_ranges <- lapply(active, function(component) {
       ggplot2::ggplot_build(component)$layout$panel_params[[1L]]$y.range
     })
-    network_x_range <- ggplot2::ggplot_build(active$network)$layout$
-      panel_params[[1L]]$x.range
+    network_x_range <- ggplot2::ggplot_build(
+      active$network
+    )$layout$panel_params[[1L]]$x.range
 
     for (size in list(c(12, 3), c(6, 9))) {
       bounds <- measure_composer_panels(composed, size[1L], size[2L])
@@ -299,7 +304,8 @@ test_that("tree endpoints stay aligned at wide and tall device sizes", {
       transform_y <- function(y, panel) {
         panel_range <- panel_ranges[[panel]]
         bounds[panel, "bottom"] +
-          (y - panel_range[1L]) / diff(panel_range) *
+          (y - panel_range[1L]) /
+            diff(panel_range) *
             (bounds[panel, "top"] - bounds[panel, "bottom"])
       }
 

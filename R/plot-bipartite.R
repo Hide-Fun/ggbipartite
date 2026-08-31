@@ -205,14 +205,17 @@ extract_bipartite_tree_component <- function(layout, side) {
   }
   if (!is.list(tree) || !"geometry" %in% names(tree)) {
     stop(
-      "`layout$trees$", side,
+      "`layout$trees$",
+      side,
       "` must contain a `geometry` component.",
       call. = FALSE
     )
   }
   if (!.is_ggplot_obj(tree$geometry)) {
     stop(
-      "`layout$trees$", side, "$geometry` must be a ggplot object.",
+      "`layout$trees$",
+      side,
+      "$geometry` must be a ggplot object.",
       call. = FALSE
     )
   }
@@ -325,7 +328,9 @@ resolve_bipartite_widths <- function(widths, components) {
   if (length(widths) != length(active_names)) {
     stop(
       "An unnamed `widths` vector must have one value per active ",
-      "component (", length(active_names), ").",
+      "component (",
+      length(active_names),
+      ").",
       call. = FALSE
     )
   }

@@ -216,7 +216,7 @@ style_sciname <- function(x) {
 
     if (
       length(rest) >= 1 &&
-      (rest[1] %in% sp_tokens || is_sp_number_token(rest[1]))
+        (rest[1] %in% sp_tokens || is_sp_number_token(rest[1]))
     ) {
       parts <- c(parts, rest[1])
       if (length(rest) >= 2) {
@@ -380,9 +380,11 @@ style_tree_label <- function(x, last_taxon_rank = NA_character_) {
       last_tok <- NULL
       if (should_handle_last_taxon(last_taxon_rank) && length(remaining) >= 1) {
         cand <- remaining[length(remaining)]
-        if (!is_accession(cand) &&
+        if (
+          !is_accession(cand) &&
             !is_otu(cand) &&
-            !grepl("^\\(.*\\)$", cand)) {
+            !grepl("^\\(.*\\)$", cand)
+        ) {
           last_tok <- cand
           remaining <- remaining[-length(remaining)]
         }
@@ -414,9 +416,11 @@ style_tree_label <- function(x, last_taxon_rank = NA_character_) {
     last_tok <- NULL
     if (should_handle_last_taxon(last_taxon_rank) && length(rest) >= 2) {
       cand <- rest[length(rest)]
-      if (!is_accession(cand) &&
+      if (
+        !is_accession(cand) &&
           !is_otu(cand) &&
-          !grepl("^\\(.*\\)$", cand)) {
+          !grepl("^\\(.*\\)$", cand)
+      ) {
         last_tok <- cand
         rest <- rest[-length(rest)]
       }
@@ -479,28 +483,36 @@ format_node_support <- function(
 ) {
   single_value <- match.arg(single_value)
 
-  if (!is.numeric(sh_alrt_cutoff) ||
+  if (
+    !is.numeric(sh_alrt_cutoff) ||
       length(sh_alrt_cutoff) != 1 ||
-      !is.finite(sh_alrt_cutoff)) {
+      !is.finite(sh_alrt_cutoff)
+  ) {
     stop("`sh_alrt_cutoff` must be a finite numeric scalar.")
   }
-  if (!is.numeric(boot_cutoff) ||
+  if (
+    !is.numeric(boot_cutoff) ||
       length(boot_cutoff) != 1 ||
-      !is.finite(boot_cutoff)) {
+      !is.finite(boot_cutoff)
+  ) {
     stop("`boot_cutoff` must be a finite numeric scalar.")
   }
   if (!is.character(sep) || length(sep) != 1 || is.na(sep)) {
     stop("`sep` must be a non-missing character scalar.")
   }
-  if (!is.character(missing_mark) ||
+  if (
+    !is.character(missing_mark) ||
       length(missing_mark) != 1 ||
-      is.na(missing_mark)) {
+      is.na(missing_mark)
+  ) {
     stop("`missing_mark` must be a non-missing character scalar.")
   }
-  if (!is.numeric(sig_digits) ||
+  if (
+    !is.numeric(sig_digits) ||
       length(sig_digits) != 1 ||
       is.na(sig_digits) ||
-      sig_digits < 1) {
+      sig_digits < 1
+  ) {
     stop("`sig_digits` must be a positive numeric scalar.")
   }
   if (!is.logical(keep_na) || length(keep_na) != 1 || is.na(keep_na)) {

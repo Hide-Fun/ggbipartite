@@ -5,6 +5,7 @@
 ^\.github$
 ^\.DS_Store$
 ^AGENTS\.md$
+^air\.toml$
 ^LICENSE\.md$
 ^README\.qmd$
 ^README_files$

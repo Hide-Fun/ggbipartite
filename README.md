@@ -67,6 +67,135 @@ exact data drawn by the layers. Long data is also supported when `row`,
 For a standard tree-link-network composition, supply trees while
 creating the layout and call `plot_bipartite()`.
 
+## Independent Metadata Legends
+
+Row and column metadata often describe different biological concepts.
+Keep their scales separate when the same category name could mean
+different things on each side of the network.
+
+``` r
+row_metadata <- tibble::tibble(
+  host = rownames(interaction_matrix),
+  family = c("Unknown", "Fagaceae", "Rosaceae")
+)
+column_metadata <- tibble::tibble(
+  otu = colnames(interaction_matrix),
+  guild = c("Unknown", "ECM", "AMF")
+)
+
+metadata_layout <- layout_bipartite(
+  interaction_matrix,
+  metadata_row = row_metadata,
+  metadata_column = column_metadata,
+  metadata_row_key = "host",
+  metadata_column_key = "otu"
+)
+
+family_palette <- c(
+  "Unknown" = "#9C755F",
+  "Fagaceae" = "#4E79A7",
+  "Rosaceae" = "#F28E2B"
+)
+guild_palette <- c(
+  "Unknown" = "#BAB0AC",
+  "ECM" = "#E15759",
+  "AMF" = "#76B7B2"
+)
+
+ggplot() +
+  geom_bipnet_interaction(
+    layout = metadata_layout,
+    mapping = aes(fill = column_guild),
+    alpha = 0.45,
+    show.legend = FALSE
+  ) +
+  geom_bipnet_box(
+    layout = metadata_layout,
+    type = "column",
+    mapping = aes(fill = column_guild)
+  ) +
+  scale_fill_manual(
+    name = "Symbiont guild",
+    values = guild_palette,
+    guide = guide_legend(order = 2)
+  ) +
+  ggnewscale::new_scale_fill() +
+  geom_bipnet_box(
+    layout = metadata_layout,
+    type = "row",
+    mapping = aes(fill = row_family)
+  ) +
+  scale_fill_manual(
+    name = "Host family",
+    values = family_palette,
+    guide = guide_legend(order = 1)
+  ) +
+  coord_fixed() +
+  theme_void()
+```
+
+<img src="man/figures/README-independent-metadata-legends-1.png"
+width="768" />
+
+`ggnewscale::new_scale_fill()` starts a second fill scale. This is
+different from merely changing guide order: the two `"Unknown"` levels
+above are mapped independently because they belong to different metadata
+variables.
+
+## Abundance Networks With Trees
+
+The same layout can carry abundance polygons, matched tree tips, and
+connector panels. The composer returns editable components, so tree
+labels can be added without recomputing the network layout.
+
+``` r
+row_tree <- ape::read.tree(
+  text = "((host_a:1,host_b:1):1,host_c:2);"
+)
+column_tree <- ape::read.tree(
+  text = "(otu_a:1,(otu_b:1,otu_c:1):1);"
+)
+
+tree_layout <- layout_bipartite(
+  interaction_matrix,
+  interaction = "abundance",
+  row_tree = row_tree,
+  column_tree = column_tree
+)
+
+tree_plot <- plot_bipartite(tree_layout)
+
+add_tree_tip_labels <- function(tree_panel, hjust = 0) {
+  tree_extent <- max(tree_panel$data$x)
+
+  tree_panel +
+    ggtree::geom_tiplab(
+      align = TRUE,
+      hjust = hjust,
+      linetype = "dotted",
+      linesize = 0.3,
+      size = 3
+    ) +
+    ggplot2::expand_limits(x = 1.55 * tree_extent)
+}
+
+tree_plot$components$row_tree <- add_tree_tip_labels(
+  tree_plot$components$row_tree
+)
+
+tree_plot$components$column_tree <- add_tree_tip_labels(
+  tree_plot$components$column_tree,
+  hjust = 1
+)
+
+as_patchwork(
+  tree_plot,
+  widths = c(row_tree = 2, network = 3, column_tree = 2)
+)
+```
+
+<img src="man/figures/README-abundance-with-trees-1.png" width="960" />
+
 ## Documentation
 
 - `vignette("getting-started", package = "ggbipartite")` covers matrix

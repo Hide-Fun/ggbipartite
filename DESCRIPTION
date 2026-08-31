@@ -34,6 +34,7 @@ Suggests:
     ape,
     covr,
     cowplot,
+    ggnewscale,
     lintr,
     marquee,
     patchwork,

@@ -126,6 +126,26 @@ jobs:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
 
+      - name: Select optional packages for the minimum-version check
+        id: floor-packages
+        if: matrix.config.minimums
+        shell: Rscript {0}
+        env:
+          MINIMUM_PACKAGE_REFS: ${{ matrix.config.packages }}
+        run: |
+          # Include our Suggests without requesting the dependencies' Suggests.
+          description <- read.dcf("DESCRIPTION")
+          rownames(description) <- description[, "Package"]
+          suggested <- tools::package_dependencies(
+            "ggbipartite", db = description, which = "Suggests"
+          )[[1]]
+          refs <- strsplit(trimws(Sys.getenv("MINIMUM_PACKAGE_REFS")), "\n")[[1]]
+          suggested <- setdiff(suggested, sub("@.*$", "", refs))
+          cat(
+            paste0("suggested=", paste(suggested, collapse = " "), "\n"),
+            file = Sys.getenv("GITHUB_OUTPUT"), append = TRUE
+          )
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
@@ -133,6 +153,8 @@ jobs:
             any::remotes
             any::rcmdcheck
             ${{ matrix.config.packages }}
+            ${{ steps.floor-packages.outputs.suggested }}
+          dependencies: ${{ matrix.config.minimums && '"hard"' || '"all"' }}
           needs: check
 
       - name: Verify the Bioconductor repository line
@@ -141,7 +163,7 @@ jobs:
           expected <- Sys.getenv("R_BIOC_VERSION")
           actual <- as.character(BiocManager::version())
           stopifnot(identical(actual, expected))
-          installed <- installed.packages(fields = "biocViews")
+          installed <- installed.packages(priority = "NA", fields = "biocViews")
           if (Sys.getenv("CHECK_MINIMUMS") == "true") {
             # Archived CRAN versions are intentional in the minimum-version job.
             installed <- installed[

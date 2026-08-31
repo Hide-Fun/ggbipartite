@@ -11,6 +11,7 @@ geom_tipmarquee(
   align = FALSE,
   linetype = "dotted",
   linesize = 0.5,
+  segment_colour = NULL,
   geom = "text",
   offset = 0,
   as_ylab = FALSE,
@@ -36,6 +37,8 @@ right x-position and guide segments are drawn.}
 \item{linetype}{Linetype for guide segments when \code{align = TRUE}.}
 
 \item{linesize}{Line width for guide segments when \code{align = TRUE}.}
+
+\item{segment_colour}{Colour for guide segments when \code{align = TRUE}.}
 
 \item{geom}{Character scalar. Only \code{"text"} is supported for compatibility
 with \code{ggtree::geom_tiplab()}.}

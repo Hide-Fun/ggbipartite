@@ -45,7 +45,6 @@ library(tibble)
 library(cowplot)
 library(ape)
 library(ggtree)
-library(marquee)
 library(ggbipartite)
 ```
 
@@ -182,12 +181,11 @@ host_tree_annotated
 この章で使う主な関数:
 
 - `ggbipartite::adjust_tree()`: tree を bipartite ボックスへ整列します。
-- `ggbipartite::.tiplab_segment_data()`: align 用の補助線座標を作ります。
-- `ggbipartite::.tiplab_marquee_data()`: `geom_marquee()` 用 tip 座標を作ります。
-- `marquee::geom_marquee()`: tip ラベルを同一フォントで安定描画します。
+- `ggbipartite::geom_tipmarquee()`: tip ラベルを同一フォントで安定描画します。
+- `ggbipartite::geom_nodemarquee()`: node support ラベルを同じ描画系へ揃えます。
 
 以降のコードでは、関数を定義せずに各チャンク内で直接
-`adjust_tree()` / `geom_marquee()` / `geom_nodelab()` / `geom_treescale()`
+`adjust_tree()` / `geom_tipmarquee()` / `geom_nodemarquee()` / `geom_treescale()`
 を組み合わせます。
 
 ## abundance版の図を作る
@@ -225,29 +223,24 @@ t_host_abundance_base <- adjust_tree(
 x_span_host_abundance <- diff(range(t_host_abundance_base$data$x, na.rm = TRUE))
 
 t_host_abundance <- t_host_abundance_base +
-  geom_segment(
-    data = function(df) ggbipartite::.tiplab_segment_data(df, offset = 0),
-    aes(x = x, xend = xend, y = y, yend = yend),
+  geom_tipmarquee(
+    align = TRUE,
     linetype = "dotted",
-    linewidth = 0.35,
-    colour = "grey45",
-    inherit.aes = FALSE
-  ) +
-  marquee::geom_marquee(
-    data = function(df) ggbipartite::.tiplab_marquee_data(df, offset = 0),
-    aes(x = x_lab, y = y, label = label),
-    inherit.aes = FALSE,
+    linesize = 0.35,
+    segment_colour = "grey45",
     hjust = 0,
     family = label_family,
-    size = tip_text_size
+    size = tip_text_size,
+    inherit.aes = FALSE
   ) +
-  ggtree::geom_nodelab(
-    aes(label = label),
+  geom_nodemarquee(
+    mapping = aes(label = label),
     node = "internal",
     nudge_x = x_span_host_abundance * 0.05,
     hjust = 0.5,
     family = label_family,
-    size = node_text_size
+    size = node_text_size,
+    inherit.aes = FALSE
   ) +
   coord_cartesian(clip = "off")
 
@@ -261,30 +254,25 @@ t_symbiont_abundance_base <- adjust_tree(
 x_span_symbiont_abundance <- diff(range(t_symbiont_abundance_base$data$x, na.rm = TRUE))
 
 t_symbiont_abundance <- t_symbiont_abundance_base +
-  geom_segment(
-    data = function(df) ggbipartite::.tiplab_segment_data(df, offset = 0),
-    aes(x = x, xend = xend, y = y, yend = yend),
+  geom_tipmarquee(
+    align = TRUE,
     linetype = "dotted",
-    linewidth = 0.35,
-    colour = "grey45",
-    inherit.aes = FALSE
-  ) +
-  marquee::geom_marquee(
-    data = function(df) ggbipartite::.tiplab_marquee_data(df, offset = 0),
-    aes(x = x_lab, y = y, label = label),
-    inherit.aes = FALSE,
+    linesize = 0.35,
+    segment_colour = "grey45",
     hjust = 1,
     family = label_family,
-    size = tip_text_size
+    size = tip_text_size,
+    inherit.aes = FALSE
   ) +
-  ggtree::geom_nodelab(
-    aes(label = label),
+  geom_nodemarquee(
+    mapping = aes(label = label),
     node = "internal",
     nudge_x = -x_span_symbiont_abundance * 0.05,
     hjust = 0.5,
     family = label_family,
     size = node_text_size,
-    colour = "grey20"
+    colour = "grey20",
+    inherit.aes = FALSE
   ) +
   coord_cartesian(clip = "off")
 
@@ -482,30 +470,25 @@ t_host_binary_base <- ggtree::ggtree(host_phylo)
 x_span_host_binary <- diff(range(t_host_binary_base$data$x, na.rm = TRUE))
 
 t_host_binary <- t_host_binary_base +
-  geom_segment(
-    data = function(df) ggbipartite::.tiplab_segment_data(df, offset = 0),
-    aes(x = x, xend = xend, y = y, yend = yend),
+  geom_tipmarquee(
+    align = TRUE,
     linetype = "dotted",
-    linewidth = 0.35,
-    colour = "grey45",
-    inherit.aes = FALSE
-  ) +
-  marquee::geom_marquee(
-    data = function(df) ggbipartite::.tiplab_marquee_data(df, offset = 0),
-    aes(x = x_lab, y = y, label = label),
-    inherit.aes = FALSE,
+    linesize = 0.35,
+    segment_colour = "grey45",
     hjust = 0,
     family = label_family,
-    size = tip_text_size
+    size = tip_text_size,
+    inherit.aes = FALSE
   ) +
-  ggtree::geom_nodelab(
-    aes(label = label),
+  geom_nodemarquee(
+    mapping = aes(label = label),
     node = "internal",
     nudge_x = x_span_host_binary * 0.05,
     hjust = 0.5,
     family = label_family,
     size = node_text_size,
-    colour = "grey20"
+    colour = "grey20",
+    inherit.aes = FALSE
   ) +
   ggtree::geom_treescale(
     x = 0.2,
@@ -520,30 +503,25 @@ t_symbiont_binary_base <- ggtree::ggtree(symbiont_phylo)
 x_span_symbiont_binary <- diff(range(t_symbiont_binary_base$data$x, na.rm = TRUE))
 
 t_symbiont_binary <- t_symbiont_binary_base +
-  geom_segment(
-    data = function(df) ggbipartite::.tiplab_segment_data(df, offset = 0),
-    aes(x = x, xend = xend, y = y, yend = yend),
+  geom_tipmarquee(
+    align = TRUE,
     linetype = "dotted",
-    linewidth = 0.35,
-    colour = "grey45",
-    inherit.aes = FALSE
-  ) +
-  marquee::geom_marquee(
-    data = function(df) ggbipartite::.tiplab_marquee_data(df, offset = 0),
-    aes(x = x_lab, y = y, label = label),
-    inherit.aes = FALSE,
+    linesize = 0.35,
+    segment_colour = "grey45",
     hjust = 1,
     family = label_family,
-    size = tip_text_size
+    size = tip_text_size,
+    inherit.aes = FALSE
   ) +
-  ggtree::geom_nodelab(
-    aes(label = label),
+  geom_nodemarquee(
+    mapping = aes(label = label),
     node = "internal",
     nudge_x = -x_span_symbiont_binary * 0.05,
     hjust = 0.5,
     family = label_family,
     size = node_text_size,
-    colour = "grey20"
+    colour = "grey20",
+    inherit.aes = FALSE
   ) +
   ggtree::geom_treescale(
     x = -0.4,

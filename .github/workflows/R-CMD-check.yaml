@@ -95,6 +95,17 @@ jobs:
             r: "4.1.0"
             bioc: "3.14"
             minimums: true
+            # Resolve one compatible graph instead of downgrading after install.
+            packages: |
+              ggplot2@3.4.0
+              dplyr@1.1.0
+              tidyr@1.3.0
+              testthat@3.1.7
+              ggfun@0.1.5
+              yulab.utils@0.1.5
+              aplot@0.2.3
+              ggnewscale@0.4.8
+              cowplot@1.1.1
           - id: bioc-devel-linux
             os: ubuntu-latest
             r: "4.6.0"
@@ -102,6 +113,7 @@ jobs:
             minimums: false
     env:
       R_BIOC_VERSION: ${{ matrix.config.bioc }}
+      CHECK_MINIMUMS: ${{ matrix.config.minimums }}
       # The Posit mirror does not retain the Bioconductor 3.14 repositories.
       R_BIOC_MIRROR: ${{ matrix.config.minimums && 'https://bioconductor.org' || 'https://bioconductor.posit.co' }}
     steps:
@@ -120,6 +132,7 @@ jobs:
             any::BiocManager
             any::remotes
             any::rcmdcheck
+            ${{ matrix.config.packages }}
           needs: check
 
       - name: Verify the Bioconductor repository line
@@ -128,13 +141,22 @@ jobs:
           expected <- Sys.getenv("R_BIOC_VERSION")
           actual <- as.character(BiocManager::version())
           stopifnot(identical(actual, expected))
-          validity <- BiocManager::valid()
+          installed <- installed.packages(fields = "biocViews")
+          if (Sys.getenv("CHECK_MINIMUMS") == "true") {
+            # Archived CRAN versions are intentional in the minimum-version job.
+            installed <- installed[
+              !is.na(installed[, "biocViews"]),
+              ,
+              drop = FALSE
+            ]
+          }
+          validity <- BiocManager::valid(pkgs = installed)
           if (!isTRUE(validity)) {
             print(validity)
             stop("The installed Bioconductor environment is not valid.")
           }
 
-      - name: Install declared minimum dependency versions
+      - name: Verify declared minimum dependency versions
         if: matrix.config.minimums
         shell: Rscript {0}
         run: |
@@ -144,14 +166,6 @@ jobs:
             tidyr = "1.3.0",
             testthat = "3.1.7"
           )
-          for (package in names(minimums)) {
-            remotes::install_version(
-              package,
-              version = minimums[[package]],
-              dependencies = FALSE,
-              upgrade = "never"
-            )
-          }
           installed <- vapply(
             names(minimums),
             function(package) as.character(packageVersion(package)),

@@ -205,9 +205,7 @@ jobs:
                 grepl("^Maintainer: ", lines) |
                 lines %in% c(
                   "",
-                  "New submission",
-                  "Suggests or Enhances not in mainstream repositories:",
-                  "RPANDA"
+                  "New submission"
                 )
               grepl("^checking CRAN incoming feasibility", lines[[1L]]) &&
                 all(known_lines)

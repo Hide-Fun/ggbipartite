@@ -39,7 +39,6 @@ Suggests:
     marquee,
     patchwork,
     quarto,
-    RPANDA,
     testthat (>= 3.1.7),
     vdiffr
 VignetteBuilder: quarto

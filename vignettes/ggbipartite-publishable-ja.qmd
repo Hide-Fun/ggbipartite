@@ -46,7 +46,6 @@ library(cowplot)
 library(ape)
 library(ggtree)
 library(marquee)
-library(RPANDA)
 library(ggbipartite)
 ```
 

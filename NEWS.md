@@ -14,6 +14,8 @@
 
 ## Plotting
 
+- Binary layouts now draw edges in a stable matrix order, independent of
+  platform-specific rounding in intermediate polygon areas.
 - Tree/network compositions now share a y scale and panel height, keeping
   abundance connectors and binary tree tips visually aligned across sizes.
 - Raw-data geoms now preserve explicit factor-level order, keeping box

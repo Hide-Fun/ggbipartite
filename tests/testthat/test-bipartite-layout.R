@@ -471,6 +471,28 @@ test_that("binary mode treats positive weights as presence only when asked", {
   expect_finite_layout_coordinates(binary_layout)
 })
 
+test_that("binary edge order is independent of polygon area rounding", {
+  interaction_matrix <- matrix(
+    1,
+    nrow = 4,
+    ncol = 3,
+    dimnames = list(c("d", "b", "c", "a"), c("z", "x", "y"))
+  )
+
+  for (gap in c(0, 0.1, 0.5)) {
+    layout <- layout_bipartite(
+      interaction_matrix,
+      interaction = "binary",
+      gap = gap
+    )
+    edges <- layout$interactions
+
+    expect_identical(edges$edge_id, paste0("edge-", seq_len(12)))
+    expect_identical(edges$row, rep(rownames(interaction_matrix), 3))
+    expect_identical(edges$column, rep(colnames(interaction_matrix), each = 4))
+  }
+})
+
 test_that("metadata keys are unique and value names are side-prefixed", {
   interaction_matrix <- matrix(
     c(1, 2, 3, 4),

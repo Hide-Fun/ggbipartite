@@ -856,6 +856,11 @@ build_layout_interactions <- function(
   if (anyNA(interactions$edge_id)) {
     stop("Internal error: interaction coordinates lost an edge ID.")
   }
+  if (interaction == "binary") {
+    # Polygon areas can differ by roundoff; they must not order binary lines.
+    interactions <- interactions |>
+      dplyr::arrange(match(.data$edge_id, edge_lookup$edge_id))
+  }
   if (!is.null(row_metadata)) {
     interactions <- dplyr::left_join(
       interactions,

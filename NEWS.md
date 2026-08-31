@@ -1,5 +1,12 @@
 # ggbipartite 0.10.0
 
+## Dependency requirements
+
+- R 4.2.0 and ggtree 3.6.2 are now the minimum supported versions. R 4.1
+  support has been dropped because its Bioconductor 3.14 release of ggtree
+  cannot load with the required ggplot2 3.4.0. The minimum-version CI job now
+  uses R 4.2.0 with Bioconductor 3.16.
+
 ## Shared layout API
 
 - Added `layout_bipartite()`, which validates matrix or explicitly mapped long

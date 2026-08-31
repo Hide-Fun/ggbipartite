@@ -92,8 +92,8 @@ jobs:
             minimums: false
           - id: floor-linux
             os: ubuntu-latest
-            r: "4.1.0"
-            bioc: "3.14"
+            r: "4.2.0"
+            bioc: "3.16"
             minimums: true
             # Resolve one compatible graph instead of downgrading after install.
             packages: |
@@ -115,7 +115,7 @@ jobs:
     env:
       R_BIOC_VERSION: ${{ matrix.config.bioc }}
       CHECK_MINIMUMS: ${{ matrix.config.minimums }}
-      # The Posit mirror does not retain the Bioconductor 3.14 repositories.
+      # Use the official archive for the minimum-version Bioconductor release.
       R_BIOC_MIRROR: ${{ matrix.config.minimums && 'https://bioconductor.org' || 'https://bioconductor.posit.co' }}
     steps:
       - uses: actions/checkout@v6
@@ -185,6 +185,7 @@ jobs:
         run: |
           minimums <- c(
             ggplot2 = "3.4.0",
+            ggtree = "3.6.2",
             dplyr = "1.1.0",
             tidyr = "1.3.0",
             testthat = "3.1.7"

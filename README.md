@@ -144,55 +144,12 @@ variables.
 
 ## Abundance Networks With Trees
 
-The same layout can carry abundance polygons, matched tree tips, and
-connector panels. The composer returns editable components, so tree
-labels can be added without recomputing the network layout.
-
-``` r
-row_tree <- ape::read.tree(
-  text = "((host_a:1,host_b:1):1,host_c:2);"
-)
-column_tree <- ape::read.tree(
-  text = "(otu_a:1,(otu_b:1,otu_c:1):1);"
-)
-
-tree_layout <- layout_bipartite(
-  interaction_matrix,
-  interaction = "abundance",
-  row_tree = row_tree,
-  column_tree = column_tree
-)
-
-tree_plot <- plot_bipartite(tree_layout)
-
-add_tree_tip_labels <- function(tree_panel, hjust = 0) {
-  tree_extent <- max(tree_panel$data$x)
-
-  tree_panel +
-    ggtree::geom_tiplab(
-      align = TRUE,
-      hjust = hjust,
-      linetype = "dotted",
-      linesize = 0.3,
-      size = 3
-    ) +
-    ggplot2::expand_limits(x = 1.55 * tree_extent)
-}
-
-tree_plot$components$row_tree <- add_tree_tip_labels(
-  tree_plot$components$row_tree
-)
-
-tree_plot$components$column_tree <- add_tree_tip_labels(
-  tree_plot$components$column_tree,
-  hjust = 1
-)
-
-as_patchwork(
-  tree_plot,
-  widths = c(row_tree = 2, network = 3, column_tree = 2)
-)
-```
+The same layout can carry abundance polygons, matched tree tips,
+connector panels, styled tip labels, and internal-node support labels.
+The rendering code for this publication-style composition is
+intentionally hidden here; it is more verbose than the minimal API
+example, but it shows the figure type that `ggbipartite` is designed to
+make practical.
 
 <img src="man/figures/README-abundance-with-trees-1.png" width="960" />
 

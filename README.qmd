@@ -156,59 +156,260 @@ independently because they belong to different metadata variables.
 
 ## Abundance Networks With Trees
 
-The same layout can carry abundance polygons, matched tree tips, and connector
-panels. The composer returns editable components, so tree labels can be added
-without recomputing the network layout.
+The same layout can carry abundance polygons, matched tree tips, connector
+panels, styled tip labels, and internal-node support labels. The rendering code
+for this publication-style composition is intentionally hidden here; it is more
+verbose than the minimal API example, but it shows the figure type that
+`ggbipartite` is designed to make practical.
 
 ```{r}
 #| label: abundance-with-trees
+#| echo: false
 #| fig-path: man/figures/README-
-#| fig-width: 10
-#| fig-height: 5
+#| fig-width: 14
+#| fig-height: 5.2
 #| out-width: 960px
-row_tree <- ape::read.tree(
-  text = "((host_a:1,host_b:1):1,host_c:2);"
-)
-column_tree <- ape::read.tree(
-  text = "(otu_a:1,(otu_b:1,otu_c:1):1);"
-)
+set.seed(20260304)
 
-tree_layout <- layout_bipartite(
-  interaction_matrix,
-  interaction = "abundance",
-  row_tree = row_tree,
-  column_tree = column_tree
+host_phylo <- ape::rtree(10)
+host_phylo$tip.label <- paste0("Host_", sprintf("%02d", 1:10))
+host_phylo$node.label <- sample(
+  70:100,
+  host_phylo$Nnode,
+  replace = TRUE
 )
 
-tree_plot <- plot_bipartite(tree_layout)
+symbiont_phylo <- ape::rtree(6)
+symbiont_phylo$tip.label <- paste0("OTU_", sprintf("%02d", 1:6))
+symbiont_phylo$node.label <- sample(
+  70:100,
+  symbiont_phylo$Nnode,
+  replace = TRUE
+)
 
-add_tree_tip_labels <- function(tree_panel, hjust = 0) {
-  tree_extent <- max(tree_panel$data$x)
+host_order <- get_tip_order(host_phylo) |> rev()
+symbiont_order <- get_tip_order(symbiont_phylo) |> rev()
 
-  tree_panel +
-    ggtree::geom_tiplab(
-      align = TRUE,
-      hjust = hjust,
-      linetype = "dotted",
-      linesize = 0.3,
-      size = 3
-    ) +
-    ggplot2::expand_limits(x = 1.55 * tree_extent)
+interaction_matrix_publishable <- matrix(
+  c(
+    120, 0, 40, 0, 15, 0,
+    40, 2, 0, 0, 6, 1,
+    0, 12, 0, 4, 0, 0,
+    8, 0, 0, 22, 0, 5,
+    0, 0, 5, 8, 18, 0,
+    65, 0, 20, 0, 3, 0,
+    0, 7, 2, 0, 0, 13,
+    4, 0, 0, 30, 0, 0,
+    0, 0, 8, 3, 25, 2,
+    20, 1, 0, 0, 10, 0
+  ),
+  nrow = 10,
+  byrow = TRUE,
+  dimnames = list(
+    paste0("Host_", sprintf("%02d", 1:10)),
+    paste0("OTU_", sprintf("%02d", 1:6))
+  )
+)
+
+interaction_matrix_publishable <- interaction_matrix_publishable[
+  host_order,
+  symbiont_order,
+  drop = FALSE
+]
+
+metadata_row_publishable <- tibble::tibble(
+  host = rownames(interaction_matrix_publishable),
+  host_lineage = c(rep("Lineage_A", 6), rep("Lineage_B", 4))
+)
+
+metadata_column_publishable <- tibble::tibble(
+  symbiont = colnames(interaction_matrix_publishable),
+  guild = c("AMF", "AMF", "ECM", "ECM", "Saprotroph", "Unknown")
+)
+
+gap_abundance <- sum(interaction_matrix_publishable) / 12
+link_gap_mm <- 3
+label_family <- "Arial"
+tip_text_size <- 3.5
+node_text_size <- 3
+
+measure_label_width_mm <- function(labels, family, size) {
+  label_plot <- ggplot2::ggplot(
+    tibble::tibble(labels = labels),
+    ggplot2::aes(x = 0, y = 0, label = labels)
+  ) +
+    marquee::geom_marquee(family = family, size = size)
+  label_grob <- ggplot2::layer_grob(label_plot)[[1L]]
+  grid::convertWidth(
+    grid::grobWidth(label_grob),
+    "mm",
+    valueOnly = TRUE
+  )
 }
 
-tree_plot$components$row_tree <- add_tree_tip_labels(
-  tree_plot$components$row_tree
+layout_abundance <- layout_bipartite(
+  interaction_matrix_publishable,
+  interaction = "abundance",
+  row_tree = host_phylo,
+  column_tree = symbiont_phylo,
+  metadata_row = metadata_row_publishable,
+  metadata_column = metadata_column_publishable,
+  metadata_row_key = "host",
+  metadata_column_key = "symbiont",
+  gap = gap_abundance
 )
 
-tree_plot$components$column_tree <- add_tree_tip_labels(
-  tree_plot$components$column_tree,
-  hjust = 1
+abundance_plot <- plot_bipartite(
+  layout_abundance,
+  widths = c(
+    row_tree = 1.5,
+    row_link = 0.28,
+    network = 1.5,
+    column_link = 0.28,
+    column_tree = 1.5
+  )
 )
 
-as_patchwork(
-  tree_plot,
-  widths = c(row_tree = 2, network = 3, column_tree = 2)
+for (component_name in c("row_tree", "column_tree")) {
+  tree_component <- abundance_plot$components[[component_name]]
+  tree_component$layers <- Filter(
+    function(layer) !inherits(layer$geom, "GeomBlank"),
+    tree_component$layers
+  )
+  abundance_plot$components[[component_name]] <- tree_component
+}
+
+host_tree <- abundance_plot$components$row_tree
+x_span_host_abundance <- diff(range(host_tree$data$x, na.rm = TRUE))
+host_tree_margin <- host_tree$theme$plot.margin
+host_tree_margin[2] <- grid::unit(
+  measure_label_width_mm(
+    host_tree$data$label[host_tree$data$isTip],
+    family = label_family,
+    size = tip_text_size
+  ),
+  "mm"
 )
+
+abundance_plot$components$row_tree <- host_tree +
+  geom_tipmarquee(
+    align = TRUE,
+    hjust = 0,
+    linetype = "dotted",
+    linesize = 0.35,
+    family = label_family,
+    size = tip_text_size
+  ) +
+  geom_nodemarquee(
+    mapping = ggplot2::aes(label = label),
+    node = "internal",
+    nudge_x = x_span_host_abundance * 0.05,
+    nudge_y = diff(range(host_tree$data$y)) * 0.015,
+    hjust = 0.5,
+    family = label_family,
+    size = node_text_size
+  ) +
+  ggplot2::scale_x_continuous(
+    expand = ggplot2::expansion(mult = c(0.05, 0))
+  ) +
+  ggplot2::theme(plot.margin = host_tree_margin)
+
+symbiont_tree <- abundance_plot$components$column_tree
+x_span_symbiont_abundance <- diff(
+  range(symbiont_tree$data$x, na.rm = TRUE)
+)
+symbiont_tree_margin <- symbiont_tree$theme$plot.margin
+symbiont_tree_margin[4] <- grid::unit(
+  measure_label_width_mm(
+    symbiont_tree$data$label[symbiont_tree$data$isTip],
+    family = label_family,
+    size = tip_text_size
+  ),
+  "mm"
+)
+
+abundance_plot$components$column_tree <- symbiont_tree +
+  geom_tipmarquee(
+    align = TRUE,
+    hjust = 1,
+    linetype = "dotted",
+    linesize = 0.35,
+    family = label_family,
+    size = tip_text_size
+  ) +
+  geom_nodemarquee(
+    mapping = ggplot2::aes(label = label),
+    node = "internal",
+    nudge_x = -x_span_symbiont_abundance * 0.05,
+    nudge_y = diff(range(symbiont_tree$data$y)) * 0.015,
+    hjust = 0.5,
+    family = label_family,
+    size = node_text_size,
+    colour = "grey20"
+  ) +
+  ggplot2::scale_x_reverse(
+    expand = ggplot2::expansion(mult = c(0, 0.05))
+  ) +
+  ggplot2::theme(plot.margin = symbiont_tree_margin)
+
+for (component_name in c("row_link", "column_link")) {
+  link_plot <- abundance_plot$components[[component_name]]
+  link_margin <- link_plot$theme$plot.margin
+  link_margin[c(2, 4)] <- grid::unit(link_gap_mm, "mm")
+  link_plot$layers <- list()
+  abundance_plot$components[[component_name]] <- link_plot +
+    ggplot2::geom_segment(
+      linetype = "dotted",
+      linewidth = 0.35,
+      colour = "grey45"
+    ) +
+    ggplot2::geom_point(
+      ggplot2::aes(x = x, y = y),
+      size = 0.7,
+      colour = "grey30"
+    ) +
+    ggplot2::geom_point(
+      ggplot2::aes(x = xend, y = yend),
+      size = 0.7,
+      colour = "grey30"
+    ) +
+    ggplot2::theme(plot.margin = link_margin)
+}
+
+network_plot <- abundance_plot$components$network
+network_plot$layers <- list()
+abundance_plot$components$network <- network_plot +
+  geom_bipnet_interaction(
+    ggplot2::aes(fill = row_host_lineage),
+    layout = layout_abundance,
+    alpha = 0.45,
+    linewidth = 0.1,
+    colour = "grey35",
+    show.legend = FALSE
+  ) +
+  geom_bipnet_box(
+    ggplot2::aes(fill = row_host_lineage),
+    layout = layout_abundance,
+    type = "row",
+    linewidth = 0.25,
+    colour = "grey20"
+  ) +
+  geom_bipnet_box(
+    layout = layout_abundance,
+    type = "column",
+    fill = "#223A5E",
+    linewidth = 0.25,
+    colour = "grey20"
+  ) +
+  ggplot2::scale_fill_manual(
+    name = "Host lineage",
+    values = c("Lineage_A" = "#4E79A7", "Lineage_B" = "#F28E2B")
+  ) +
+  ggplot2::theme(text = ggplot2::element_text(family = label_family))
+
+as_patchwork(abundance_plot) +
+  patchwork::plot_layout(guides = "collect") &
+  ggplot2::theme(legend.position = "bottom")
 ```
 
 ## Documentation

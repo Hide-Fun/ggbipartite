@@ -240,7 +240,11 @@ print.bipartite_layout <- function(x, ...) {
   cat("<bipartite_layout>\n")
   cat("  mode: ", x$params$interaction, "\n", sep = "")
   cat(
-    "  nodes: ", row_count, " row / ", column_count, " column\n",
+    "  nodes: ",
+    row_count,
+    " row / ",
+    column_count,
+    " column\n",
     sep = ""
   )
   cat("  interactions: ", edge_count, "\n", sep = "")
@@ -339,7 +343,9 @@ validate_layout_columns <- function(data, required, arg_name) {
   missing_columns <- setdiff(required, names(data))
   if (length(missing_columns) > 0L) {
     stop(
-      "`", arg_name, "` is missing columns: ",
+      "`",
+      arg_name,
+      "` is missing columns: ",
       paste(missing_columns, collapse = ", "),
       ".",
       call. = FALSE
@@ -463,14 +469,20 @@ resolve_layout_column <- function(column, data, arg_name) {
     expression
   } else {
     stop(
-      "`", arg_name, "` must be a bare column name or a single string.",
+      "`",
+      arg_name,
+      "` must be a bare column name or a single string.",
       call. = FALSE
     )
   }
 
   if (!column_name %in% names(data)) {
     stop(
-      "`", arg_name, "` refers to missing column `", column_name, "`.",
+      "`",
+      arg_name,
+      "` refers to missing column `",
+      column_name,
+      "`.",
       call. = FALSE
     )
   }
@@ -485,7 +497,9 @@ normalize_layout_ids <- function(ids, arg_name, unique_required = TRUE) {
   normalized <- as.character(ids)
   if (anyNA(normalized) || any(normalized == "")) {
     stop(
-      "`", arg_name, "` must not contain missing or empty IDs.",
+      "`",
+      arg_name,
+      "` must not contain missing or empty IDs.",
       call. = FALSE
     )
   }
@@ -493,7 +507,9 @@ normalize_layout_ids <- function(ids, arg_name, unique_required = TRUE) {
   duplicated_ids <- unique(normalized[duplicated(normalized)])
   if (unique_required && length(duplicated_ids) > 0L) {
     stop(
-      "`", arg_name, "` must be unique; duplicated IDs: ",
+      "`",
+      arg_name,
+      "` must be unique; duplicated IDs: ",
       paste(duplicated_ids, collapse = ", "),
       ".",
       call. = FALSE
@@ -645,7 +661,9 @@ reconcile_layout_tree <- function(
   }
   if (length(errors) > 0L) {
     stop(
-      "ID mismatch for the ", side, " side; ",
+      "ID mismatch for the ",
+      side,
+      " side; ",
       paste(errors, collapse = "; "),
       ".",
       call. = FALSE
@@ -655,7 +673,9 @@ reconcile_layout_tree <- function(
   retained_ids <- ids[ids %in% tip_ids]
   if (length(retained_ids) == 0L) {
     stop(
-      "No ", side, " IDs remain after tree reconciliation.",
+      "No ",
+      side,
+      " IDs remain after tree reconciliation.",
       call. = FALSE
     )
   }
@@ -695,7 +715,9 @@ prepare_layout_metadata <- function(metadata, key, side) {
       key == ""
   ) {
     stop(
-      "`metadata_", side, "_key` must be a single non-empty string.",
+      "`metadata_",
+      side,
+      "_key` must be a single non-empty string.",
       call. = FALSE
     )
   }
@@ -833,6 +855,11 @@ build_layout_interactions <- function(
 
   if (anyNA(interactions$edge_id)) {
     stop("Internal error: interaction coordinates lost an edge ID.")
+  }
+  if (interaction == "binary") {
+    # Polygon areas can differ by roundoff; they must not order binary lines.
+    interactions <- interactions |>
+      dplyr::arrange(match(.data$edge_id, edge_lookup$edge_id))
   }
   if (!is.null(row_metadata)) {
     interactions <- dplyr::left_join(
@@ -1038,7 +1065,13 @@ validate_layout_scalar <- function(
   if (is_invalid) {
     comparison <- if (strict) "greater than" else "at least"
     stop(
-      "`", arg_name, "` must be ", comparison, " ", lower, ".",
+      "`",
+      arg_name,
+      "` must be ",
+      comparison,
+      " ",
+      lower,
+      ".",
       call. = FALSE
     )
   }

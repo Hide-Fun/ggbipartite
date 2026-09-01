@@ -1,9 +1,12 @@
 layout_contract_matrix <- function() {
   matrix(
     c(
-      2, 0,
-      1, 3,
-      2, 1
+      2,
+      0,
+      1,
+      3,
+      2,
+      1
     ),
     nrow = 3,
     byrow = TRUE,
@@ -37,47 +40,59 @@ test_that("layout exposes the stable v0.10 schema", {
   layout <- layout_bipartite(layout_contract_matrix(), gap = 0.25)
 
   expect_s3_class(layout, "bipartite_layout")
-  expect_true(all(c(
-    "nodes",
-    "interactions",
-    "tree_links",
-    "params",
-    "trees"
-  ) %in% names(layout)))
+  expect_true(all(
+    c(
+      "nodes",
+      "interactions",
+      "tree_links",
+      "params",
+      "trees"
+    ) %in%
+      names(layout)
+  ))
   expect_s3_class(layout$nodes, "tbl_df")
   expect_s3_class(layout$interactions, "tbl_df")
   expect_s3_class(layout$tree_links, "tbl_df")
-  expect_true(all(c(
-    "side",
-    "id",
-    "order",
-    "interaction_size",
-    "xmin",
-    "xmax",
-    "ymin",
-    "ymax",
-    "x",
-    "y"
-  ) %in% names(layout$nodes)))
-  expect_true(all(c(
-    "edge_id",
-    "row",
-    "column",
-    "weight",
-    "vertex",
-    "group",
-    "x",
-    "y",
-    "area"
-  ) %in% names(layout$interactions)))
-  expect_true(all(c(
-    "side",
-    "id",
-    "x",
-    "xend",
-    "y",
-    "yend"
-  ) %in% names(layout$tree_links)))
+  expect_true(all(
+    c(
+      "side",
+      "id",
+      "order",
+      "interaction_size",
+      "xmin",
+      "xmax",
+      "ymin",
+      "ymax",
+      "x",
+      "y"
+    ) %in%
+      names(layout$nodes)
+  ))
+  expect_true(all(
+    c(
+      "edge_id",
+      "row",
+      "column",
+      "weight",
+      "vertex",
+      "group",
+      "x",
+      "y",
+      "area"
+    ) %in%
+      names(layout$interactions)
+  ))
+  expect_true(all(
+    c(
+      "side",
+      "id",
+      "x",
+      "xend",
+      "y",
+      "yend"
+    ) %in%
+      names(layout$tree_links)
+  ))
   expect_true(all(c("row", "column") %in% names(layout$trees)))
   expect_null(layout$trees$row)
   expect_null(layout$trees$column)
@@ -456,6 +471,28 @@ test_that("binary mode treats positive weights as presence only when asked", {
   expect_finite_layout_coordinates(binary_layout)
 })
 
+test_that("binary edge order is independent of polygon area rounding", {
+  interaction_matrix <- matrix(
+    1,
+    nrow = 4,
+    ncol = 3,
+    dimnames = list(c("d", "b", "c", "a"), c("z", "x", "y"))
+  )
+
+  for (gap in c(0, 0.1, 0.5)) {
+    layout <- layout_bipartite(
+      interaction_matrix,
+      interaction = "binary",
+      gap = gap
+    )
+    edges <- layout$interactions
+
+    expect_identical(edges$edge_id, paste0("edge-", seq_len(12)))
+    expect_identical(edges$row, rep(rownames(interaction_matrix), 3))
+    expect_identical(edges$column, rep(colnames(interaction_matrix), each = 4))
+  }
+})
+
 test_that("metadata keys are unique and value names are side-prefixed", {
   interaction_matrix <- matrix(
     c(1, 2, 3, 4),
@@ -481,18 +518,24 @@ test_that("metadata keys are unique and value names are side-prefixed", {
     metadata_column_key = "taxon"
   )
 
-  expect_true(all(c(
-    "row_group",
-    "row_side",
-    "column_group",
-    "column_side"
-  ) %in% names(layout$nodes)))
-  expect_true(all(c(
-    "row_group",
-    "row_side",
-    "column_group",
-    "column_side"
-  ) %in% names(layout$interactions)))
+  expect_true(all(
+    c(
+      "row_group",
+      "row_side",
+      "column_group",
+      "column_side"
+    ) %in%
+      names(layout$nodes)
+  ))
+  expect_true(all(
+    c(
+      "row_group",
+      "row_side",
+      "column_group",
+      "column_side"
+    ) %in%
+      names(layout$interactions)
+  ))
   row_nodes <- dplyr::filter(layout$nodes, .data$side == "row")
   column_nodes <- dplyr::filter(layout$nodes, .data$side == "column")
   expect_equal(row_nodes$row_group, c("r-a", "r-b"))
@@ -662,11 +705,14 @@ test_that("tree tip order controls node order and binary alignment", {
     expect_equal(layout$params$row_order, expected_order)
     expect_equal(row_nodes$id, expected_order)
     expect_true(all(diff(row_nodes$y) > 0))
-    expect_true(all(c(
-      "original",
-      "validated",
-      "geometry"
-    ) %in% names(layout$trees$row)))
+    expect_true(all(
+      c(
+        "original",
+        "validated",
+        "geometry"
+      ) %in%
+        names(layout$trees$row)
+    ))
   }
 
   binary_nodes <- dplyr::filter(

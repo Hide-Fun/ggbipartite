@@ -3,13 +3,16 @@ expect_fixed_linux_snapshot <- function(title, figure, filename) {
   testthat::skip_if_not_installed("vdiffr")
 
   old_not_cran <- Sys.getenv("NOT_CRAN", unset = NA_character_)
-  on.exit({
-    if (is.na(old_not_cran)) {
-      Sys.unsetenv("NOT_CRAN")
-    } else {
-      Sys.setenv(NOT_CRAN = old_not_cran)
-    }
-  }, add = TRUE)
+  on.exit(
+    {
+      if (is.na(old_not_cran)) {
+        Sys.unsetenv("NOT_CRAN")
+      } else {
+        Sys.setenv(NOT_CRAN = old_not_cran)
+      }
+    },
+    add = TRUE
+  )
 
   if (Sys.getenv("RUN_VDIFFR") != "true") {
     Sys.setenv(NOT_CRAN = "false")
@@ -63,9 +66,15 @@ test_that("binary nodes align directly with tree tips", {
 
   interaction_matrix <- matrix(
     c(
-      1, 0, 1,
-      0, 1, 1,
-      1, 1, 0
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0
     ),
     nrow = 3,
     byrow = TRUE,

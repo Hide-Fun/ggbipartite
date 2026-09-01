@@ -68,12 +68,12 @@
 <line x1='12.39' y1='340.22' x2='12.39' y2='470.93' style='stroke-width: 1.07;' />
 <line x1='12.39' y1='340.22' x2='12.39' y2='340.22' style='stroke-width: 1.07;' />
 <line x1='12.39' y1='340.22' x2='12.39' y2='209.51' style='stroke-width: 1.07;' />
+<line x1='198.60' y1='470.93' x2='521.40' y2='470.93' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <line x1='198.60' y1='296.65' x2='521.40' y2='470.93' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <line x1='198.60' y1='470.93' x2='521.40' y2='296.65' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<line x1='198.60' y1='470.93' x2='521.40' y2='470.93' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<line x1='198.60' y1='122.37' x2='521.40' y2='122.37' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<line x1='198.60' y1='296.65' x2='521.40' y2='122.37' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <line x1='198.60' y1='122.37' x2='521.40' y2='296.65' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<line x1='198.60' y1='296.65' x2='521.40' y2='122.37' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<line x1='198.60' y1='122.37' x2='521.40' y2='122.37' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <circle cx='198.60' cy='470.93' r='2.95' style='stroke-width: 0.57; fill: #BEBEBE;' />
 <circle cx='198.60' cy='296.65' r='2.95' style='stroke-width: 0.57; fill: #BEBEBE;' />
 <circle cx='198.60' cy='122.37' r='2.95' style='stroke-width: 0.57; fill: #BEBEBE;' />

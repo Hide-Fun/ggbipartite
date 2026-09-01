@@ -17,6 +17,7 @@ geom_nodemarquee(
   segment = align,
   segment_linetype = "dotted",
   segment_linewidth = 0.5,
+  segment_colour = NULL,
   stat = "identity",
   position = "identity",
   ...,
@@ -53,6 +54,8 @@ with \code{ggtree::geom_nodelab()}.}
 \item{segment_linetype}{Linetype for guide segments.}
 
 \item{segment_linewidth}{Line width for guide segments.}
+
+\item{segment_colour}{Colour for guide segments.}
 
 \item{stat}{Passed to \code{\link[marquee:geom_marquee]{marquee::geom_marquee()}}.}
 

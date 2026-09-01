@@ -78,7 +78,8 @@ test_that("coordinate construction returns one box per named node", {
       table(
         coords$interaction_coords$row,
         coords$interaction_coords$column
-      ) > 0
+      ) >
+        0
     ],
     rep(4L, 5)
   )

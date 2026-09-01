@@ -514,7 +514,9 @@ geom_bipnet_interaction <- function(
       rlang::abort(
         paste0(
           "`interaction_type` must match `layout$params$interaction` ",
-          "(`\"", layout_mode, "\"`)."
+          "(`\"",
+          layout_mode,
+          "\"`)."
         )
       )
     }

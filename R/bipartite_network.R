@@ -215,7 +215,9 @@ normalize_metadata_key <- function(metadata, key, metadata_arg, key_arg) {
   duplicated_names <- unique(names(metadata)[duplicated(names(metadata))])
   if (length(duplicated_names) > 0L) {
     stop(
-      "`", metadata_arg, "` must have unique column names; duplicated names: ",
+      "`",
+      metadata_arg,
+      "` must have unique column names; duplicated names: ",
       paste(duplicated_names, collapse = ", "),
       ".",
       call. = FALSE
@@ -228,13 +230,19 @@ normalize_metadata_key <- function(metadata, key, metadata_arg, key_arg) {
       key == ""
   ) {
     stop(
-      "`", key_arg, "` must be a single non-empty column name.",
+      "`",
+      key_arg,
+      "` must be a single non-empty column name.",
       call. = FALSE
     )
   }
   if (!key %in% names(metadata)) {
     stop(
-      "`", metadata_arg, "` must contain the key column `", key, "`.",
+      "`",
+      metadata_arg,
+      "` must contain the key column `",
+      key,
+      "`.",
       call. = FALSE
     )
   }
@@ -242,7 +250,10 @@ normalize_metadata_key <- function(metadata, key, metadata_arg, key_arg) {
   key_values <- as.character(metadata[[key]])
   if (anyNA(key_values) || any(key_values == "")) {
     stop(
-      "`", metadata_arg, "$", key,
+      "`",
+      metadata_arg,
+      "$",
+      key,
       "` must not contain missing or empty IDs.",
       call. = FALSE
     )
@@ -251,7 +262,11 @@ normalize_metadata_key <- function(metadata, key, metadata_arg, key_arg) {
   duplicated_ids <- unique(key_values[duplicated(key_values)])
   if (length(duplicated_ids) > 0L) {
     stop(
-      "`", metadata_arg, "$", key, "` must be unique; duplicated IDs: ",
+      "`",
+      metadata_arg,
+      "$",
+      key,
+      "` must be unique; duplicated IDs: ",
       paste(duplicated_ids, collapse = ", "),
       ".",
       call. = FALSE

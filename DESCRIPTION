@@ -15,11 +15,11 @@ Encoding: UTF-8
 URL: https://github.com/Hide-Fun/ggbipartite
 BugReports: https://github.com/Hide-Fun/ggbipartite/issues
 Depends:
-    R (>= 4.1.0),
-    ggplot2 (>= 3.4.0)
+    R (>= 4.5.0),
+    ggplot2 (>= 4.0.0)
 Imports: 
-    dplyr (>= 1.1.0),
-    ggtree,
+    dplyr (>= 1.1.4),
+    ggtree (>= 4.0.5),
     lifecycle,
     magrittr,
     methods,
@@ -39,7 +39,6 @@ Suggests:
     marquee,
     patchwork,
     quarto,
-    RPANDA,
     testthat (>= 3.1.7),
     vdiffr
 VignetteBuilder: quarto

@@ -246,6 +246,7 @@
 #' @param segment Logical scalar. If `TRUE`, draw guide segments.
 #' @param segment_linetype Linetype for guide segments.
 #' @param segment_linewidth Line width for guide segments.
+#' @param segment_colour Colour for guide segments.
 #' @param stat Passed to [marquee::geom_marquee()].
 #' @param position Passed to [marquee::geom_marquee()].
 #' @param ... Additional arguments passed to [marquee::geom_marquee()].
@@ -285,6 +286,7 @@ geom_nodemarquee <- function(
   segment = align,
   segment_linetype = "dotted",
   segment_linewidth = 0.5,
+  segment_colour = NULL,
   stat = "identity",
   position = "identity",
   ...,
@@ -333,6 +335,14 @@ geom_nodemarquee <- function(
       segment_linewidth < 0
   ) {
     stop("`segment_linewidth` must be a non-negative finite numeric scalar.")
+  }
+  if (
+    !is.null(segment_colour) &&
+      (!is.character(segment_colour) ||
+        length(segment_colour) != 1L ||
+        is.na(segment_colour))
+  ) {
+    stop("`segment_colour` must be `NULL` or a single string.")
   }
 
   data_fn <- .resolve_layer_data(data = data)
@@ -386,7 +396,8 @@ geom_nodemarquee <- function(
           ),
           inherit.aes = FALSE,
           linetype = segment_linetype,
-          linewidth = segment_linewidth
+          linewidth = segment_linewidth,
+          colour = segment_colour
         )
       )
     )

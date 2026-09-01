@@ -64,10 +64,16 @@ test_that("factor levels govern layout independently of observation order", {
 
   for (side in c("row", "column", "interaction")) {
     expected <- ggbipartite:::StatBipnet$compute_panel(
-      inputs$data, scales = NULL, type = side, gap = 0.75
+      inputs$data,
+      scales = NULL,
+      type = side,
+      gap = 0.75
     )
     actual <- ggbipartite:::StatBipnet$compute_panel(
-      shuffled, scales = NULL, type = side, gap = 0.75
+      shuffled,
+      scales = NULL,
+      type = side,
+      gap = 0.75
     )
     expect_equal(actual, expected)
   }
@@ -94,7 +100,10 @@ test_that("character IDs retain the legacy sorted matrix order", {
 
   for (side in c("row", "column")) {
     actual <- ggbipartite:::StatBipnet$compute_panel(
-      character_data, scales = NULL, type = side, gap = 0.75
+      character_data,
+      scales = NULL,
+      type = side,
+      gap = 0.75
     )
     boxes <- expected[[paste0(side, "_box")]]
     expect_equal(actual[names(boxes)], boxes)
@@ -124,7 +133,10 @@ test_that("each partition can specify factor order independently", {
 
     for (side in c("row", "column")) {
       actual <- ggbipartite:::StatBipnet$compute_panel(
-        data, scales = NULL, type = side, gap = 0.75
+        data,
+        scales = NULL,
+        type = side,
+        gap = 0.75
       )
       boxes <- expected[[paste0(side, "_box")]]
       expect_equal(actual[names(boxes)], boxes)
@@ -141,7 +153,10 @@ test_that("unused factor levels do not add singleton nodes", {
 
   for (side in c("row", "column")) {
     actual <- ggbipartite:::StatBipnet$compute_panel(
-      data, scales = NULL, type = side, gap = 0.75
+      data,
+      scales = NULL,
+      type = side,
+      gap = 0.75
     )
     expect_equal(nrow(actual), 1L)
     expect_equal(actual$ymin, 0)

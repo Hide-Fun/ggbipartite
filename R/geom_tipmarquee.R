@@ -13,6 +13,7 @@
 #'   right x-position and guide segments are drawn.
 #' @param linetype Linetype for guide segments when `align = TRUE`.
 #' @param linesize Line width for guide segments when `align = TRUE`.
+#' @param segment_colour Colour for guide segments when `align = TRUE`.
 #' @param geom Character scalar. Only `"text"` is supported for compatibility
 #'   with `ggtree::geom_tiplab()`.
 #' @param offset Numeric scalar added to the tip label x-position.
@@ -47,6 +48,7 @@ geom_tipmarquee <- function(
   align = FALSE,
   linetype = "dotted",
   linesize = 0.5,
+  segment_colour = NULL,
   geom = "text",
   offset = 0,
   as_ylab = FALSE,
@@ -84,6 +86,14 @@ geom_tipmarquee <- function(
   }
   if (!is.numeric(linesize) || length(linesize) != 1L || !is.finite(linesize)) {
     stop("`linesize` must be a finite numeric scalar.")
+  }
+  if (
+    !is.null(segment_colour) &&
+      (!is.character(segment_colour) ||
+        length(segment_colour) != 1L ||
+        is.na(segment_colour))
+  ) {
+    stop("`segment_colour` must be `NULL` or a single string.")
   }
 
   data_fn <- .resolve_layer_data(data = data)
@@ -127,7 +137,8 @@ geom_tipmarquee <- function(
           ),
           inherit.aes = FALSE,
           linetype = linetype,
-          linewidth = linesize
+          linewidth = linesize,
+          colour = segment_colour
         )
       )
     )

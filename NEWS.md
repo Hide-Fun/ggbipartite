@@ -1,5 +1,15 @@
 # ggbipartite 0.10.0
 
+## Dependency requirements
+
+- R 4.5.0, ggplot2 4.0.0, and ggtree 4.0.5 are now the minimum supported
+  versions. R 4.4 and earlier are no longer supported. This aligns the
+  supported environment with the Bioconductor 3.22 ggtree release and its
+  ggplot2 4.0 requirement, rather than maintaining incompatible older tree
+  packages. The minimum-version CI job uses R 4.5.0 with Bioconductor 3.22.
+- dplyr 1.1.4 is now required to avoid the defunct vctrs vector-check API
+  called by the previous dplyr 1.1.0 minimum.
+
 ## Shared layout API
 
 - Added `layout_bipartite()`, which validates matrix or explicitly mapped long
@@ -14,6 +24,8 @@
 
 ## Plotting
 
+- Binary layouts now draw edges in a stable matrix order, independent of
+  platform-specific rounding in intermediate polygon areas.
 - Tree/network compositions now share a y scale and panel height, keeping
   abundance connectors and binary tree tips visually aligned across sizes.
 - Raw-data geoms now preserve explicit factor-level order, keeping box

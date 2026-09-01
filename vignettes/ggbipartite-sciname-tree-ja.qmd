@@ -28,15 +28,14 @@ vignette: >
 
 - `ggbipartite::style_tree_label()`: 学名ラベルを Markdown 形式で整形します。
 - `ggbipartite::format_node_support()`: node support 値を閾値で整形します。
-- `marquee::geom_marquee()`: Markdown ラベルを安定して描画します。
-- `ggbipartite::.tiplab_*()`: tip label の x 座標と補助線を計算します。
+- `ggbipartite::geom_tipmarquee()`: Markdown tip ラベルを安定して描画します。
+- `ggbipartite::geom_nodemarquee()`: node support ラベルを描画します。
 
 ```{r}
 #| label: setup
 library(ggplot2)
 library(ape)
 library(ggtree)
-library(marquee)
 library(ggbipartite)
 ```
 
@@ -108,21 +107,19 @@ base_tree <- ggtree::ggtree(tree_pretty) +
   ggtree::hexpand(ratio = 0.55)
 
 p_unaligned <- base_tree +
-  marquee::geom_marquee(
-    data = function(df) {
-      ggbipartite::.tiplab_marquee_data_unaligned(df = df, offset = 0)
-    },
-    aes(x = x_lab, y = y, label = label),
+  geom_tipmarquee(
+    align = FALSE,
     hjust = 0,
     size = 3.2,
     family = "Arial",
     inherit.aes = FALSE
   ) +
-  ggtree::geom_nodelab(
-    aes(label = label),
+  geom_nodemarquee(
+    mapping = aes(label = label),
     hjust = 1,
     vjust = -0.4,
-    size = 2.6
+    size = 2.6,
+    inherit.aes = FALSE
   ) +
   coord_cartesian(clip = "off")
 
@@ -136,31 +133,22 @@ p_unaligned
 #| fig-width: 9
 #| fig-height: 5
 p_aligned <- base_tree +
-  geom_segment(
-    data = function(df) {
-      ggbipartite::.tiplab_segment_data(df = df, offset = 0)
-    },
-    aes(x = x, xend = xend, y = y, yend = yend),
+  geom_tipmarquee(
+    align = TRUE,
     linetype = "dotted",
-    linewidth = 0.35,
-    colour = "grey45",
-    inherit.aes = FALSE
-  ) +
-  marquee::geom_marquee(
-    data = function(df) {
-      ggbipartite::.tiplab_marquee_data(df = df, offset = 0)
-    },
-    aes(x = x_lab, y = y, label = label),
+    linesize = 0.35,
+    segment_colour = "grey45",
     hjust = 0,
     size = 3.2,
     family = "Arial",
     inherit.aes = FALSE
   ) +
-  ggtree::geom_nodelab(
-    aes(label = label),
+  geom_nodemarquee(
+    mapping = aes(label = label),
     hjust = 1,
     vjust = -0.4,
-    size = 2.6
+    size = 2.6,
+    inherit.aes = FALSE
   ) +
   coord_cartesian(clip = "off")
 
@@ -184,21 +172,11 @@ tip ラベルが見切れることがあります。
 base_tree_tight <- ggtree::ggtree(tree_pretty)
 
 p_clipping_control <- base_tree_tight +
-    geom_segment(
-    data = function(df) {
-      ggbipartite::.tiplab_segment_data(df = df, offset = 0)
-    },
-    aes(x = x, xend = xend, y = y, yend = yend),
+  geom_tipmarquee(
+    align = TRUE,
     linetype = "dotted",
-    linewidth = 0.35,
-    colour = "grey45",
-    inherit.aes = FALSE
-  ) +
-  marquee::geom_marquee(
-    data = function(df) {
-      ggbipartite::.tiplab_marquee_data(df = df, offset = 0)
-    },
-    aes(x = x_lab, y = y, label = label),
+    linesize = 0.35,
+    segment_colour = "grey45",
     hjust = 0,
     size = 3.2,
     family = "Arial",
@@ -226,31 +204,22 @@ p_clipping_control
 #| fig-height: 5
 p_reversed <- ggtree::ggtree(tree_pretty) +
   ggtree::hexpand(ratio = 0.55) +
-  geom_segment(
-    data = function(df) {
-      ggbipartite::.tiplab_segment_data(df = df, offset = 0)
-    },
-    aes(x = x, xend = xend, y = y, yend = yend),
+  geom_tipmarquee(
+    align = TRUE,
     linetype = "dotted",
-    linewidth = 0.35,
-    colour = "grey45",
-    inherit.aes = FALSE
-  ) +
-  marquee::geom_marquee(
-    data = function(df) {
-      ggbipartite::.tiplab_marquee_data(df = df, offset = 0)
-    },
-    aes(x = x_lab, y = y, label = label),
+    linesize = 0.35,
+    segment_colour = "grey45",
     hjust = 1,
     size = 3.2,
     family = "Arial",
     inherit.aes = FALSE
   ) +
-  ggtree::geom_nodelab(
-    aes(label = label),
+  geom_nodemarquee(
+    mapping = aes(label = label),
     hjust = 0,
     vjust = -0.4,
-    size = 2.6
+    size = 2.6,
+    inherit.aes = FALSE
   ) +
   coord_cartesian(clip = "off") +
   scale_x_reverse() +

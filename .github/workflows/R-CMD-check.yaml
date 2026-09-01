@@ -92,9 +92,15 @@ jobs:
             minimums: false
           - id: floor-linux
             os: ubuntu-latest
-            r: "4.1.0"
-            bioc: "3.14"
+            r: "4.5.0"
+            bioc: "3.22"
             minimums: true
+            # Resolve one compatible graph instead of downgrading after install.
+            packages: |
+              ggplot2@4.0.0
+              dplyr@1.1.4
+              tidyr@1.3.0
+              testthat@3.1.7
           - id: bioc-devel-linux
             os: ubuntu-latest
             r: "4.6.0"
@@ -102,6 +108,9 @@ jobs:
             minimums: false
     env:
       R_BIOC_VERSION: ${{ matrix.config.bioc }}
+      CHECK_MINIMUMS: ${{ matrix.config.minimums }}
+      # Use the official archive for the minimum-version Bioconductor release.
+      R_BIOC_MIRROR: ${{ matrix.config.minimums && 'https://bioconductor.org' || 'https://bioconductor.posit.co' }}
     steps:
       - uses: actions/checkout@v6
 
@@ -112,12 +121,35 @@ jobs:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
 
+      - name: Select optional packages for the minimum-version check
+        id: floor-packages
+        if: matrix.config.minimums
+        shell: Rscript {0}
+        env:
+          MINIMUM_PACKAGE_REFS: ${{ matrix.config.packages }}
+        run: |
+          # Include our Suggests without requesting the dependencies' Suggests.
+          description <- read.dcf("DESCRIPTION")
+          rownames(description) <- description[, "Package"]
+          suggested <- tools::package_dependencies(
+            "ggbipartite", db = description, which = "Suggests"
+          )[[1]]
+          refs <- strsplit(trimws(Sys.getenv("MINIMUM_PACKAGE_REFS")), "\n")[[1]]
+          suggested <- setdiff(suggested, sub("@.*$", "", refs))
+          cat(
+            paste0("suggested=", paste(suggested, collapse = " "), "\n"),
+            file = Sys.getenv("GITHUB_OUTPUT"), append = TRUE
+          )
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
             any::BiocManager
             any::remotes
             any::rcmdcheck
+            ${{ matrix.config.packages }}
+            ${{ steps.floor-packages.outputs.suggested }}
+          dependencies: ${{ matrix.config.minimums && '"hard"' || '"all"' }}
           needs: check
 
       - name: Verify the Bioconductor repository line
@@ -126,30 +158,32 @@ jobs:
           expected <- Sys.getenv("R_BIOC_VERSION")
           actual <- as.character(BiocManager::version())
           stopifnot(identical(actual, expected))
-          validity <- BiocManager::valid()
+          installed <- installed.packages(priority = "NA", fields = "biocViews")
+          if (Sys.getenv("CHECK_MINIMUMS") == "true") {
+            # Archived CRAN versions are intentional in the minimum-version job.
+            installed <- installed[
+              !is.na(installed[, "biocViews"]),
+              ,
+              drop = FALSE
+            ]
+          }
+          validity <- BiocManager::valid(pkgs = installed)
           if (!isTRUE(validity)) {
             print(validity)
             stop("The installed Bioconductor environment is not valid.")
           }
 
-      - name: Install declared minimum dependency versions
+      - name: Verify declared minimum dependency versions
         if: matrix.config.minimums
         shell: Rscript {0}
         run: |
           minimums <- c(
-            ggplot2 = "3.4.0",
-            dplyr = "1.1.0",
+            ggplot2 = "4.0.0",
+            ggtree = "4.0.5",
+            dplyr = "1.1.4",
             tidyr = "1.3.0",
             testthat = "3.1.7"
           )
-          for (package in names(minimums)) {
-            remotes::install_version(
-              package,
-              version = minimums[[package]],
-              dependencies = FALSE,
-              upgrade = "never"
-            )
-          }
           installed <- vapply(
             names(minimums),
             function(package) as.character(packageVersion(package)),
@@ -198,19 +232,30 @@ jobs:
             result$notes,
             function(note) {
               lines <- trimws(strsplit(note, "\n", fixed = TRUE)[[1L]])
-              known_lines <- grepl(
+              incoming_lines <- grepl(
                 "^checking CRAN incoming feasibility .*NOTE$",
                 lines
               ) |
                 grepl("^Maintainer: ", lines) |
                 lines %in% c(
                   "",
-                  "New submission",
-                  "Suggests or Enhances not in mainstream repositories:",
-                  "RPANDA"
+                  "New submission"
                 )
-              grepl("^checking CRAN incoming feasibility", lines[[1L]]) &&
-                all(known_lines)
+              is_incoming <- grepl(
+                "^checking CRAN incoming feasibility", lines[[1L]]
+              ) &&
+                all(incoming_lines)
+              timing_lines <- grepl("^checking examples .*NOTE$", lines) |
+                lines == "Examples with CPU (user + system) or elapsed time > 5s" |
+                grepl("^user +system +elapsed$", lines) |
+                grepl(
+                  "^[[:alnum:]_.]+ +[0-9.]+ +[0-9.]+ +[0-9.]+$",
+                  lines
+                ) |
+                lines == ""
+              is_timing <- grepl("^checking examples", lines[[1L]]) &&
+                all(timing_lines)
+              is_incoming || is_timing
             },
             logical(1)
           )
@@ -336,6 +381,15 @@ jobs:
             stop_on_failure = TRUE,
             stop_on_warning = TRUE
           )
+
+      - name: Upload visual snapshot differences
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-regression-results
+          path: tests/testthat/_snaps/visual-regression
+          if-no-files-found: error
+          retention-days: 7
 
   docs:
     name: Render README from source

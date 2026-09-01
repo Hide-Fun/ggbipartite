@@ -98,7 +98,7 @@ jobs:
             # Resolve one compatible graph instead of downgrading after install.
             packages: |
               ggplot2@4.0.0
-              dplyr@1.1.0
+              dplyr@1.1.4
               tidyr@1.3.0
               testthat@3.1.7
           - id: bioc-devel-linux
@@ -180,7 +180,7 @@ jobs:
           minimums <- c(
             ggplot2 = "4.0.0",
             ggtree = "4.0.5",
-            dplyr = "1.1.0",
+            dplyr = "1.1.4",
             tidyr = "1.3.0",
             testthat = "3.1.7"
           )
@@ -232,7 +232,7 @@ jobs:
             result$notes,
             function(note) {
               lines <- trimws(strsplit(note, "\n", fixed = TRUE)[[1L]])
-              known_lines <- grepl(
+              incoming_lines <- grepl(
                 "^checking CRAN incoming feasibility .*NOTE$",
                 lines
               ) |
@@ -241,8 +241,21 @@ jobs:
                   "",
                   "New submission"
                 )
-              grepl("^checking CRAN incoming feasibility", lines[[1L]]) &&
-                all(known_lines)
+              is_incoming <- grepl(
+                "^checking CRAN incoming feasibility", lines[[1L]]
+              ) &&
+                all(incoming_lines)
+              timing_lines <- grepl("^checking examples .*NOTE$", lines) |
+                lines == "Examples with CPU (user + system) or elapsed time > 5s" |
+                grepl("^user +system +elapsed$", lines) |
+                grepl(
+                  "^[[:alnum:]_.]+ +[0-9.]+ +[0-9.]+ +[0-9.]+$",
+                  lines
+                ) |
+                lines == ""
+              is_timing <- grepl("^checking examples", lines[[1L]]) &&
+                all(timing_lines)
+              is_incoming || is_timing
             },
             logical(1)
           )

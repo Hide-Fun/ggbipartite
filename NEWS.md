@@ -7,6 +7,8 @@
   supported environment with the Bioconductor 3.22 ggtree release and its
   ggplot2 4.0 requirement, rather than maintaining incompatible older tree
   packages. The minimum-version CI job uses R 4.5.0 with Bioconductor 3.22.
+- dplyr 1.1.4 is now required to avoid the defunct vctrs vector-check API
+  called by the previous dplyr 1.1.0 minimum.
 
 ## Shared layout API
 

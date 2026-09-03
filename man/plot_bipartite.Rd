@@ -34,12 +34,14 @@ A \code{ggbipartite_plot} object with named \code{components}, the reusable
 are represented by \code{NULL}.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+}
+\details{
 \code{plot_bipartite()} builds editable ggplot components from either raw
 interaction data or a reusable \code{\link[=layout_bipartite]{layout_bipartite()}} result. Raw data are
 normalized and laid out exactly once. When a layout is supplied, its
 validated trees and fixed coordinates are reused without recomputation.
-}
-\details{
+
 The returned object is deliberately not a patchwork object. Its named
 components can be inspected or edited before \code{\link[=as_patchwork]{as_patchwork()}} assembles
 them. The suggested package \code{patchwork} is required only when two or more

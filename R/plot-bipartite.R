@@ -1,5 +1,7 @@
 #' Compose a bipartite network and optional phylogenetic trees
 #'
+#' `r lifecycle::badge("experimental")`
+#'
 #' `plot_bipartite()` builds editable ggplot components from either raw
 #' interaction data or a reusable [layout_bipartite()] result. Raw data are
 #' normalized and laid out exactly once. When a layout is supplied, its

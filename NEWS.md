@@ -24,6 +24,8 @@
 
 ## Plotting
 
+- `plot_bipartite()` is now explicitly marked as experimental while its
+  composition API is refined.
 - Binary layouts now draw edges in a stable matrix order, independent of
   platform-specific rounding in intermediate polygon areas.
 - Tree/network compositions now share a y scale and panel height, keeping
